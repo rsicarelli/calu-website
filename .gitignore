@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+
+# Saída de build
+dist/
+.astro/
+.output/
+
+# Caches de deploy / ferramentas
+.wrangler/
+.vercel/
+.netlify/
+.cache/
+
+# Env e segredos
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml

@@ -1,0 +1,7 @@
+# Toolchain pinado para o mise (https://mise.jdx.dev).
+# Rode `mise install` uma vez após o clone, depois `task --list` para ver os comandos.
+# O pnpm também é declarado no `packageManager` do package.json (corepack/CI leem de lá).
+[tools]
+node = "24.19.0"
+pnpm = "11.5.0"
+task = "3.51.1"

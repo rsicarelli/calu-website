@@ -1,0 +1,8 @@
+# Gerado / vendorizado
+node_modules/
+dist/
+.astro/
+pnpm-lock.yaml
+
+# Skills do Claude Code (de origem externa) — manter na íntegra
+.claude/skills/

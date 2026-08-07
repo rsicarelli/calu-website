@@ -1,0 +1,4 @@
+# Configuração do pnpm 11. O pnpm bloqueia scripts de postinstall por padrão (defesa contra
+# pacotes comprometidos); libere aqui, um a um, só o que realmente precisa compilar.
+allowBuilds:
+  esbuild: true

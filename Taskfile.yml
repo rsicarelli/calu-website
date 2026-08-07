@@ -1,0 +1,82 @@
+# Task runner do site da Calu (https://taskfile.dev).
+# Wrappers finos sobre os scripts do pnpm, para que o dia a dia e a Definition of Done estejam
+# a um `task <nome>` de distância. Node/pnpm/task são pinados no mise.toml — rode `mise install`
+# uma vez, depois `task --list`.
+version: '3'
+
+tasks:
+  default:
+    desc: Lista as tasks disponíveis
+    cmds:
+      - task --list
+
+  install:
+    desc: Instala as dependências a partir do lockfile congelado
+    cmds:
+      - pnpm install --frozen-lockfile
+
+  dev:
+    desc: Sobe o servidor de desenvolvimento do Astro
+    cmds:
+      - pnpm dev
+
+  build:
+    desc: Gera o site de produção em dist/
+    cmds:
+      - pnpm build
+
+  preview:
+    desc: Serve o build de produção localmente
+    cmds:
+      - pnpm preview
+
+  typecheck:
+    desc: Checagem de tipos de Astro + TypeScript (astro check)
+    cmds:
+      - pnpm typecheck
+
+  lint:
+    desc: Roda o ESLint
+    cmds:
+      - pnpm lint
+
+  lint:fix:
+    desc: Roda o ESLint corrigindo o que for automático
+    cmds:
+      - pnpm lint:fix
+
+  fmt:
+    desc: Formata o repositório inteiro com o Prettier
+    cmds:
+      - pnpm format
+
+  fmt:check:
+    desc: Verifica a formatação sem escrever (somente leitura)
+    cmds:
+      - pnpm format:check
+
+  check:
+    desc: Todos os gates de qualidade — typecheck + lint + verificação de formatação
+    cmds:
+      - task: typecheck
+      - task: lint
+      - task: fmt:check
+
+  dod:
+    desc: Definition of Done — formata, roda os gates e builda (rode antes de commitar)
+    cmds:
+      - task: fmt
+      - task: check
+      - task: build
+
+  hooks:install:
+    desc: Ativa o diretório .githooks/ versionado (gate de DOD no pre-commit)
+    cmds:
+      - git config core.hooksPath .githooks
+      - echo "✓ git hooks ativados (.githooks/). Pule uma vez com 'git commit --no-verify'."
+
+  hooks:uninstall:
+    desc: Volta para o diretório padrão .git/hooks/ do Git
+    cmds:
+      - git config --unset core.hooksPath
+      - echo "✓ git hooks desativados (de volta para .git/hooks/)."
