@@ -28,3 +28,12 @@ yarn-error.log*
 Thumbs.db
 .idea/
 *.iml
+
+# Skills de agente externas (com lockfile de proveniência) — não são código
+# deste projeto. Fora do versionamento por ora; decisão a reavaliar depois.
+# `astro-expert` veio da mesma origem (registrada no skills-lock.json, importada
+# de smithery.ai). As skills PRÓPRIAS do repositório — .claude/skills/astro/ e
+# .claude/skills/commit/ — continuam versionadas, e é para continuarem.
+.agents/
+skills-lock.json
+.claude/skills/astro-expert/
