@@ -1,0 +1,63 @@
+---
+/**
+ * Container — o primitivo horizontal do site. Centraliza o conteúdo e aplica o gutter
+ * responsivo (20px no mobile, 40px a partir de 900px) em uma de duas larguras.
+ *
+ * Ele é só uma casca sobre as utilities `container-measure` / `container-page` de
+ * `global.css`, que continuam sendo a fonte única da largura — as mesmas classes ficam
+ * disponíveis soltas para os casos em que importar um componente atrapalha.
+ *
+ * Props
+ *   width  'measure' (padrão) = coluna de leitura travada em 68ch, para texto corrido.
+ *          'page'             = trilho de 1280px, para header, rodapé e grades de seção.
+ *   as     tag renderizada, para semântica (`section`, `header`, `footer`, `nav`…).
+ *   class  classes extras, mescladas depois da utility de largura.
+ *   …      qualquer outro atributo válido para a tag escolhida é repassado ao elemento
+ *          (COMPONENTS.md: "todo componente aceita `class` e repassa atributos").
+ *
+ * O repasse não é conveniência: sem ele o Container engolia em silêncio `data-prose` —
+ * e a regra `:where([data-prose]) a` de `global.css` §7, que garante sublinhado em link
+ * de texto corrido, ficava inalcançável —, além de `id` para âncora, `aria-labelledby`
+ * para nomear um `<section>` como marco e `data-surface` para reescopar o anel de foco.
+ *
+ * Tipagem: `Props` estende `HTMLAttributes<'div'>`, então o repasse é TIPADO — `id`, `role`,
+ * `aria-*`, `data-*`, `hidden`, `title` e companhia são validados, e um typo (`arialabel`)
+ * é erro de compilação, não atributo mudo. Duas escolhas deliberadas:
+ *
+ *   · `HTMLAttributes` direto, não o helper `Polymorphic`: este remove a index signature
+ *     `data-${string}` do tipo do elemento, o que reprovaria justamente o `data-prose` que
+ *     motivou a correção.
+ *   · `Props` NÃO é genérica em `as` — a forma polimórfica (`Props<Tag extends HTMLTag>`)
+ *     faz o conversor de TSX do `astro check` (@astrojs/compiler 2.13.1, wasm/Go) estourar
+ *     em `js_scanner.GetPropsType` ("slice bounds out of range") assim que o arquivo passa
+ *     de ~3KB — o `astro build`, que usa outro compilador, nem percebe. O preço é o teto do
+ *     que o tipo cobre: atributo EXCLUSIVO de uma tag (o `href` de `<a>`) não passa. Nenhum
+ *     dos alvos do Container (`section`, `header`, `footer`, `nav`, `main`, `article`, `div`)
+ *     tem atributo próprio, então o teto não aperta em uso real. Se um dia apertar, o
+ *     caminho é o genérico + comentário curto — não vale trocar o `astro check` por ele.
+ *
+ * Ele só controla largura + gutter. Ritmo vertical (padding/margin de bloco) e qualquer
+ * flex/grid ficam no elemento que o consome, via `class` — o Container não conhece a
+ * página e não define margem externa própria.
+ *
+ *   <Container>…</Container>                          coluna de leitura
+ *   <Container width="page" as="section">…</Container> trilho largo, tag própria
+ *   <Container as="section" data-prose>…</Container>   prosa: links sublinhados
+ *
+ * Quando NÃO usar: para uma faixa de fundo que sangra até a borda da tela. Nesse caso o
+ * fundo fica no elemento externo e o Container entra dentro dele, só para o conteúdo.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Largura do trilho. `measure` = coluna de leitura (padrão); `page` = largura total. */
+  width?: 'page' | 'measure';
+  /** Tag a renderizar, para flexibilidade semântica (padrão: um `div` neutro). */
+  as?: HTMLTag;
+}
+
+const { width = 'measure', as: Tag = 'div', class: className, ...rest } = Astro.props;
+const widthClass = width === 'page' ? 'container-page' : 'container-measure';
+---
+
+<Tag class:list={[widthClass, className]} {...rest}><slot /></Tag>
