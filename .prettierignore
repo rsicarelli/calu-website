@@ -6,3 +6,11 @@ pnpm-lock.yaml
 
 # Skills do Claude Code (de origem externa) — manter na íntegra
 .claude/skills/
+
+# Skills externas (mesmo motivo acima) — manter na íntegra
+.agents/
+
+# Handoff de design: documento vivo editado à mão (não é código do projeto),
+# inclui HTML de 230KB e support.js gerado por ferramenta de terceiros
+# ("GENERATED ... do not edit") — reformatar geraria diff enorme à toa
+design_handoff_calu/
