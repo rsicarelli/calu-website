@@ -131,6 +131,9 @@ pelo commit da sub-fase correspondente conforme ela é implementada.
   media/container query (`@min-[…]:`, `min-[…]:`, `max-[…]:`, `@[…]:`) sem tocar nos usos legítimos
   de variante arbitrária de atributo (`aria-[…]:`, `[&_…]:`, `has-[…]:`, `supports-[…]:`) que o
   projeto já usa.
+- **Advertência do `max-w-measure`.** Comentário adicionado junto à declaração de
+  `--container-measure` em `global.css`: a utility crua emite 68ch sem somar o gutter — usar
+  sempre `container-measure` ou `<Container>`.
 
 ## Fases seguintes
 

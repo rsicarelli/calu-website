@@ -20,7 +20,16 @@
   --calu-surface-deep:  #16211B;   /* verde-quase-preto, rodapé e CTA escuro */
 
   /* ---- linhas ---- */
-  --calu-line:          #DED6C4;   /* divisória padrão */
+  --calu-line:          #8F7B50;   /* corrigido: era #DED6C4, 1.42:1 sobre surface e 1.29:1 sobre
+                                       bg — reprovava 1.4.11 na borda PADRÃO (não pressionada) do
+                                       ThemeToggle, que usa a linha direto num <button> interativo
+                                       real. Mesma família quente do sistema (--calu-line-soft,
+                                       --calu-input-border). Candidatos testados: #A08B5E
+                                       3.25/2.96 e #94804F 3.78/3.44 (perto do piso), #7A6845
+                                       5.30/4.83 (mais forte que o necessário); ficou #8F7B50,
+                                       4.03:1 sobre surface e 3.67:1 sobre bg — folga menor que
+                                       --calu-line-strong, preservando a distinção visual entre o
+                                       estado padrão e o pressionado do ThemeToggle. */
   --calu-line-strong:   #16211B;   /* régua de abertura de seção */
   --calu-line-soft:     #D6CDB9;   /* divisória sobre surface-alt */
 
@@ -195,8 +204,20 @@
   --calu-surface-brand: #3E4A3C;
   --calu-surface-deep:  #1C2822;
 
-  --calu-line:          #2E3C33;
-  --calu-line-strong:   #2E3C33;
+  --calu-line:          #6B7A64;   /* corrigido: era #2E3C33, 1.32:1 sobre surface e 1.43:1 sobre
+                                       bg — mesmo defeito do claro, na borda PADRÃO (não
+                                       pressionada) do ThemeToggle. Mesma família sálvia de
+                                       --calu-line-strong (--calu-sage / #738071). Candidatos
+                                       testados: #5C6E5C 2.79:1 sobre surface / 3.03:1 sobre bg
+                                       (reprova em surface), #647560 3.09:1 / 3.36:1 (no limite);
+                                       ficou #6B7A64, 3.34:1 sobre surface e 3.62:1 sobre bg —
+                                       folga menor que --calu-line-strong (3.73/4.05), preservando
+                                       a distinção de estado. */
+  --calu-line-strong:   #748268;   /* corrigido: #2E3C33 colapsava com --calu-line (mesmo hex),
+                                       1.32:1 sobre surface — a borda do skip-link focado ficava
+                                       quase invisível. Sálvia médio-claro, mesma família de
+                                       --calu-sage (#7E8368) e do --calu-input-border escuro
+                                       (#738071): 3.73:1 sobre surface. */
   --calu-line-soft:     #2E3C33;
 
   --calu-text:          #EDE7D9;

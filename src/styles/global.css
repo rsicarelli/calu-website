@@ -114,7 +114,17 @@
   --color-surface-deep: #16211b; /* verde-quase-preto, rodapé e CTA escuro */
 
   /* ---- linhas ---- */
-  --color-line: #ded6c4;
+  --color-line: #8f7b50; /* corrigido: #DED6C4 dava 1.42:1 sobre surface e 1.29:1 sobre bg —
+                             reprovava a 1.4.11 na borda PADRÃO (não pressionada) do
+                             ThemeToggle, que usa border-line direto num <button> interativo
+                             real. Isenção anterior em pairs.ts alegava "nenhum uso interativo",
+                             o que era falso. Mesma família quente do sistema (--color-line-soft,
+                             --color-field-border); candidatos testados: #A08B5E 3.25/2.96 e
+                             #94804F 3.78/3.44 (perto do piso), #7A6845 5.30/4.83 (mais forte que
+                             o necessário); ficou #8F7B50, 4.03:1 sobre surface e 3.67:1 sobre
+                             bg — folga menor que --color-line-strong (16.29/14.83 abaixo), o que
+                             preserva a distinção visual entre o estado padrão e o
+                             aria-pressed do ThemeToggle. */
   --color-line-strong: #16211b; /* régua de abertura de seção */
   --color-line-soft: #d6cdb9; /* divisória sobre surface-alt */
 
@@ -281,7 +291,17 @@
   --breakpoint-lg: 80rem; /* 1280px */
 
   /* ---- layout: larguras máximas ---- */
-  --container-measure: 68ch; /* coluna de leitura, travada mesmo em tela larga */
+  --container-measure: 68ch; /* coluna de leitura, travada mesmo em tela larga.
+                                 ATENÇÃO: a utility CRUA que o Tailwind gera daqui,
+                                 `max-w-measure`, emite 68ch sem somar o gutter/padding
+                                 lateral — como o Preflight liga `box-sizing: border-box`,
+                                 o padding come a medida por dentro e a coluna real fica em
+                                 ~59ch, não 68ch (o mesmo problema que a utility
+                                 `container-measure` da §8 existe para resolver, somando o
+                                 gutter ao teto — ver o comentário lá). Para coluna de
+                                 leitura, use sempre a utility do projeto `container-measure`
+                                 (ou o componente `<Container>`) — nunca `max-w-measure`
+                                 diretamente. */
   --container-answer: 64ch; /* resposta de FaqItem — COMPONENTS.md § FaqAccordion
                                ("Resposta em 19px, line-height 1.7, máx. 64ch").
                                Não havia token: o número existia só na prosa do
@@ -336,8 +356,23 @@
   --color-surface-alt: #1c2822;
   --color-surface-deep: #1c2822;
 
-  --color-line: #2e3c33;
-  --color-line-strong: #2e3c33;
+  --color-line: #6b7a64; /* corrigido: #2E3C33 dava 1.32:1 sobre surface e 1.43:1 sobre bg — mesmo
+                             defeito do claro, na borda PADRÃO (não pressionada) do ThemeToggle.
+                             Mesma família sálvia de --color-line-strong (--logo-sage / #738071).
+                             Candidatos testados: #5C6E5C 2.79:1 sobre surface / 3.03:1 sobre bg
+                             (reprova em surface), #647560 3.09:1 / 3.36:1 (no limite); ficou
+                             #6B7A64 — já cotado como candidato na correção de --color-line-strong
+                             abaixo —, 3.34:1 sobre surface e 3.62:1 sobre bg: passa com folga
+                             menor que --color-line-strong (3.73/4.05), preservando a distinção
+                             de estado. */
+  --color-line-strong: #748268; /* corrigido: #2E3C33 colapsava com --color-line (mesmo hex) e
+                                    dava 1.32:1 sobre surface — a borda do skip-link focado ficava
+                                    quase invisível no escuro. Sálvia médio-claro, mesma família de
+                                    --logo-sage (#7E8368) e do --color-field-border escuro (#738071):
+                                    3.73:1 sobre surface. Candidatos testados: #5C6E5C 2.79:1,
+                                    #6B7A64 3.34:1, #647560 3.09:1 (reprovavam ou ficavam no limite);
+                                    #748268 3.73:1 e #7C8A70 4.16:1 passavam — ficou o primeiro, com
+                                    folga sobre o piso de 3:1 e sem esverdear mais que a paleta pede. */
   --color-line-soft: #2e3c33;
 
   --color-ink: #ede7d9;
@@ -406,8 +441,8 @@
     --color-surface-alt: #1c2822;
     --color-surface-deep: #1c2822;
 
-    --color-line: #2e3c33;
-    --color-line-strong: #2e3c33;
+    --color-line: #6b7a64;
+    --color-line-strong: #748268;
     --color-line-soft: #2e3c33;
 
     --color-ink: #ede7d9;
