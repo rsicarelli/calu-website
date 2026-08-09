@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Site da Calu — hook de pre-commit
 #
-# Roda o gate da Definition of Done (typecheck de Astro/TS + ESLint + Prettier). A formatação é
-# tratada como verificação somente-leitura, para que um commit desformatado seja rejeitado com uma
-# dica clara em vez de reescrever silenciosamente a árvore de trabalho no meio do commit.
+# Roda o gate de qualidade (task check: typecheck de Astro/TS + ESLint + Prettier + estilos) por
+# um único alvo, para que o hook nunca divirja do gate quando novos checks entrarem. A formatação
+# é tratada como verificação somente-leitura, para que um commit desformatado seja rejeitado com
+# uma dica clara em vez de reescrever silenciosamente a árvore de trabalho no meio do commit.
 #
 # Ativar: task hooks:install     (define core.hooksPath como .githooks)
 # Pular uma vez: git commit --no-verify
@@ -14,18 +15,13 @@ if ! command -v task >/dev/null 2>&1; then
   exit 0
 fi
 
-echo "→ verificação de formatação"
-if ! task fmt:check >/dev/null 2>&1; then
+echo "→ check (typecheck + lint + fmt:check + check:styles)"
+if ! task check >/dev/null 2>&1; then
   echo "" >&2
-  echo "✗ Há arquivos desformatados." >&2
-  echo "  Rode: task fmt && git add -u" >&2
+  echo "✗ O gate de qualidade falhou." >&2
+  echo "  Rode: task check" >&2
+  echo "  Se for só formatação: task fmt && git add -u" >&2
   exit 1
 fi
-
-echo "→ typecheck"
-task typecheck >/dev/null
-
-echo "→ lint"
-task lint >/dev/null
 
 echo "✓ checks de DOD aprovados"
