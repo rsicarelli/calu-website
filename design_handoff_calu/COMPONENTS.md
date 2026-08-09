@@ -56,6 +56,7 @@ Usado em todo bloco de contato: header desktop, `CtaBlock`, topo do `ContactForm
 
 ### Header + MobileNav
 Lockup: medalhão circular (`--calu-surface-deep`, 46–52px) com o símbolo + "CaLu" em 25–28px + assinatura "Pilates e Fisioterapia" em 15px **caixa normal**.
+**Correção**: na implementação, a assinatura "Pilates e Fisioterapia" sai em `text-small` (17px, caixa normal), não em 15px. `--calu-fs-label`/`text-label` foi endurecido de propósito para SEMPRE emitir caixa-alta (DESIGN-SYSTEM §2.2: "não existe 15px de texto no site" fora desse pacote fechado, e "a exceção nunca vem sozinha" — 15px só é legítimo junto com caixa-alta, `--calu-font-label`, tracking e peso 600); criar um segundo token de 15px em caixa normal contradiria essa regra explícita e reabriria exatamente o buraco que o endurecimento fechou. `text-small` já existe, já é caixa normal, e já está coberto pelo piso tipográfico testado do projeto — ver `src/components/blocks/Header.astro`.
 Mobile: botão "Menu" (palavra, não hambúrguer sozinho) com `aria-expanded` e `aria-controls` apontando para o `id` do painel; painel com links de 52px empilhados e CTA WhatsApp no fim.
 Painel aberto: o restante da página recebe `inert` — é isso que torna a prisão de foco real, em vez de um laço de `keydown` tentando recapturar o Tab. Fechar (Esc, clique fora ou seleção de um link) devolve o foco ao botão que abriu o menu.
 Trava de rolagem do body, se existir enquanto o painel está aberto, não pode usar `position: fixed` no `<body>` — perde a posição de rolagem e quebra o refluxo ao reabrir.

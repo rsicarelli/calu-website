@@ -1,0 +1,93 @@
+---
+/**
+ * Header — lockup CaLu + nav desktop + ContactPair + ThemeToggle + MobileNav
+ * (COMPONENTS.md § Header + MobileNav). Documentado como um bloco só no handoff; aqui, dois
+ * arquivos por testabilidade — `MobileNav.astro` concentra o botão "Menu", o painel e o script
+ * que os une.
+ *
+ * Props
+ *   navLinks  itens do nav principal (desktop + mobile), na ordem em que aparecem.
+ *   …         qualquer outro atributo de `<header>` é repassado (COMPONENTS.md: "todo
+ *             componente aceita `class` e repassa atributos").
+ *
+ * Sticky com fundo SÓLIDO (`bg-bg`), nunca translúcido (COMPONENTS.md § Header). `min-h-header`
+ * é o MESMO token que alimenta `scroll-padding-top` em `global.css` §3 — usar aqui garante que
+ * a altura real do header e o orçamento de rolagem nunca divirjam (ver o comentário do token).
+ *
+ * O medalhão sai com `alt=""`: o texto "CaLu" ao lado do link já nomeia o link inteiro, então o
+ * `<img>` é decorativo (texto alternativo que só repetiria o nome do link é redundante, não
+ * informativo). `width`/`height` explícitos são o que zera o CLS.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'header'>`, não genérica — mesmo teto documentado em
+ * `Container.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1 estoura em `Props`
+ * genérica acima de ~3KB de arquivo). `<header>` é a única tag plausível aqui, então o teto não
+ * aperta em uso real.
+ */
+import { Image } from 'astro:assets';
+import type { HTMLAttributes } from 'astro/types';
+
+import logoMark from '@/assets/brand/logo-mark.png';
+import Container from '@/components/ui/Container.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import { SITE } from '@/lib/site';
+
+import MobileNav from './MobileNav.astro';
+
+export interface NavLink {
+  href: string;
+  label: string;
+}
+
+interface Props extends HTMLAttributes<'header'> {
+  /** Itens do nav principal (desktop + mobile), na ordem de exibição. */
+  navLinks: NavLink[];
+}
+
+const { navLinks, class: className, ...rest } = Astro.props;
+---
+
+<header class:list={['sticky top-0 z-30 min-h-header bg-bg', className]} {...rest}>
+  <Container width="page" class="flex h-full items-center justify-between gap-4">
+    <a href="/" class="inline-flex items-center gap-3">
+      <Image src={logoMark} alt="" width={52} height={52} class="size-target rounded-full" />
+      <span>
+        <span class="text-lockup font-semibold text-ink">CaLu</span>
+        <span class="block text-small text-ink-muted">Pilates e Fisioterapia</span>
+      </span>
+    </a>
+
+    <nav aria-label="Principal" class="hidden items-center gap-6 md:flex">
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="inline-flex min-h-target items-center font-body text-body text-ink"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="hidden md:block">
+      <ContactPair
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+        size="small"
+        class="text-ink"
+      />
+    </div>
+
+    <ThemeToggle class="hidden md:inline-flex" />
+
+    <MobileNav
+      navLinks={navLinks}
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+      class="md:hidden"
+    />
+  </Container>
+</header>

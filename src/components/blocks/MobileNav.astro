@@ -1,0 +1,155 @@
+---
+/**
+ * MobileNav — painel de navegação mobile do Header (COMPONENTS.md § Header + MobileNav).
+ * Bloco, não primitivo: dono do botão "Menu", do painel full-screen e do script que os une
+ * (abrir/fechar, `inert` no resto da página, devolução de foco, trava de rolagem).
+ *
+ * Props
+ *   navLinks                              mesmos itens do nav desktop (`Header.astro`).
+ *   whatsappHref, phoneHref, phoneLabel    repassados ao `ContactPair` do fim do painel.
+ *   class                                  aplicado ao wrapper externo (botão + painel).
+ *
+ * Botão "Menu": a PALAVRA, nunca ícone de hambúrguer sozinho (DESIGN-SYSTEM §6), e o texto
+ * NUNCA muda para "Fechar" — nome estável, mesmo racional do `ThemeToggle.astro` (WCAG 4.1.2):
+ * um controle cujo NOME muda junto com o estado nunca forma proposição estável em um dos dois
+ * lados. O botão que fecha o painel POR DENTRO pode se chamar "Fechar" porque é um controle
+ * diferente — só o que ABRE precisa do nome fixo.
+ *
+ * `aria-label="Menu"` no `<nav>` interno, DIFERENTE de "Principal" (o `<nav>` desktop de
+ * `Header.astro`) — decisão deliberada, não descuido: (a) COMPONENTS.md pede rótulo distinto
+ * por `<nav>` da página; (b) nem este projeto, nem o `jsdom` construído à mão nos testes,
+ * computa `display: none`/CSS, então dois `<nav>` com o MESMO rótulo apareceriam
+ * simultaneamente "visíveis" para qualquer ferramenta que leia o HTML estático — falso positivo
+ * de `landmark-unique` indistinguível de bug real. Rótulos distintos eliminam a ambiguidade em
+ * produção E em teste, custo zero.
+ *
+ * Trava de rolagem do body via classe `nav-open` no `<html>` — NUNCA `position: fixed` no
+ * `<body>`, que perde a posição de rolagem ao reabrir (COMPONENTS.md § Header + MobileNav).
+ *
+ * Clique-fora-fecha: FORA de propósito. Um listener solto em `document` que fecha ao clicar
+ * fora arrisca disparar no MESMO evento que abre o painel (o clique no botão "Menu" borbulha
+ * até `document` antes de o painel existir vazio) — daria para blindar (checar `event.target`,
+ * ou um pequeno atraso), mas Esc + botão "Fechar" + clique em link já cobrem os casos
+ * essenciais, e a complexidade extra não se justificou aqui.
+ */
+import type { NavLink } from './Header.astro';
+
+import ContactPair from '@/components/ui/ContactPair.astro';
+
+interface Props {
+  /** Mesmos itens do nav desktop (Header.astro). */
+  navLinks: NavLink[];
+  whatsappHref: string;
+  phoneHref: string;
+  phoneLabel: string;
+  class?: string;
+}
+
+const { navLinks, whatsappHref, phoneHref, phoneLabel, class: className } = Astro.props;
+---
+
+<div class:list={[className]}>
+  <button
+    type="button"
+    id="mobile-nav-toggle"
+    aria-expanded="false"
+    aria-controls="mobile-nav-panel"
+    class="inline-flex min-h-target items-center rounded-control border border-line px-4 font-body text-body font-semibold text-ink"
+  >
+    Menu
+  </button>
+
+  <div id="mobile-nav-panel" hidden class="fixed inset-0 z-40 overflow-y-auto bg-bg">
+    <div class="flex items-center justify-between p-gutter">
+      <span class="label text-ink-muted">Menu</span>
+      <button
+        type="button"
+        data-mobile-nav-close
+        class="inline-flex min-h-target items-center rounded-control border border-line px-4 font-body text-body font-semibold text-ink"
+      >
+        Fechar
+      </button>
+    </div>
+
+    <nav aria-label="Menu" class="flex flex-col">
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="inline-flex min-h-target items-center border-b border-line px-gutter font-body text-body text-ink"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <ContactPair
+      whatsappHref={whatsappHref}
+      phoneHref={phoneHref}
+      phoneLabel={phoneLabel}
+      class="p-gutter text-ink"
+    />
+  </div>
+</div>
+
+<style>
+  /* Trava de rolagem do body enquanto o painel está aberto — nunca `position: fixed` no
+     `<body>` (ver comentário do bloco de props acima: perderia a posição de rolagem ao
+     reabrir). O ancestral vai em `:global()` porque `<html>` não pertence a este componente. */
+  :global(html.nav-open) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  // Idempotente: guarda no dataset do botão que abre, mesmo padrão de ThemeToggle.astro e
+  // WhatsAppFab.astro — sobrevive a qualquer reexecução futura do módulo.
+  (() => {
+    const toggle = document.querySelector<HTMLButtonElement>('#mobile-nav-toggle');
+    const panel = document.querySelector<HTMLDivElement>('#mobile-nav-panel');
+    const closeButton = panel?.querySelector<HTMLButtonElement>('[data-mobile-nav-close]');
+    const nav = panel?.querySelector<HTMLElement>('nav[aria-label="Menu"]');
+
+    if (!toggle || !panel || !closeButton || !nav) return;
+    if (toggle.dataset.mobileNavBound === 'true') return;
+    toggle.dataset.mobileNavBound = 'true';
+
+    const root = document.documentElement;
+
+    /** Elementos irmãos do `<header>` no `<body>` — o que o painel precisa deixar `inert`
+     *  enquanto está aberto. Seletor genérico (não lista `main`/`footer`/FAB manualmente) para
+     *  continuar correto mesmo se o `BaseLayout` ganhar um irmão de topo novo no futuro. O
+     *  próprio `<header>` — dono do botão, do painel e do botão "Fechar" — fica de fora e
+     *  continua interativo. */
+    const siblings = () => document.querySelectorAll<HTMLElement>('body > :not(header)');
+
+    const close = () => {
+      for (const el of siblings()) el.inert = false;
+      panel.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+      root.classList.remove('nav-open');
+      toggle.focus();
+      document.removeEventListener('keydown', onKeydown);
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+
+    const open = () => {
+      panel.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      for (const el of siblings()) el.inert = true;
+      root.classList.add('nav-open');
+      closeButton.focus();
+      document.addEventListener('keydown', onKeydown);
+    };
+
+    toggle.addEventListener('click', open);
+    closeButton.addEventListener('click', close);
+    nav.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) close();
+    });
+  })();
+</script>
