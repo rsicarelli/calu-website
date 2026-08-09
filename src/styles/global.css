@@ -1,0 +1,736 @@
+/* Calu Pilates e Fisioterapia — design system
+   ============================================================================
+   Fonte única de verdade de cor, tipografia, espaço e forma.
+
+   Os tokens vivem dentro de `@theme`, com os namespaces do Tailwind, porque é
+   isso que faz a utility existir: `--color-surface` gera `bg-surface`,
+   `--text-body` gera `text-body`, `--spacing-target` gera `min-h-target`.
+
+   Regra do projeto: **arbitrary value é proibido** (`p-[13px]`, `text-[#8F5E23]`).
+   Se falta um valor, ele entra aqui e ganha nome. `scripts/check-utilities.mjs`
+   reprova o commit — tanto o arbitrary value quanto a classe que não gera CSS.
+
+   Tema: `:root` = claro, `[data-theme='dark']` = escuro. Sem terceiro tema.
+   Trocar de tema é trocar o valor da mesma custom property — nenhum componente
+   muda de marcação, e `dark:` quase nunca é necessário.
+   ============================================================================ */
+
+@import 'tailwindcss' source(none);
+
+/* ----------------------------------------------------------------------------
+   Fontes de varredura — allowlist explícito.
+
+   `source(none)` desliga a detecção automática. Ela é obrigatória: `@source`
+   SOMA à detecção automática, não a substitui (o plugin de Vite concatena
+   `compiler.root` com `compiler.sources`). Sem `source(none)`, o Tailwind varre
+   a raiz do projeto inteira — tudo que não está no `.gitignore` — e arrasta
+   `design_handoff_calu/`, `.agents/`, `.claude/` e os `.md` da raiz
+   para dentro do bundle. Os arbitrary values dos COMENTÁRIOS que documentam a
+   proibição (`p-[13px]`, `text-[#8F5E23]`) viravam CSS de produção.
+
+   O glob espelha exatamente o que `scripts/check-utilities.mjs` varre
+   (`ROOT/src`, extensões `.astro` `.ts` `.js` `.md` `.mdx`). Os dois conjuntos
+   PRECISAM coincidir: o que o gate verifica é o que o build compila.
+   Base do caminho = o diretório deste arquivo, então `../` é `src/`.
+---------------------------------------------------------------------------- */
+@source '../**/*.{astro,ts,js,md,mdx}';
+
+/* O tema é atributo, não classe. Os dois seletores são necessários: o primeiro
+   casa o próprio <html>, o segundo os descendentes. Só com `*` uma utility
+   `dark:` aplicada na raiz não pegaria. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ----------------------------------------------------------------------------
+   1. Paleta do logo — FORA do @theme, de propósito.
+   Não vira utility. `text-sage` não existe, e a regra "sálvia nunca em texto"
+   (DESIGN-SYSTEM §1) deixa de depender de disciplina. Consumida só pelo SVG
+   da marca.
+---------------------------------------------------------------------------- */
+:root {
+  --logo-sage: #7e8368;
+  --logo-cream: #ede7d9;
+  --logo-gold: #c9a45c;
+}
+
+/* ----------------------------------------------------------------------------
+   2. Elevação — indireção obrigatória.
+   As utilities de cor/tamanho/raio emitem `var(--token)` e por isso respeitam a
+   sobrescrita por tema. `shadow-*` NÃO: o compilador resolve o valor cru e o
+   inlineia em `--tw-shadow`. Sem esta camada, apagar a sombra no escuro seria
+   silenciosamente ignorado.
+
+   No escuro o valor é `0 0 #0000` — uma sombra TRANSPARENTE —, nunca `none`.
+   `shadow-lift` compila para `--tw-shadow: var(--elevation-lift)` dentro de
+   `box-shadow: var(--tw-inset-shadow), …, var(--tw-shadow)`, e a gramática de
+   `box-shadow` é `none | <shadow>#`: um `none` no MEIO da lista é inválido e
+   derruba a declaração inteira (IACVT). O efeito desejado saía por acidente e
+   levava junto qualquer `ring-*` / `inset-shadow-*` do mesmo elemento —
+   `shadow-lift focus-within:ring-3 ring-focus-halo` perdia o halo de foco.
+---------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --elevation-lift: 0 10px 30px -14px rgb(22 33 27 / 0.45);
+  --elevation-float: 0 12px 30px -10px rgb(22 33 27 / 0.7);
+}
+
+/* ----------------------------------------------------------------------------
+   3. Tokens.
+   `static` força a emissão de todos eles no `:root`, mesmo os ainda não usados
+   por nenhuma utility — sem isso o tree-shaking apaga o manifesto e os testes
+   de contraste ficam sem o que ler.
+---------------------------------------------------------------------------- */
+@theme static {
+  /* Zera os namespaces default. O que sobra é só o vocabulário da Calu:
+     `bg-blue-500`, `text-sm`, `font-medium`, `rounded-xl`, `max-w-3xl` e `2xl:`
+     deixam de existir.
+
+     `--font-*` e `--font-weight-*` são namespaces INDEPENDENTES, e a ordem
+     entre os dois resets é indiferente — o reset não é textual por prefixo.
+     Verificado isolando cada linha com `__unstable__loadDesignSystem`: só com
+     `--font-*: initial`, `--font-weight-medium` continua valendo 500 e
+     `font-medium` continua gerando CSS. Quem apaga `font-medium` é a linha
+     `--font-weight-*: initial`, sozinha. Não reordenar por medo de algo que
+     não acontece — mas também não remover nenhuma das duas. */
+  --color-*: initial;
+  --text-*: initial;
+  --font-*: initial;
+  --font-weight-*: initial;
+  --leading-*: initial;
+  --tracking-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --breakpoint-*: initial;
+  --container-*: initial;
+
+  /* `--spacing` NÃO é zerado: a escala default (0.25rem) reproduz exatamente a
+     escala 4 do handoff — `p-6` já é 24px, `p-12` já é 48px. Os 12 tokens
+     `--calu-space-*` foram deletados por redundância. */
+
+  /* ---- superfícies ---- */
+  --color-bg: #f6f2e9;
+  --color-surface: #fffdf7;
+  --color-surface-alt: #ede7d9; /* faixa creme, blocos de destaque */
+  --color-surface-brand: #3e4a3c; /* verde profundo, manifesto e CTA */
+  --color-surface-deep: #16211b; /* verde-quase-preto, rodapé e CTA escuro */
+
+  /* ---- linhas ---- */
+  --color-line: #ded6c4;
+  --color-line-strong: #16211b; /* régua de abertura de seção */
+  --color-line-soft: #d6cdb9; /* divisória sobre surface-alt */
+
+  /* ---- texto ----
+     Radical `ink`, não `text`: `text-<x>` resolve primeiro em `--text-*`
+     (tamanho) e só depois em `--color-*`. Com `--color-text-body` a cor ficaria
+     inalcançável, porque `--text-body` já reivindica o nome. */
+  --color-ink: #16211b; /* títulos          14.83:1 sobre bg */
+  --color-ink-body: #444b42; /* corpo             8.06:1 sobre bg */
+  --color-ink-muted: #454c43; /* meta              7.94:1 sobre bg */
+  /* `surface-brand` (#3E4A3C) tem UM nível de texto, e só um. Nenhum tom
+     cinza-esverdeado do sistema chega a 7:1 sobre ela: `ink-on-deep-2` dá
+     4.87:1, e os candidatos mais claros medidos (#CED2C3, #D5D9CA) param em
+     6.06:1 e 6.49:1. O limite é a superfície, não a paleta. Dentro da skin
+     `brand` do CtaBlock a hierarquia vem de TAMANHO e PESO — título, apoio e
+     ContactPair usam todos `ink-on-brand`. Ver COMPONENTS.md § CtaBlock. */
+  --color-ink-on-brand: #f4f0e6; /* único texto sobre surface-brand   8.20:1 */
+  --color-ink-on-deep: #ede7d9; /* sobre surface-deep */
+  --color-ink-on-deep-2: #b9bdae; /* secundário sobre surface-deep — NUNCA sobre
+                                     surface-brand, onde dá 4.87:1 */
+  --color-ink-on-deep-3: #a7ada1; /* meta sobre surface-deep   7.21:1 */
+
+  /* ---- marca ---- */
+  --color-brand: #414a38; /* texto e link de marca     8.31:1 */
+  --color-brand-tint: #e4e7da; /* fundo de hover/foco */
+
+  /* ---- ação ----
+     `accent` é o bronze do CTA no claro. Como TEXTO ele dá 4.96:1 sobre o bg e
+     reprova AAA — é cor de fundo. Link de marca usa `brand`. */
+  --color-accent: #8f5e23;
+  --color-accent-hover: #74491a;
+  --color-on-accent: #ffffff;
+
+  /* Dourado do logo. O nome carrega a regra: só sobre superfície escura. */
+  --color-accent-deep: #c9a45c;
+  --color-on-accent-deep: #16211b;
+
+  /* ---- estados ---- */
+  --color-focus-ring: #414a38;
+  /* O mesmo anel, dentro de superfície escura. Existe porque o `focus-ring` do
+     tema claro dá 1.01:1 sobre `surface-brand` e 1.78:1 sobre `surface-deep`, e
+     o `outline-offset` da §7 joga o anel exatamente nessas superfícies (Footer,
+     CtaBlock skins `deep` e `brand`). Quem troca o valor é a §6; o controle
+     focado não sabe onde está. Hex literal em vez de `var(--color-ink-on-deep)`
+     — mesmo valor — para o contrato de contraste conseguir medir o token:
+     7.57:1 sobre surface-brand, 13.44:1 sobre surface-deep. */
+  --color-focus-ring-on-dark: #ede7d9;
+  --color-focus-halo: #e4e7da;
+  --color-error: #7d2c15; /* corrigido: #863017 dava 6.96:1 sobre surface-alt e reprovava
+                             AAA (e antes dele #A33A1C dava 5.91:1 sobre bg) */
+  --color-error-bg: #f7e9e2;
+  /* `--color-error-border` (#D9A48D no claro, #7A4132 no escuro) foi DELETADO:
+     reprovava 1.4.11 em 9 das 12 superfícies em que apareceria (1.77:1 sobre
+     surface-alt, 1.74:1 sobre brand-tint, 1.17:1 sobre o brand-tint do escuro) e
+     nenhum documento o consumia. A borda de erro do campo é `--color-error`
+     (COMPONENTS.md § FieldText): 9.36:1 sobre field-bg no claro, 7.78:1 no escuro. */
+  --color-disabled-bg: #ede7d9;
+  --color-disabled-ink: #a8a296;
+  --color-field-bg: #ffffff;
+  --color-field-border: #847e6d; /* corrigido: #8A8474 dava 2.97:1 sobre brand-tint — a
+                                    superfície de hover/foco de secondary e ghost — e
+                                    reprovava 1.4.11; antes dele, #C9C0AC dava 1.81:1 */
+
+  /* ---- famílias ----
+     `--font-source-serif` vem da Fonts API do Astro: self-hosted, com métrica
+     de fallback — é o que zera o CLS de troca de fonte. */
+  --font-body: var(--font-source-serif), ui-serif, Georgia, 'Times New Roman', serif;
+  --font-label: -apple-system, 'Segoe UI', system-ui, sans-serif;
+
+  /* ---- escala tipográfica ----
+     Piso absoluto de 17px. Os modificadores pareados fazem cada utility
+     carregar a entrelinha e o tracking corretos sozinha. */
+  --text-display: clamp(2.25rem, 1.5rem + 3.2vw, 3.75rem); /* 36 → 60 */
+  --text-display--line-height: 1.12;
+  --text-display--letter-spacing: -0.015em;
+
+  --text-h1: clamp(2.125rem, 1.7rem + 1.9vw, 3rem); /* 34 → 48 */
+  --text-h1--line-height: 1.2;
+  --text-h1--letter-spacing: -0.015em;
+
+  --text-h2: clamp(1.75rem, 1.5rem + 1.1vw, 2.5rem); /* 28 → 40 */
+  --text-h2--line-height: 1.2;
+
+  --text-h3: clamp(1.375rem, 1.3rem + 0.4vw, 1.625rem); /* 22 → 26 */
+  --text-h3--line-height: 1.2;
+
+  /* Lockup "CaLu" e pergunta de FAQ: a escala de 8 tamanhos do handoff não
+     cobria nenhum dos dois — caíam entre `lead` e `h3`. */
+  --text-lockup: clamp(1.5625rem, 1.5rem + 0.3vw, 1.75rem); /* 25 → 28 */
+  --text-lockup--line-height: 1.1;
+  --text-lockup--letter-spacing: -0.01em;
+
+  --text-question: clamp(1.3125rem, 1.29rem + 0.1vw, 1.375rem); /* 21 → 22 */
+  --text-question--line-height: 1.35;
+
+  --text-lead: clamp(1.25rem, 1.2rem + 0.2vw, 1.3125rem); /* 20 → 21 */
+  --text-lead--line-height: 1.5;
+
+  --text-body: clamp(1.1875rem, 1.16rem + 0.15vw, 1.25rem); /* 19 → 20 */
+  --text-body--line-height: 1.7;
+
+  --text-small: 1.0625rem; /* 17px — PISO ABSOLUTO */
+  --text-small--line-height: 1.6;
+
+  /* Único token abaixo do piso. Só rótulo em caixa-alta de até 3 palavras —
+     nunca frase, nunca credencial. Já carrega tracking e peso. */
+  --text-label: 0.9375rem; /* 15px */
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.08em;
+  --text-label--font-weight: 600;
+
+  /* ---- entrelinha e tracking avulsos ---- */
+  --leading-tight: 1.12;
+  --leading-heading: 1.2;
+  --leading-body: 1.7;
+  --tracking-display: -0.015em;
+  --tracking-label: 0.08em;
+
+  /* ---- pesos: dois, e só dois ---- */
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+
+  /* ---- alvo de toque (público 60+) ---- */
+  --spacing-target: 3.25rem; /* 52px — mínimo de qualquer controle */
+  --spacing-target-primary: 3.5rem; /* 56px — ação principal */
+
+  /* ---- orçamento de rolagem do Header sticky ----
+     Consumido por `scroll-padding-top` na §7. O projeto mira AAA, então o
+     critério é o 2.4.12 (Foco Não Obscurecido — Aprimorado): NENHUMA parte do
+     elemento focado pode ficar coberta pelo header, seja o foco vindo de
+     âncora, de Tab, de `scrollIntoView()` ou de restauração programática.
+
+     Derivado da spec do Header (COMPONENTS.md § Header + MobileNav), não
+     chutado: lockup/medalhão e botão "Menu" no alvo de 52px (`--spacing-target`)
+     + 12px de padding em cima e embaixo + 1px da linha inferior = 77px. O anel
+     de foco do elemento que para logo abaixo do header soma mais 5px (traço de
+     3px + `outline-offset: 2px` da §7) = 82px. Arredondado para o degrau de 4px
+     acima do próximo múltiplo de 8: 88px.
+     Se o Header mudar de altura, ESTE token é quem muda — e `min-h-header`
+     existe justamente para que os dois não possam divergir. */
+  --spacing-header: 5.5rem; /* 88px */
+
+  /* ---- gutter ---- */
+  --spacing-gutter: 1.25rem; /* 20px no mobile */
+  --spacing-gutter-lg: 2.5rem; /* 40px no desktop — o handoff dizia 48px, mas a
+                                  media query e as 7 telas usam 40px */
+
+  /* ---- forma ----
+     `rounded-none` e `rounded-full` são estáticas no Tailwind e sobrevivem ao
+     reset, então `--calu-radius-0` e `--calu-radius-pill` não viram token. */
+  --radius-control: 0.25rem; /* 4px  — padrão de contêiner */
+  --radius-card: 0.5rem; /* 8px  — card externo, moldura */
+
+  /* ---- elevação (ver §2) ---- */
+  --shadow-lift: var(--elevation-lift);
+  --shadow-float: var(--elevation-float);
+
+  /* ---- breakpoints ----
+     600 / 900 / 1280. `sm:` só solta a coluna de leitura e passa listas de 1
+     para 2 colunas; mudança estrutural real acontece em `md:`, que é o único
+     com tela desenhada além da Home. */
+  --breakpoint-sm: 37.5rem; /* 600px */
+  --breakpoint-md: 56.25rem; /* 900px */
+  --breakpoint-lg: 80rem; /* 1280px */
+
+  /* ---- layout: larguras máximas ---- */
+  --container-measure: 68ch; /* coluna de leitura, travada mesmo em tela larga */
+  --container-answer: 64ch; /* resposta de FaqItem — COMPONENTS.md § FaqAccordion
+                               ("Resposta em 19px, line-height 1.7, máx. 64ch").
+                               Não havia token: o número existia só na prosa do
+                               handoff, e `container-measure` (68ch) é outra coisa.
+                               Vira `max-w-answer`. */
+  --container-page: 80rem; /* 1280px */
+
+  /* ---- layout: limiares de container query ----
+     `--container-*: initial` acima apaga a escala default (`@3xs:` … `@7xl:`),
+     e sem substituto o único escape é `@min-[30rem]:`, um arbitrary value em
+     VARIANTE — que a Trava A do gate não inspeciona por design (para não
+     reprovar `aria-[current=page]:`). Ou seja: a lacuna de vocabulário desagua
+     exatamente no ponto cego da trava. Estes tokens fecham a lacuna.
+
+     Nomeados pelo que o espaço PERMITE, não pela medida, e derivados da geometria
+     dos componentes — não de uma escala genérica. O breakpoint de VIEWPORT
+     continua sendo `sm:`/`md:`/`lg:`; isto aqui é o que o componente sabe sobre
+     si mesmo, e é o que permite o mesmo ServiceCard viver em 1 coluna na Home e
+     em linha no índice sem prop de variante. */
+  --container-thumb: 26rem; /* 416px — cabe uma MINIATURA ao lado do texto.
+                               ProfessionalBio compacto (COMPONENTS.md): retrato de
+                               112px + 24px de gap + ~40ch de texto (≈280px a 19px).
+                               Acima de 360px de propósito: "nunca duas colunas
+                               espremidas em 360px" é regra do mesmo documento. */
+  --container-row: 34rem; /* 544px — cabe uma IMAGEM 16/9 ao lado do texto.
+                               ServiceCard: imagem de ~200px + 24px de gap + ~45ch
+                               (≈320px). Separa os dois usos reais com folga larga —
+                               na Home o card mede ~250px (md) a ~378px (lg) por
+                               coluna e continua empilhado; no índice de serviços ele
+                               ocupa o trilho inteiro (~1200px) e vira linha, que é o
+                               que PAGES.md § Índice de serviços pede. */
+}
+
+/* ----------------------------------------------------------------------------
+   4. Tema escuro.
+   SEM `@layer`, de propósito: o `@theme` sempre cai em `@layer theme`, e CSS
+   não-camadado vence qualquer camada. Não depende de ordem de origem nem de
+   especificidade — `:root` e `[data-theme]` empatam em (0,1,0).
+
+   Só os tokens que MUDAM aparecem aqui. Os demais são herdados do bloco claro.
+---------------------------------------------------------------------------- */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Sombra transparente, não `none` — ver §2. No escuro a elevação continua
+     sendo superfície mais clara + linha; o que muda é só COMO se apaga a sombra. */
+  --elevation-lift: 0 0 #0000;
+  --elevation-float: 0 12px 30px -10px rgb(0 0 0 / 0.8);
+
+  --color-bg: #16211b;
+  --color-surface: #1c2822;
+  --color-surface-alt: #1c2822;
+  --color-surface-deep: #1c2822;
+
+  --color-line: #2e3c33;
+  --color-line-strong: #2e3c33;
+  --color-line-soft: #2e3c33;
+
+  --color-ink: #ede7d9;
+  --color-ink-body: #c3c7b8; /* corrigido: #B9BDAE achataria a hierarquia após o ajuste de muted */
+  --color-ink-muted: #b2b8ac; /* corrigido: #A7ADA1 dava 6.64:1 sobre surface */
+  /* `surface-deep` no escuro é #1C2822, não #16211B — o token herdado reprovava
+     AAA no rodapé e ninguém tinha reconferido. */
+  --color-ink-on-deep-3: #b2b8ac;
+
+  /* O dourado assume a marca e a ação: o bronze some no escuro (2.1:1). */
+  --color-brand: #d3b070; /* corrigido: #C9A45C passava por 0.06 e reprovava sobre card */
+  /* corrigido: #24322A reprovava AAA em TRÊS pares que a interface produz —
+     `brand` 6.53:1, `ink-muted` 6.61:1 e `error` 6.30:1 sobre ele (é a superfície
+     de hover/foco do Button `secondary`/`ghost`). Agora: 9.06 / 9.18 / 8.75.
+
+     O tint precisou passar por BAIXO do `bg`, e isso não foi escolha estética.
+     Com frentes claras (L≈0.44–0.47) o piso de 7:1 exige fundo com L ≤ 0.0204;
+     `surface` já ocupa 0.0188 e `bg` está em 0.0134, então a faixa "mais clara
+     que o bg e ainda AAA" tem 0.007 de largura e já está tomada. Escurecer só
+     até caber nela dava #1D2822 — ΔE00 de 0.47 contra `surface`, ou seja, a
+     superfície de hover viraria o mesmo cinza-verde do card. Recuar em vez de
+     elevar mantém o matiz da família (162°, o mesmo de `surface`) e SEPARA
+     melhor do que o valor antigo: ΔE00 5.60 contra `bg` (era 5.35) e 7.29
+     contra `surface` (era 3.27); razão de luminância 1.13:1 contra o `bg`.
+     De quebra `field-border` sobe de 3.23:1 para 4.49:1 na 1.4.11. */
+  --color-brand-tint: #0e1411;
+  --color-accent: #d3b070;
+  --color-accent-hover: #e2c48c;
+  --color-on-accent: #16211b;
+  --color-accent-deep: #d3b070;
+
+  --color-focus-ring: #ede7d9;
+  --color-focus-halo: rgb(201 164 92 / 0.25);
+  --color-error: #e9a08a;
+  --color-error-bg: #33221c;
+  --color-disabled-bg: #1c2822;
+  --color-disabled-ink: #66705f;
+  --color-field-bg: #16211b;
+  --color-field-border: #738071; /* corrigido: #6E7A6C dava 2.98:1 sobre brand-tint e
+                                    reprovava 1.4.11; antes dele, #45524A dava 2.02:1 e
+                                    era a causa raiz do --calu-control-border órfão. */
+}
+
+/* ----------------------------------------------------------------------------
+   5. Sem JavaScript, respeita o sistema operacional.
+   O script inline do <head> sempre define `data-theme`, então este bloco só
+   entra em cena com JS desabilitado.
+
+   A duplicação é deliberada: `light-dark()` resolveria em um lugar só, mas é
+   Baseline apenas desde 2024 e num navegador antigo a função inválida derruba
+   a propriedade inteira — quebra as cores em vez de degradar. Para um público
+   com aparelho velho, isso é risco alto demais.
+
+   `tests/tokens/invariants.test.ts` compara os dois blocos e falha se
+   divergirem, então a duplicação não pode se desencontrar em silêncio.
+---------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --elevation-lift: 0 0 #0000;
+    --elevation-float: 0 12px 30px -10px rgb(0 0 0 / 0.8);
+
+    --color-bg: #16211b;
+    --color-surface: #1c2822;
+    --color-surface-alt: #1c2822;
+    --color-surface-deep: #1c2822;
+
+    --color-line: #2e3c33;
+    --color-line-strong: #2e3c33;
+    --color-line-soft: #2e3c33;
+
+    --color-ink: #ede7d9;
+    --color-ink-body: #c3c7b8;
+    --color-ink-muted: #b2b8ac;
+    --color-ink-on-deep-3: #b2b8ac;
+
+    --color-brand: #d3b070;
+    --color-brand-tint: #0e1411;
+    --color-accent: #d3b070;
+    --color-accent-hover: #e2c48c;
+    --color-on-accent: #16211b;
+    --color-accent-deep: #d3b070;
+
+    --color-focus-ring: #ede7d9;
+    --color-focus-halo: rgb(201 164 92 / 0.25);
+    --color-error: #e9a08a;
+    --color-error-bg: #33221c;
+    --color-disabled-bg: #1c2822;
+    --color-disabled-ink: #66705f;
+    --color-field-bg: #16211b;
+    --color-field-border: #738071;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   6. Contexto de superfície — o anel de foco dentro de bloco escuro.
+
+   WCAG 1.4.11 (AA) e 2.4.13 (AAA). O `outline-offset: 2px` da §7 tira o anel de
+   cima do controle e o joga na superfície ATRÁS dele. É isso que torna o anel
+   previsível dentro de card — e é isso que o matava dentro de bloco escuro no
+   tema claro: `--color-focus-ring` (#414A38) dá **1.01:1** sobre `surface-brand`
+   e **1.78:1** sobre `surface-deep`. Footer (links de 52px, ContactPair) e
+   CtaBlock nas skins `deep` e `brand` têm controles focáveis exatamente aí:
+   quem navegava por teclado no tema claro perdia o foco de vista por completo.
+
+   MECANISMO — o mesmo do tema, um nível abaixo. `data-theme` re-escopa tokens no
+   <html>; `data-surface` re-escopa, no bloco que pinta o fundo, o token que
+   depende dele. Custom property herda, então:
+     · o controle focado continua sem saber onde está — Button, Link e
+       ContactPair não ganham prop, variante nem `dark:`;
+     · quem sabe é quem pinta a superfície, e ele já sabia;
+     · funciona nos dois temas (no escuro a regra é idempotente: `focus-ring` já
+       é #EDE7D9) — 7.57:1 sobre surface-brand, 13.44:1 sobre o surface-deep do
+       claro, 12.38:1 sobre o do escuro;
+     · é testável, porque o valor tem nome próprio no @theme e entra em
+       `tests/tokens/pairs.ts` como par medido.
+
+   Quem pinta um fundo escuro declara o atributo junto:
+     <footer  data-surface="deep"  class="bg-surface-deep text-ink-on-deep">
+     <section data-surface="brand" class="bg-surface-brand text-ink-on-brand">
+
+   `--color-focus-halo` NÃO precisa de escopo: #E4E7DA dá 7.44:1 sobre
+   surface-brand e 13.21:1 sobre surface-deep.
+
+   Fora de `@layer`, como a §4 e a §5, e pelo mesmo motivo: são declarações de
+   token, e quem vence entre elas é a proximidade na herança, não a camada.
+---------------------------------------------------------------------------- */
+[data-surface='deep'],
+[data-surface='brand'] {
+  --color-focus-ring: var(--color-focus-ring-on-dark);
+}
+
+/* ----------------------------------------------------------------------------
+   7. Base.
+---------------------------------------------------------------------------- */
+@layer base {
+  /* REGRA DA CAMADA — onde `:where()` pode e onde não pode.
+
+     O Preflight do Tailwind vive na MESMA `@layer base`. Camada empatada devolve
+     a decisão para a ESPECIFICIDADE, e só depois para a ordem. `:where()` zera a
+     especificidade para (0,0,0), então qualquer seletor do Preflight vence a
+     regra do projeto por mais tarde que ela venha. Foi assim que `h1..h6`
+     (Preflight `font-weight: inherit`, (0,0,1)) e o anel de foco (Preflight
+     `:-moz-focusring:where(:not(iframe))`, (0,1,0)) foram descartados em
+     silêncio — os dois defeitos invisíveis porque as OUTRAS declarações do
+     mesmo bloco, sem concorrente no Preflight, continuavam valendo.
+
+     Critério: o seletor que precisa VENCER o Preflight vai nu. `:where()` só é
+     legítimo na parte que não disputa nada — o ancestral de
+     `:where([data-prose]) a` fica envolto de propósito, para que o `a` mantenha
+     (0,0,1) contra o `a` do Preflight e ao mesmo tempo qualquer utility de cor
+     no próprio link continue vencendo o bloco inteiro. */
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink-body);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--font-weight-normal);
+    -webkit-font-smoothing: antialiased;
+    /* WCAG 1.4.10 (Reflow) a 320px: URL, e-mail e termo técnico longo colados do
+       Word não podem empurrar rolagem horizontal no texto corrido. */
+    overflow-wrap: break-word;
+  }
+
+  /* WCAG 2.4.11/2.4.12 — nada focado pode parar embaixo do Header sticky.
+     `scroll-padding-top` no elemento de rolagem cobre os QUATRO caminhos:
+     navegação por fragmento, foco sequencial por Tab, `scrollIntoView()` e
+     restauração de foco. O `scroll-margin-top` em `:target` que morava aqui
+     cobria só o primeiro — e com um `--spacing(20)` que não vinha de altura de
+     header nenhuma. O orçamento agora é um token e está justificado na §3. */
+  html {
+    scroll-padding-top: var(--spacing-header);
+  }
+
+  /* WCAG 2.2 — 2.4.13 Focus Appearance. O offset tira o anel de cima do próprio
+     controle e o joga na superfície da página, onde o contraste é conhecido.
+     Dentro de bloco escuro quem responde por esse contraste é a §6.
+
+     Sem `:where()`: (0,1,0) empata com o `:-moz-focusring:where(:not(iframe))`
+     do Preflight e vence por vir depois. Com (0,0,0) o Gecko trocava o anel de
+     3px por `outline: auto` e sobrava só o `outline-offset` — um anel do
+     navegador, descolado 2px, que não é o especificado. E até um
+     `button { outline: none }` (0,0,1) apagaria o anel.
+
+     Sem `border-radius`: navegador moderno já segue o raio do próprio elemento
+     no `outline`. A declaração não arredondava o anel, arredondava o ELEMENTO
+     ao receber foco — mudava a forma de `<img>` e de link de rodapé sem raio
+     próprio, exatamente no momento em que ele precisa parecer estável. */
+  :focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Título usa o mesmo peso semibold em toda a escala: são dois pesos, só.
+     Seletor nu, (0,0,1): o Preflight emite `h1,…,h6{font-size:inherit;
+     font-weight:inherit}` com a mesma especificidade na mesma camada, e com
+     `:where()` era ELE quem ganhava — todo título do site renderizava em 400.
+     O defeito era invisível porque `color` e `text-wrap` não têm concorrente no
+     Preflight: o título saía com a cor certa e o peso errado.
+
+     `overflow-wrap` + `hyphens` são a 1.4.10 a 320px, não polimento. Medido no
+     .woff2 do próprio build (Source Serif 4, HVAR no peso 600) contra a caixa de
+     280px (320 − 2×20 de gutter): "Acompanhamento" ocupa 322px em `--text-display`
+     e 304px em `--text-h1`; "condicionamento" e "desenvolvimento" também estouram.
+     `text-wrap: balance` não quebra palavra, e não havia nada mais no arquivo que
+     quebrasse. `hyphens: auto` funciona porque o `<html>` já declara `lang="pt-BR"`;
+     `overflow-wrap` é a rede de segurança para quando não houver ponto de
+     hifenização (a palavra quebra, mas a página não rola de lado). */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-ink);
+    font-weight: var(--font-weight-semibold);
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Link em texto corrido é sempre sublinhado — cor sozinha não é sinal
+     suficiente (DESIGN-SYSTEM §4). Fora de prosa, o componente decide. */
+  :where([data-prose]) a {
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* O Preflight já cobre `img` e `video` com os MESMOS valores em (0,0,1); isto
+     aqui existe por `picture` e `svg`, que ele não cita. (0,0,0) de propósito:
+     não há conflito a vencer, e assim `max-w-none` / `h-full` seguem podendo
+     sobrescrever numa imagem específica. */
+  :where(img, picture, svg, video) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Nada de parallax, reveal-on-scroll ou carrossel automático neste projeto;
+     isto cobre o que resta. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   8. Containers.
+   O gutter responsivo mora aqui porque `@theme` não aceita media query.
+---------------------------------------------------------------------------- */
+
+/* Largura de página inteira: header, rodapé, grades de seção. */
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--container-page);
+  padding-inline: var(--spacing-gutter);
+
+  @media (width >= 56.25rem) {
+    padding-inline: var(--spacing-gutter-lg);
+  }
+}
+
+/* Coluna de leitura: texto corrido nunca passa de 68ch, mesmo em 1280px.
+   O `max-width` soma o gutter DOS DOIS LADOS porque o Preflight liga
+   `box-sizing: border-box`: com `max-width: 68ch` cru, o padding come a medida
+   por dentro e a coluna real ficava em 68ch − 40px no mobile e 68ch − 80px no
+   desktop (≈59ch). A resposta de FAQ especificada em 64ch (COMPONENTS.md
+   § FaqAccordion) não cabia em nenhum dos dois — o token dizia 68 e a tela
+   entregava 59.
+
+   Das três saídas possíveis (somar o gutter ao teto, mover o padding para um
+   wrapper externo, ou inflar o token), esta é a que mantém `--container-measure`
+   significando exatamente "68ch de TEXTO" — o número que o handoff cita e o que
+   qualquer pessoa espera ao ler o token. O preço é que a caixa externa cresce:
+   ~646px + 80px = ~726px no desktop, ainda bem abaixo do trilho de 1280px, e
+   nenhuma tela do mockup encosta nesse limite. As outras duas foram descartadas
+   por motivos opostos: o wrapper externo obrigaria todo consumidor a lembrar de
+   dois elementos (e o Container é justamente o primitivo que existe para isso
+   não acontecer), e inflar o token faria `--container-measure` mentir sobre o
+   próprio nome, além de mudar de sentido conforme o breakpoint. */
+@utility container-measure {
+  margin-inline: auto;
+  width: 100%;
+  max-width: calc(var(--container-measure) + 2 * var(--spacing-gutter));
+  padding-inline: var(--spacing-gutter);
+
+  @media (width >= 56.25rem) {
+    max-width: calc(var(--container-measure) + 2 * var(--spacing-gutter-lg));
+    padding-inline: var(--spacing-gutter-lg);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   9. Utilities de componente.
+   Existem aqui, e não como lista de classes no `.astro`, quando a ORDEM entre as
+   declarações precisa ser garantida — dentro de um `@utility` quem ordena é o
+   autor; entre utilities soltas quem ordena é o Tailwind.
+---------------------------------------------------------------------------- */
+
+/* Rótulo de seção — o ÚNICO texto de 15px do site.
+   `--text-label` é a única exceção ao piso de 17px, e ela só vale para caixa-alta
+   de até 3 palavras (DESIGN-SYSTEM §2.2 e §2.4). Só que `text-label` sozinho
+   emite tamanho, entrelinha, tracking e peso — e NÃO emite `text-transform` nem
+   `font-family`. Ou seja, a utility crua produz 15px em caixa normal em Source
+   Serif: a exceção sem nenhuma das duas condições que a justificam, e invisível
+   para as duas travas do gate (gera CSS, e o invariante só compara o VALOR do
+   token). `label` empacota a exceção com a regra, e é o nome a usar.
+
+   `text-label` continua existindo porque o `@theme` o gera a partir do token —
+   não há como ter o token sem a utility. Então ele é ENDURECIDO logo abaixo, em
+   vez de apenas documentado: um `@utility` com o mesmo nome de uma utility
+   funcional do tema se soma a ela, então `text-label` passa a sair com a
+   caixa-alta e a sans do sistema também. Escrito completo (e não só o que falta)
+   para não depender da semântica de merge continuar a mesma numa versão futura:
+   se um dia ela virar substituição, o resultado ainda é o pacote inteiro. */
+@utility label {
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  line-height: var(--tw-leading, var(--text-label--line-height));
+  letter-spacing: var(--tw-tracking, var(--text-label--letter-spacing));
+  font-weight: var(--tw-font-weight, var(--text-label--font-weight));
+  text-transform: uppercase;
+}
+
+@utility text-label {
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  line-height: var(--tw-leading, var(--text-label--line-height));
+  letter-spacing: var(--tw-tracking, var(--text-label--letter-spacing));
+  font-weight: var(--tw-font-weight, var(--text-label--font-weight));
+  text-transform: uppercase;
+}
+
+/* Skip link — WCAG 2.4.1. Primeiro elemento focável do <body>.
+   Escondido até receber foco, NUNCA `display: none` (sairia da ordem de foco e o
+   link deixaria de existir para quem navega por teclado).
+
+   Vive num `@utility` porque a versão em classes soltas dependia de SORTE:
+   `.focus\:not-sr-only:focus` e `.focus\:px-5:focus` têm a mesma especificidade
+   (0,2,0), e `not-sr-only` (que zera `position`, `width`, `height`, `padding` e
+   `margin`) só perdia para as outras porque o Tailwind a emitia primeiro. Essa
+   ordem é ordenação INTERNA do compilador, não algo que o projeto controle: uma
+   utility nova no meio, ou uma mudança de ordenação numa versão futura, e o skip
+   link volta a ser invisível ao receber foco — exatamente a falha de 2.4.1 que
+   ele existe para evitar, e das que não aparecem em nenhum teste automático.
+   Aqui as duas metades são o mesmo bloco e quem ordena é este arquivo. */
+@utility skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+
+  &:focus {
+    position: fixed;
+    z-index: 50;
+    top: var(--spacing-gutter);
+    left: var(--spacing-gutter);
+    display: inline-flex;
+    align-items: center;
+    /* Alvo de 52px: o skip link é um controle como qualquer outro (público 60+). */
+    min-height: var(--spacing-target);
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding-inline: var(--spacing-gutter);
+    padding-block: --spacing(3);
+    overflow: visible;
+    clip-path: none;
+    white-space: nowrap;
+    border-width: 1px;
+    border-color: var(--color-line-strong);
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-label);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    font-weight: var(--font-weight-semibold);
+    text-decoration-line: none;
+    box-shadow: var(--elevation-float);
+  }
+}
