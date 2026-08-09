@@ -1,0 +1,87 @@
+---
+/**
+ * Footer — logo lockup + endereço/horário + navegação + ContactPair + responsável técnica
+ * (COMPONENTS.md § Footer).
+ *
+ * Props
+ *   navLinks  mesmos itens do nav principal do Header, repetidos na mesma ordem
+ *             (COMPONENTS.md § Footer: "navegação").
+ *   …         qualquer outro atributo de `<footer>` é repassado (COMPONENTS.md: "todo
+ *             componente aceita `class` e repassa atributos").
+ *
+ * `data-surface="deep"` no elemento raiz NÃO é decorativo — é o mecanismo de `global.css`
+ * §6 que reaponta `--color-focus-ring` para a variante -on-dark. Sem ele, o anel de foco dos
+ * links de navegação e do `ContactPair` cai para ~1,78:1 sobre `surface-deep` no tema claro:
+ * invisível para quem navega por teclado (COMPONENTS.md § Footer confirma a mesma medição).
+ *
+ * O lockup usa `alt` NÃO-vazio — diferente do medalhão do Header (`alt=""`): aqui não há
+ * texto visível ao lado nomeando a marca, então a imagem carrega a informação sozinha.
+ *
+ * `min-h-target` nos links de navegação é aplicado a TODOS, sem exceção — mesmo onde o
+ * mockup visual do handoff mostra 48px em alguns lugares. COMPONENTS.md § Footer é
+ * explícito: "links de 52px, `--calu-target` — sem exceção para rodapé; o mockup violava
+ * isso em 5 lugares". A especificação escrita vale sobre o mockup.
+ *
+ * Responsável técnica em `text-small` (17px, o piso do projeto) — texto regulatório/
+ * credencial não é exceção ao piso tipográfico.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'footer'>`, não genérica — mesmo teto documentado
+ * em `Container.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1 estoura em `Props`
+ * genérica acima de ~3KB de arquivo). `<footer>` é a única tag plausível aqui.
+ */
+import { Image } from 'astro:assets';
+import type { HTMLAttributes } from 'astro/types';
+
+import logoLockup from '@/assets/brand/logo-lockup.png';
+import Container from '@/components/ui/Container.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+
+import type { NavLink } from './Header.astro';
+
+interface Props extends HTMLAttributes<'footer'> {
+  /** Itens do nav principal, repetidos no rodapé na mesma ordem. */
+  navLinks: NavLink[];
+}
+
+const { navLinks, class: className, ...rest } = Astro.props;
+---
+
+<footer data-surface="deep" class:list={['bg-surface-deep text-ink-on-deep', className]} {...rest}>
+  <Container width="page" class="flex flex-col gap-8">
+    <Image src={logoLockup} alt="Calu Pilates e Fisioterapia" width={128} height={142} />
+
+    <p class="text-ink-on-deep-2">
+      {SITE.address}
+      <br />
+      {SITE.hours}
+    </p>
+
+    <div>
+      <span class="label text-ink-on-deep-3">Navegação</span>
+      <nav aria-label="Rodapé" class="flex flex-col">
+        {
+          navLinks.map((link) => (
+            <a href={link.href} class="inline-flex min-h-target items-center text-ink-on-deep">
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <div>
+      <span class="label text-ink-on-deep-3">Contato</span>
+      <ContactPair
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+        class="text-ink-on-deep"
+      />
+    </div>
+
+    <p class="text-small font-semibold text-ink-on-deep-3">
+      {SITE.technicalManager.name} — {SITE.technicalManager.crefito}
+    </p>
+  </Container>
+</footer>
