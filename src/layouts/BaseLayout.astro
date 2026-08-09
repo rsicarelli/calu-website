@@ -1,15 +1,25 @@
 ---
 /**
  * BaseLayout — a casca de toda página. Dono do `<html>`, do `<head>` e do esqueleto de
- * marcos (skip link + `<main>`). Header e rodapé entram na Fase 2.
+ * marcos (skip link + `<header>` + `<main>` + `<footer>` + FAB).
  *
  * Props
  *   title        `<title>` já pronto, composto pela página.
  *   description  meta description. Omitida quando a página ainda não tem texto aprovado.
  *   noindex      emite `robots: noindex, follow` — para /lab e afins, que não vão ao índice.
+ *
+ * `navLinks` NÃO é prop deste componente: a navegação do site é global e sempre a mesma, então
+ * `BaseLayout` importa `SITE_NAV` de `@/lib/site` direto e repassa para `Header`/`Footer` — só
+ * este arquivo, o único ponto de montagem real da casca do site, precisa saber disso. Toda
+ * página futura evita ter que repetir `navLinks={SITE_NAV}`.
  */
 import '../styles/global.css';
 import { Font } from 'astro:assets';
+
+import Footer from '@/components/blocks/Footer.astro';
+import Header from '@/components/blocks/Header.astro';
+import WhatsAppFab from '@/components/blocks/WhatsAppFab.astro';
+import { SITE, SITE_NAV } from '@/lib/site';
 
 interface Props {
   /** `<title>` da página, já composto (ex.: `Fisioterapia · Calu`). */
@@ -86,10 +96,14 @@ const { title, description, noindex } = Astro.props;
     }
     <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
 
+    <Header navLinks={SITE_NAV} />
+
     {
-      /* `pb-target-primary` reserva a altura do WhatsAppFab (56px, fixo no canto inferior
-      direito) para que ele não cubra o fim do conteúdo — COMPONENTS.md § WhatsAppFab. O FAB
-      ainda não existe; quando entrar, ele é quem define o próprio afastamento da borda.
+      /* `pb-fab-offset` reserva a altura do WhatsAppFab (56px, fixo no canto inferior direito)
+      MAIS o gutter que o separa da borda (20px) — 76px no total — para que ele não cubra o fim
+      do conteúdo — COMPONENTS.md § WhatsAppFab. `pb-target-primary` sozinho sub-reservaria por
+      exatamente esses 20px de gutter (ver comentário do token `--spacing-fab-offset` em
+      `global.css` §"alvo de toque").
 
       `tabindex="-1"` faz do alvo do skip link algo REALMENTE focável. Sem ele, navegadores
       modernos ainda movem o ponto de partida da navegação sequencial, mas Safari + VoiceOver
@@ -100,8 +114,23 @@ const { title, description, noindex } = Astro.props;
       `:-moz-focusring:where(:not(iframe)){outline:auto}` do Preflight, e o Firefox descarta o
       anel do design system. Não reintroduzir. */
     }
-    <main id="conteudo" tabindex="-1" class="pb-target-primary">
+    <main id="conteudo" tabindex="-1" class="pb-fab-offset">
       <slot />
     </main>
+
+    <Footer navLinks={SITE_NAV} />
+
+    {
+      /* `<aside>` dá ao FAB seu próprio landmark (role implícito `complementary`) — sem isso ele
+      fica como filho direto de `<body>`, irmão de `<header>`/`<main>`/`<footer>`, fora de
+      QUALQUER landmark, o que o axe-core reprova na regra `region` ao rodar sobre o documento
+      inteiro (WCAG best practice "todo conteúdo de página deve estar contido em landmarks").
+      `complementary` é semanticamente correto: o atalho de WhatsApp é conteúdo complementar,
+      não parte do fluxo principal. Sem classe própria de propósito — `<aside>` sem estilo não
+      interfere no `position: fixed` do FAB, que não depende do posicionamento do pai. */
+    }
+    <aside aria-label="Contato rápido pelo WhatsApp">
+      <WhatsAppFab href={SITE.whatsapp.href} />
+    </aside>
   </body>
 </html>
