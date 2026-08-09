@@ -126,6 +126,11 @@ Fase 2).
 Registradas na Fase 0 como dívida pendente; fechadas na Fase 1 — Fundação. Cada bullet é somado
 pelo commit da sub-fase correspondente conforme ela é implementada.
 
+- **Cobertura do contrato de contraste generalizada.** `tests/tokens/invariants.test.ts`
+  só exigia par medido para tokens `--color-ink*` — foi essa lacuna que deixou o anel de foco
+  chegar a 1.01:1 sem teste vermelho no passado. Agora todo `--color-*` do `@theme` precisa
+  aparecer em algum par de `pairs.ts` OU estar em `EXEMPT_COLOR_TOKENS`, lista pequena com
+  justificativa escrita por entrada.
 - **Ponto cego do gate em variante arbitrária de breakpoint.** Verificado empiricamente com o
   parser real do Tailwind: `scripts/check-utilities.mjs` passou a reprovar variante arbitrária de
   media/container query (`@min-[…]:`, `min-[…]:`, `max-[…]:`, `@[…]:`) sem tocar nos usos legítimos
@@ -134,6 +139,22 @@ pelo commit da sub-fase correspondente conforme ela é implementada.
 - **Advertência do `max-w-measure`.** Comentário adicionado junto à declaração de
   `--container-measure` em `global.css`: a utility crua emite 68ch sem somar o gutter — usar
   sempre `container-measure` ou `<Container>`.
+- **Três bugs de contraste reais descobertos pela cobertura generalizada, no tema escuro e/ou
+  claro.** Generalizar o invariante (primeiro bullet) expôs pares nunca medidos antes:
+  `--color-line` (borda padrão do `ThemeToggle`) e `--color-line-strong` (borda no estado
+  pressionado) — ambos abaixo de 3:1 em algum tema, escondidos atrás de isenções com justificativa
+  incorreta ou nunca medidos; e `--color-focus-halo`, abaixo de 3:1 no escuro (1.46:1 contra
+  `--color-surface-brand`, 1.61:1 contra `--color-surface-deep`). Mesma classe do defeito histórico
+  do anel de foco a 1.01:1. Correções: `--color-line` ajustado para `#8F7B50` no claro (4.03:1
+  contra `--color-surface`, 3.67:1 contra `--color-bg`) e `#6B7A64` no escuro (3.34:1 contra
+  `--color-surface`, 3.62:1 contra `--color-bg`) — era `#DED6C4`/`#2E3C33`, 1.42:1/1.32:1 contra
+  `--color-surface`; e `--color-line-strong` para `#748268` no escuro (3.73:1 contra
+  `--color-surface`), já corrigido numa passada anterior desta mesma leva — os dois agora com par
+  medido real em `pairs.ts`, mantendo `--color-line` visivelmente mais sutil que
+  `--color-line-strong` pra preservar a distinção de estado no `ThemeToggle`. `--color-focus-halo`
+  foi isento em vez de corrigido: é reforço decorativo supletivo ao anel de foco sólido
+  (`--color-focus-ring`, que já é conforme sozinho) e não tem consumidor hoje; a isenção precisa
+  ser revisitada se isso mudar.
 
 ## Fases seguintes
 

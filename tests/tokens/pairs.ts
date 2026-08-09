@@ -24,6 +24,28 @@ export type ContrastPair = {
   readonly where: string;
 };
 
+/** Token de cor isento de par medido — cobertura obrigatória (invariante 6 em
+ *  `invariants.test.ts`) sem uso interativo ou textual a medir. Cada entrada carrega
+ *  o PORQUÊ por escrito: isenção sem justificativa é exatamente o buraco que deixou o
+ *  anel de foco chegar a 1.01:1 sem teste vermelho. */
+export interface ColorExemption {
+  token: string;
+  reason: string;
+}
+
+export const EXEMPT_COLOR_TOKENS: ColorExemption[] = [
+  { token: '--color-line-soft', reason: 'divisória decorativa, nenhum uso interativo hoje' },
+  {
+    token: '--color-disabled-ink',
+    reason: 'WCAG 1.4.11 isenta controle desabilitado de contraste mínimo',
+  },
+  {
+    token: '--color-focus-halo',
+    reason:
+      'halo decorativo supletivo ao redor do anel de foco sólido (--color-focus-ring), que já é o indicador funcional e já tem contraste próprio medido; zero consumidor em src/ hoje. Se algum componente vier a usar este halo como ÚNICO indicador de foco (sem o anel sólido), esta isenção precisa ser revisitada e o par precisa voltar a NONTEXT_PAIRS.',
+  },
+];
+
 /** Texto corrido — piso 7:1 (WCAG 2.2 AAA, 1.4.6).
  *  AAA é requisito do projeto, não meta: o público inclui a faixa 60–75 lendo no celular. */
 export const TEXT_PAIRS: readonly ContrastPair[] = [
@@ -270,6 +292,28 @@ export const NONTEXT_PAIRS: readonly ContrastPair[] = [
     fg: '--color-focus-ring-on-dark',
     bg: '--color-surface-deep',
     where: 'anel de foco nos links de 52px do Footer e no CtaBlock skin deep',
+  },
+
+  // ---- Borda forte — o token que a cobertura generalizada do invariante 6 pegou sem par
+  // medido. `--color-focus-halo` NÃO entra aqui: é isento, ver `EXEMPT_COLOR_TOKENS`.
+  {
+    fg: '--color-line-strong',
+    bg: '--color-surface',
+    where: 'borda do skip-link quando focado',
+  },
+
+  // ---- Borda padrão do ThemeToggle. Também pega a cobertura generalizada do invariante 6 —
+  // a isenção anterior em `EXEMPT_COLOR_TOKENS` alegava "nenhum uso interativo hoje", o que
+  // era falso: é a borda do estado NÃO pressionado de um <button> real (ThemeToggle.astro).
+  {
+    fg: '--color-line',
+    bg: '--color-surface',
+    where: 'borda padrão (não pressionada) do ThemeToggle sobre card',
+  },
+  {
+    fg: '--color-line',
+    bg: '--color-bg',
+    where: 'borda padrão (não pressionada) do ThemeToggle direto sobre o fundo da página',
   },
 ];
 

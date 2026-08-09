@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { darkMediaTokens, darkTokens, resolveTheme, themeTokens, tokenValue } from './parse.ts';
-import { TEXT_PAIRS } from './pairs.ts';
+import { EXEMPT_COLOR_TOKENS, NONTEXT_PAIRS, TEXT_PAIRS, UI_TEXT_PAIRS } from './pairs.ts';
 
 const light = resolveTheme('light');
 
@@ -100,14 +100,35 @@ describe('5. sem órfão de tema', () => {
 });
 
 describe('6. cobertura do contrato de contraste', () => {
-  /* Impede que um token de texto entre no sistema sem teste. Se este falhar, a correção é
-     adicionar o par em `pairs.ts` — não renomear o token para escapar do filtro. */
-  it('todo --color-ink* aparece em pelo menos um par de TEXT_PAIRS', () => {
-    const paired = new Set(TEXT_PAIRS.flatMap((pair) => [pair.fg, pair.bg]));
-    const uncovered = [...light.keys()].filter(
-      (token) => token.startsWith('--color-ink') && !paired.has(token),
+  /* Impede que um token de cor entre no sistema sem teste. Foi a versão anterior deste
+     invariante — restrita a `--color-ink*` — que deixou `--color-focus-ring` de fora da
+     cobertura obrigatória e um anel de foco chegar a 1.01:1 sem teste vermelho: o token
+     nem era `ink`, nem tinha par medido, e nada acusava a lacuna.
+
+     Generalizado para TODO `--color-*` do `@theme`: ou aparece como `fg`/`bg` em algum par
+     de `TEXT_PAIRS`, `UI_TEXT_PAIRS` ou `NONTEXT_PAIRS`, ou está listado em
+     `EXEMPT_COLOR_TOKENS` com justificativa. Se este falhar, a correção é adicionar o par
+     em `pairs.ts` (ou a isenção, com motivo) — não renomear o token para escapar do filtro. */
+  it('todo --color-* aparece em algum par medido ou em EXEMPT_COLOR_TOKENS', () => {
+    const paired = new Set(
+      [...TEXT_PAIRS, ...UI_TEXT_PAIRS, ...NONTEXT_PAIRS].flatMap((pair) => [pair.fg, pair.bg]),
     );
-    expect(uncovered, `tokens de texto sem par de contraste: ${uncovered.join(', ')}`).toEqual([]);
+    const exempt = new Set(EXEMPT_COLOR_TOKENS.map((entry) => entry.token));
+    const uncovered = [...light.keys()].filter(
+      (token) => token.startsWith('--color-') && !paired.has(token) && !exempt.has(token),
+    );
+    expect(
+      uncovered,
+      `tokens de cor sem par de contraste nem isenção: ${uncovered.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('toda entrada de EXEMPT_COLOR_TOKENS tem motivo escrito', () => {
+    const withoutReason = EXEMPT_COLOR_TOKENS.filter((entry) => entry.reason.trim() === '');
+    expect(
+      withoutReason.map((entry) => entry.token),
+      'isenção sem justificativa é o mesmo buraco que deixou o anel de foco passar batido',
+    ).toEqual([]);
   });
 });
 
