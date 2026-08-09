@@ -68,12 +68,20 @@ tasks:
       - task: fmt:check
       - task: check:styles
 
+  test:
+    desc: Roda a suíte de testes (Vitest)
+    deps:
+      - build
+    cmds:
+      - pnpm test
+
   dod:
-    desc: Definition of Done — formata, roda os gates e builda (rode antes de commitar)
+    desc: Definition of Done — formata, roda os gates, builda e testa (rode antes de commitar)
     cmds:
       - task: fmt
       - task: check
       - task: build
+      - task: test
 
   hooks:install:
     desc: Ativa o diretório .githooks/ versionado (gate de DOD no pre-commit)
