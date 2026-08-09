@@ -1,0 +1,121 @@
+---
+/**
+ * ThemeToggle — alterna claro/escuro. Vanilla, zero dependência, um único `<button>`.
+ *
+ * Props: nenhuma própria além de `class`; qualquer outro atributo de `<button>` é repassado
+ * (COMPONENTS.md: "todo componente aceita `class` e repassa atributos"). O componente não
+ * sabe onde está (header, rodapé, /lab) e não define margem externa própria — quem posiciona
+ * é quem o consome.
+ *
+ * Contrato com o `<script is:inline>` do `<head>` (BaseLayout): aquele script é o dono do
+ * estado na primeira pintura — lê `localStorage['calu-theme']`, cai em `prefers-color-scheme`,
+ * escreve `data-theme` + `color-scheme` e marca `data-js` no `<html>`. Este componente é
+ * renderizado estático (SSG) e sai sempre com `aria-pressed="false"`; o script abaixo corrige
+ * o estado a partir do `data-theme` já aplicado.
+ *
+ * Acessibilidade
+ *   - NOME ESTÁVEL. O rótulo é sempre "Tema escuro" e nomeia A COISA ALTERNADA — não o estado
+ *     atual, não a ação. `aria-pressed` é propriedade do controle TAL COMO NOMEADO: um nome
+ *     que muda junto com o estado nunca forma proposição estável e garante contradição em um
+ *     dos dois lados. O rótulo anterior ("Tema claro" quando o claro estava ativo) era lido
+ *     pelo NVDA como "Tema claro, não pressionado" — ou seja, "tema claro NÃO está ligado",
+ *     exatamente o oposto do verdadeiro (WCAG 4.1.2). Com nome fixo: "Tema escuro, pressionado"
+ *     = escuro ligado; "Tema escuro, não pressionado" = escuro desligado. Coerente nos dois
+ *     estados, e o leitor de tela anuncia a troca sozinho, sem o componente mexer no texto.
+ *   - `aria-pressed` reflete "escuro está ativo", e é ele quem carrega o indicador VISUAL
+ *     (variantes `aria-pressed:` na lista de classes) — estado nunca só por cor de texto.
+ *   - SEM JS O CONTROLE NÃO EXISTE. Sem JavaScript não há `data-theme`, o bloco
+ *     `@media (prefers-color-scheme: dark) :root:not([data-theme])` de `global.css` §5 assume,
+ *     e quem estivesse com o SO no escuro veria o site escuro enquanto o botão anunciava
+ *     "não pressionado" — `aria-pressed` permanentemente errado num controle que não faz nada
+ *     (WCAG 4.1.2). O `<style>` abaixo esconde o botão enquanto o `<html>` não tiver `data-js`,
+ *     a flag que o script inline do `<head>` escreve ANTES da primeira pintura. Consequências:
+ *     JS desligado ⇒ botão nunca aparece; JS ligado ⇒ botão já nasce visível, sem CLS (o
+ *     caminho oposto — renderizar escondido e desesconder pelo `<script type="module">` deste
+ *     componente — apareceria depois da pintura, porque módulo é *deferred*, e mexeria a altura
+ *     do header: violaria o inviolável nº 5).
+ *   - Palavra sempre visível, nunca só ícone (DESIGN-SYSTEM §2.6). Não há ícone aqui: a
+ *     referência visual usa pílula de texto puro, e um glifo trocado por JS só adicionaria
+ *     um segundo estado para manter em sincronia.
+ *   - Alvo de 52px (`min-h-target`) e texto de 17px (`text-small`) — os pisos do projeto.
+ *   - O foco visível vem do `:focus-visible` de `global.css` — seletor nu, sem `:where()`. A
+ *     especificidade (0,1,0) é o que faz o anel do design system vencer o
+ *     `:-moz-focusring:where(:not(iframe)){outline:auto}` do Preflight; com `:where()` ele
+ *     cai para (0,0,0), empata, e o Firefox troca o anel de 3px pelo do navegador.
+ *
+ * Quando NÃO usar: mais de uma vez na mesma tela sem necessidade. Funciona (o script
+ * sincroniza todas as instâncias), mas dois controles do mesmo estado confundem.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'button'>;
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  aria-pressed="false"
+  class:list={[
+    'inline-flex min-h-target cursor-pointer items-center justify-center gap-2 rounded-full',
+    'border border-line bg-surface px-5 font-body text-small font-semibold text-ink',
+    'transition-colors duration-150',
+    'hover:bg-brand-tint aria-pressed:border-line-strong aria-pressed:bg-brand-tint',
+    className,
+  ]}
+  {...rest}
+>
+  Tema escuro
+</button>
+
+<style>
+  /* Enquanto o `<html>` não anunciar que o JavaScript rodou, o controle não existe —
+     ver "SEM JS O CONTROLE NÃO EXISTE" no bloco acima. A parte do ancestral vai em
+     `:global()` porque o `<html>` não pertence a este componente e não recebe o atributo
+     de escopo; o alvo continua escopado ao botão daqui. */
+  :global(html:not([data-js])) [data-theme-toggle] {
+    display: none;
+  }
+</style>
+
+<script>
+  // Idempotente por botão: o `<script>` do Astro já é içado e deduplicado por página, mas o
+  // guarda custa uma linha e sobrevive a qualquer reexecução futura (ilhas, navegação
+  // client-side). Mesma ideia do `window.__navMenuBound` do projeto de referência, só que no
+  // elemento em vez do `window` — não precisa de declaração global e o TypeScript aceita.
+  (() => {
+    const STORAGE_KEY = 'calu-theme';
+    const root = document.documentElement;
+
+    const isDark = () => root.dataset.theme === 'dark';
+
+    const buttons = () => document.querySelectorAll<HTMLButtonElement>('button[data-theme-toggle]');
+
+    /** Escreve nos botões o estado que o `<html>` já tem. Corrige o render estático. */
+    const paint = () => {
+      const dark = String(isDark());
+      for (const button of buttons()) button.setAttribute('aria-pressed', dark);
+    };
+
+    const apply = (theme: 'dark' | 'light') => {
+      root.dataset.theme = theme;
+      // Sem isto, scrollbar, campos e menus nativos continuam no tema anterior.
+      root.style.colorScheme = theme;
+      try {
+        localStorage.setItem(STORAGE_KEY, theme);
+      } catch {
+        // Modo privado ou storage bloqueado: o tema vale para esta visita e não persiste.
+      }
+      paint();
+    };
+
+    paint();
+
+    for (const button of buttons()) {
+      if (button.dataset.themeToggleBound === 'true') continue;
+      button.dataset.themeToggleBound = 'true';
+      button.addEventListener('click', () => apply(isDark() ? 'light' : 'dark'));
+    }
+  })();
+</script>

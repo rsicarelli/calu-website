@@ -1,9 +1,26 @@
 ---
+/**
+ * BaseLayout — a casca de toda página. Dono do `<html>`, do `<head>` e do esqueleto de
+ * marcos (skip link + `<main>`). Header e rodapé entram na Fase 2.
+ *
+ * Props
+ *   title        `<title>` já pronto, composto pela página.
+ *   description  meta description. Omitida quando a página ainda não tem texto aprovado.
+ *   noindex      emite `robots: noindex, follow` — para /lab e afins, que não vão ao índice.
+ */
+import '../styles/global.css';
+import { Font } from 'astro:assets';
+
 interface Props {
+  /** `<title>` da página, já composto (ex.: `Fisioterapia · Calu`). */
   title: string;
+  /** Meta description. Sem placeholder inventado: se não houver texto aprovado, omita. */
+  description?: string;
+  /** Mantém a página fora do índice (`noindex, follow`) — links continuam sendo seguidos. */
+  noindex?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, description, noindex } = Astro.props;
 ---
 
 <!doctype html>
@@ -11,9 +28,80 @@ const { title } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {
+      /* Tema, o mais cedo possível — antes do CSS e de qualquer render, senão a primeira
+      pintura sai no tema errado. Adaptado de `design_handoff_calu/theme-init.js` com duas
+      correções: (1) `style.colorScheme`, que o original não setava e sem o qual scrollbar,
+      campos e menus nativos ficam no tema oposto até o JS do toggle rodar; (2) validação do
+      valor lido do storage, agora que ele alimenta `color-scheme` — um valor estranho
+      deixado por uma versão anterior produziria uma declaração inválida.
+      `data-theme` sempre é escrito, então o bloco `prefers-color-scheme` de `global.css`
+      (§5) só entra em cena com JS desabilitado, que é exatamente o papel dele.
+
+      `data-js` é a flag de "o JavaScript rodou", e é a PRIMEIRA linha de propósito: vale
+      mesmo que o resto do bloco caia no `catch`. Ela existe para que controles que só fazem
+      sentido com JS não sejam renderizados sem ele — hoje, o ThemeToggle, que sem JS seria
+      um botão inoperante anunciando um estado falso (WCAG 4.1.2). Como este script é inline
+      e roda antes da primeira pintura, o controle já nasce visível quando há JS: nada
+      aparece depois do paint, então o custo em CLS é zero. Quem consome a flag é o
+      `<style>` do próprio componente; ela não muda nada por conta própria. */
+    }
+    <script is:inline>
+      (function () {
+        document.documentElement.dataset.js = 'on';
+        try {
+          const saved = localStorage.getItem('calu-theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme =
+            saved === 'dark' || saved === 'light' ? saved : prefersDark ? 'dark' : 'light';
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+          document.documentElement.style.colorScheme = 'light';
+        }
+      })();
+    </script>
+
+    {
+      /* Source Serif 4 self-hosted pela Fonts API do Astro. Só o subset `latin` é
+      preloadado: os diacríticos do português (ã õ á é ç) já vivem nele, e preloadar
+      `latin-ext` gastaria banda de rede móvel por caracteres que o site não usa —
+      `latin-ext` continua configurado e carrega sob demanda, com `display: swap`. */
+    }
+    <Font cssVariable="--font-source-serif" preload={[{ style: 'normal', subset: 'latin' }]} />
+
     <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
   </head>
-  <body>
-    <slot />
+  <body class="min-h-dvh">
+    {
+      /* Primeiro elemento focável da página (WCAG 2.4.1). Escondido até receber foco, e aí
+      um alvo de 52px fixo no topo — toda a aparência vem do `@utility skip-link`
+      (global.css §9), nunca de uma lista de classes aqui. O motivo está no comentário do
+      utility: esconder e revelar são duas metades que precisam de ORDEM garantida entre si,
+      e entre utilities soltas quem ordena é o compilador, não este arquivo. */
+    }
+    <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+    {
+      /* `pb-target-primary` reserva a altura do WhatsAppFab (56px, fixo no canto inferior
+      direito) para que ele não cubra o fim do conteúdo — COMPONENTS.md § WhatsAppFab. O FAB
+      ainda não existe; quando entrar, ele é quem define o próprio afastamento da borda.
+
+      `tabindex="-1"` faz do alvo do skip link algo REALMENTE focável. Sem ele, navegadores
+      modernos ainda movem o ponto de partida da navegação sequencial, mas Safari + VoiceOver
+      historicamente não reposicionam o cursor virtual: o link "funciona" e o usuário continua
+      no topo da página. Não recebe estilo de foco próprio — é alvo de rolagem, não controle —
+      e o `:focus-visible` de `global.css` não pinta anel em clique de mouse. Sem `:where()`,
+      de propósito: com especificidade zerada o seletor empata em (0,0,0) e PERDE para o
+      `:-moz-focusring:where(:not(iframe)){outline:auto}` do Preflight, e o Firefox descarta o
+      anel do design system. Não reintroduzir. */
+    }
+    <main id="conteudo" tabindex="-1" class="pb-target-primary">
+      <slot />
+    </main>
   </body>
 </html>
