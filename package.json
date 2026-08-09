@@ -19,7 +19,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check:styles": "node scripts/check-utilities.mjs"
   },
   "dependencies": {
     "astro": "^7.2.0"

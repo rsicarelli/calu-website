@@ -55,12 +55,18 @@ tasks:
     cmds:
       - pnpm format:check
 
+  check:styles:
+    desc: Reprova arbitrary value e classe que não gera CSS
+    cmds:
+      - pnpm check:styles
+
   check:
-    desc: Todos os gates de qualidade — typecheck + lint + verificação de formatação
+    desc: Todos os gates de qualidade — typecheck + lint + verificação de formatação + estilos
     cmds:
       - task: typecheck
       - task: lint
       - task: fmt:check
+      - task: check:styles
 
   dod:
     desc: Definition of Done — formata, roda os gates e builda (rode antes de commitar)

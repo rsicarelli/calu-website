@@ -1,0 +1,411 @@
+#!/usr/bin/env node
+/* Calu — gate de utilities do Tailwind
+   ============================================================================
+   Duas travas, um script só. Roda em `pnpm check:styles` / `task check:styles`.
+
+   TRAVA A — arbitrary value é proibido.
+   `p-[13px]`, `text-[#8F5E23]`, `[color:red]`, `bg-(--x)`, `text-body/[1.9]`.
+   Se falta um valor, ele vira token nomeado no @theme de src/styles/global.css.
+   A checagem usa o PARSER do Tailwind (`parseCandidate`), não regex, por um
+   motivo específico: arbitrary em VARIANTE é legítimo e usado no projeto —
+   `aria-[current=page]:underline`, `[&_summary]:hidden`, `has-[>svg]:pl-0`,
+   `supports-[display:grid]:grid`. Um `grep -- -\[` não separa os dois casos;
+   o parser separa de graça, porque as variantes vivem em `candidate.variants`
+   e a trava nunca olha para lá.
+
+   TRAVA B — utility morta (a razão de o script existir).
+   No Tailwind v4 uma utility inexistente NÃO quebra o build: vira no-op
+   silencioso. Como `src/styles/global.css` zera os namespaces default
+   (`--color-*: initial`, `--text-*: initial`, ...), `text-sm` compila para
+   nada, o texto herda o tamanho do pai e o piso de 17px é violado sem que
+   ninguém perceba. `candidatesToCss()` devolve `null` no índice da classe que
+   não gera CSS — é isso que pega `text-sm`, `font-medium`, `max-w-3xl`,
+   `bg-white`, `2xl:flex` e qualquer typo (`bg-surfce`).
+
+   ---------------------------------------------------------------------------
+   EXTRAÇÃO — por que NÃO é o Scanner do oxide sozinho.
+
+   `new Scanner().getCandidatesWithPositions()` funciona e devolve posição, mas
+   o extractor do oxide é deliberadamente permissivo: sobre o arquivo inteiro
+   ele emite `const`, `posts`, `lang`, `pt-BR`, `charset`, `utf-8`, `class`,
+   `href` — tudo o que parece um identificador. Isso é inofensivo para gerar
+   CSS (o Tailwind simplesmente descarta), mas é veneno para a TRAVA B: cada um
+   desses tokens devolve `null` em `candidatesToCss` e viraria falso positivo.
+   `pt-BR`, aliás, chega a parsear como utility funcional (`pt` com valor `BR`).
+
+   Caminho adotado — híbrido:
+     1. um scanner próprio delimita as regiões que de fato contêm classe
+        (atributos `class` / `className` / `class:list` e argumentos de
+        `@apply`), respeitando aspas, template literals, comentários e chaves
+        aninhadas em expressões Astro/JSX;
+     2. o arquivo é MASCARADO: tudo fora dessas regiões vira espaço, com o
+        mesmo comprimento, de modo que todo índice continua valendo para o
+        arquivo original;
+     3. o `Scanner` do oxide tokeniza a máscara. Ganhamos a tokenização real do
+        Tailwind (brackets, `/` de modificador, `!`, `[&_p]:`) e a posição para
+        reportar `arquivo:linha:coluna`, sem o ruído do arquivo inteiro.
+
+   Limitação conhecida e aceita: `class={estilos.card}` não tem literal de
+   string, então não há o que verificar. Classe montada fora de literal escapa
+   das duas travas — é o preço de não inventar análise de fluxo.
+   ============================================================================ */
+
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { __unstable__loadDesignSystem } from 'tailwindcss';
+import { Scanner } from '@tailwindcss/oxide';
+
+/* ----------------------------------------------------------------------------
+   Allowlist — VAZIA, e é para continuar assim.
+   Toda entrada aqui é uma utility que o gate deixa passar sem verificar, ou
+   seja, um buraco permanente no piso tipográfico e no vocabulário da marca.
+   Qualquer entrada futura exige justificativa ESCRITA ao lado dela: por que o
+   valor não pode virar token nomeado no @theme. "Foi mais rápido assim" não é
+   justificativa. Na dúvida, o token entra em src/styles/global.css.
+---------------------------------------------------------------------------- */
+const ALLOWLIST = new Set([]);
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const THEME_CSS = path.join(ROOT, 'src/styles/global.css');
+const SCAN_DIR = path.join(ROOT, 'src');
+const SCAN_EXTENSIONS = new Set(['.astro', '.ts', '.js', '.md', '.mdx']);
+
+/* `design_handoff_calu` é material de referência do handoff, não código. */
+const IGNORED_DIRS = new Set(['node_modules', 'dist', '.astro', '.git', 'design_handoff_calu']);
+
+/* Início de um atributo de classe: class= / className= / class:list= */
+const CLASS_ATTR_START = /\b(?:class|className)\s*(?::list)?\s*=\s*/g;
+/* Argumentos de @apply dentro de <style> em componentes .astro */
+const APPLY = /@apply\s+([^;]+);/g;
+
+/* ============================================================================
+   1. Delimitação das regiões que contêm classe
+   ========================================================================= */
+
+/** Consome uma string entre aspas simples ou duplas e registra o miolo. */
+function scanQuoted(src, index, spans) {
+  const quote = src[index];
+  let i = index + 1;
+  while (i < src.length) {
+    const char = src[i];
+    if (char === '\\') {
+      i += 2;
+      continue;
+    }
+    if (char === quote || char === '\n') break;
+    i += 1;
+  }
+  spans.push([index + 1, i]);
+  return i + 1;
+}
+
+/**
+ * Consome um template literal. Cada trecho de texto vira região de classe; as
+ * interpolações `${...}` são varridas como código — os literais de string
+ * dentro delas contam (`${ativo ? 'bg-surface' : 'bg-bg'}` são classes), o
+ * resto não.
+ */
+function scanTemplate(src, index, spans) {
+  let i = index + 1;
+  let segmentStart = i;
+  while (i < src.length) {
+    const char = src[i];
+    if (char === '\\') {
+      i += 2;
+      continue;
+    }
+    if (char === '`') {
+      spans.push([segmentStart, i]);
+      return i + 1;
+    }
+    if (char === '$' && src[i + 1] === '{') {
+      spans.push([segmentStart, i]);
+      i = scanBraced(src, i + 1, spans);
+      segmentStart = i;
+      continue;
+    }
+    i += 1;
+  }
+  spans.push([segmentStart, i]);
+  return i;
+}
+
+/**
+ * Consome uma expressão delimitada por chaves a partir do `{` em `openIndex` e
+ * devolve o índice logo depois da chave que fecha. Registra em `spans` só os
+ * literais de string — identificadores como `ativo` ou `props.classe` ficam de
+ * fora e por isso nunca viram falso positivo.
+ */
+function scanBraced(src, openIndex, spans) {
+  let i = openIndex + 1;
+  let depth = 1;
+  while (i < src.length && depth > 0) {
+    const char = src[i];
+    if (char === '{') {
+      depth += 1;
+      i += 1;
+    } else if (char === '}') {
+      depth -= 1;
+      i += 1;
+    } else if (char === '"' || char === "'") {
+      i = scanQuoted(src, i, spans);
+    } else if (char === '`') {
+      i = scanTemplate(src, i, spans);
+    } else if (char === '/' && src[i + 1] === '/') {
+      const end = src.indexOf('\n', i);
+      i = end === -1 ? src.length : end;
+    } else if (char === '/' && src[i + 1] === '*') {
+      const end = src.indexOf('*/', i + 2);
+      i = end === -1 ? src.length : end + 2;
+    } else {
+      i += 1;
+    }
+  }
+  return i;
+}
+
+/** Todas as regiões do arquivo em que um token pode legitimamente ser classe. */
+function collectClassSpans(content) {
+  const spans = [];
+
+  CLASS_ATTR_START.lastIndex = 0;
+  let match;
+  while ((match = CLASS_ATTR_START.exec(content)) !== null) {
+    const start = match.index + match[0].length;
+    const char = content[start];
+    let next;
+    if (char === '"' || char === "'") {
+      next = scanQuoted(content, start, spans);
+    } else if (char === '{') {
+      next = scanBraced(content, start, spans);
+    } else if (char !== undefined && !/[\s>/]/.test(char)) {
+      /* Atributo sem aspas: class=destaque */
+      let end = start;
+      while (end < content.length && !/[\s>/]/.test(content[end])) end += 1;
+      spans.push([start, end]);
+      next = end;
+    } else {
+      next = start + 1;
+    }
+    /* Evita reprocessar o que já foi consumido (e laço infinito em `class=`). */
+    CLASS_ATTR_START.lastIndex = Math.max(next, match.index + match[0].length);
+  }
+
+  APPLY.lastIndex = 0;
+  while ((match = APPLY.exec(content)) !== null) {
+    const start = match.index + match[0].indexOf(match[1]);
+    spans.push([start, start + match[1].length]);
+  }
+
+  return spans;
+}
+
+/**
+ * Devolve uma cópia do arquivo em que só as regiões de classe sobrevivem; todo
+ * o resto vira espaço. Comprimento preservado ⇒ índice na máscara é índice no
+ * arquivo original, e o `arquivo:linha:coluna` sai correto de graça.
+ */
+function maskContent(content, spans) {
+  if (spans.length === 0) return '';
+  const masked = new Array(content.length).fill(' ');
+  for (const [start, end] of spans) {
+    for (let i = Math.max(0, start); i < Math.min(end, content.length); i += 1) {
+      masked[i] = content[i];
+    }
+  }
+  return masked.join('');
+}
+
+/* ============================================================================
+   2. Posição → linha:coluna
+   ========================================================================= */
+
+function buildLineIndex(content) {
+  const starts = [0];
+  for (let i = 0; i < content.length; i += 1) {
+    if (content[i] === '\n') starts.push(i + 1);
+  }
+  return starts;
+}
+
+function locate(lineStarts, position) {
+  let low = 0;
+  let high = lineStarts.length - 1;
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    if (lineStarts[mid] <= position) low = mid;
+    else high = mid - 1;
+  }
+  return { line: low + 1, column: position - lineStarts[low] + 1 };
+}
+
+/* ============================================================================
+   3. Varredura de arquivos
+   ========================================================================= */
+
+function listFiles(dir) {
+  const found = [];
+  let entries;
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return found;
+  }
+  for (const entry of entries) {
+    if (entry.name.startsWith('.') && entry.name !== '.gitkeep') continue;
+    if (IGNORED_DIRS.has(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...listFiles(full));
+    else if (entry.isFile() && SCAN_EXTENSIONS.has(path.extname(entry.name))) found.push(full);
+  }
+  return found;
+}
+
+/* ============================================================================
+   4. Design system
+   ========================================================================= */
+
+async function loadDesignSystem() {
+  let css;
+  try {
+    css = readFileSync(THEME_CSS, 'utf8');
+  } catch {
+    throw new Error(`não consegui ler o design system em ${path.relative(ROOT, THEME_CSS)}`);
+  }
+
+  return __unstable__loadDesignSystem(css, {
+    base: path.dirname(THEME_CSS),
+    loadStylesheet: async (id, base) => {
+      /* `@import 'tailwindcss'` resolve pelo export map do pacote; o resto é
+         relativo ao arquivo que importou. */
+      const resolved = id.startsWith('.')
+        ? path.resolve(base, id)
+        : fileURLToPath(import.meta.resolve(id.endsWith('.css') ? id : `${id}/index.css`));
+      return {
+        path: resolved,
+        base: path.dirname(resolved),
+        content: readFileSync(resolved, 'utf8'),
+      };
+    },
+  });
+}
+
+/* ============================================================================
+   5. As duas travas
+   ========================================================================= */
+
+/**
+ * TRAVA A. Olha a utility e o modificador; NUNCA `candidate.variants` —
+ * arbitrary em variante é legítimo e a distinção é o ponto do script.
+ */
+function isArbitraryUtility(candidate) {
+  if (candidate.kind === 'arbitrary') return true; // [color:red]
+  if (candidate.kind === 'functional' && candidate.value?.kind === 'arbitrary') return true; // p-[13px], bg-(--x)
+  if (candidate.modifier?.kind === 'arbitrary') return true; // text-body/[1.9]
+  return false;
+}
+
+const HINTS = {
+  A: 'adicione um token nomeado no @theme de src/styles/global.css e use a utility gerada',
+  B: 'esta classe não gera CSS — o namespace foi zerado (ou o nome não existe); use um token da marca de src/styles/global.css',
+};
+
+const LABELS = {
+  A: 'trava A · arbitrary value',
+  B: 'trava B · utility morta',
+};
+
+/* ============================================================================
+   6. Execução
+   ========================================================================= */
+
+async function main() {
+  const designSystem = await loadDesignSystem();
+  const scanner = new Scanner({ sources: [] });
+  const files = listFiles(SCAN_DIR);
+
+  /* Ocorrências: { file, candidate, line, column } */
+  const occurrences = [];
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf8');
+    const masked = maskContent(content, collectClassSpans(content));
+    if (masked.trim() === '') continue;
+
+    /* A máscara é um saco de classes separadas por espaço; qualquer extractor
+       do oxide a tokeniza igual, então a extensão declarada é indiferente. */
+    const tokens = scanner.getCandidatesWithPositions({
+      file,
+      content: masked,
+      extension: 'html',
+    });
+    if (tokens.length === 0) continue;
+
+    const lineStarts = buildLineIndex(content);
+    for (const { candidate, position } of tokens) {
+      if (ALLOWLIST.has(candidate)) continue;
+      const { line, column } = locate(lineStarts, position);
+      occurrences.push({ file, candidate, line, column });
+    }
+  }
+
+  /* Uma única compilação para todos os nomes distintos. */
+  const unique = [...new Set(occurrences.map((o) => o.candidate))];
+  const compiled = designSystem.candidatesToCss(unique);
+  const generatesCss = new Map(unique.map((name, i) => [name, compiled[i] !== null]));
+
+  const findings = [];
+  for (const occurrence of occurrences) {
+    const parsed = designSystem.parseCandidate(occurrence.candidate);
+    if (parsed.some(isArbitraryUtility)) {
+      findings.push({ ...occurrence, trava: 'A' });
+      continue;
+    }
+    if (!generatesCss.get(occurrence.candidate)) {
+      findings.push({ ...occurrence, trava: 'B' });
+    }
+  }
+
+  if (findings.length === 0) {
+    const plural = occurrences.length === 1 ? 'utility verificada' : 'utilities verificadas';
+    const arquivos = files.length === 1 ? 'arquivo' : 'arquivos';
+    console.log(`✓ ${occurrences.length} ${plural} em ${files.length} ${arquivos}`);
+    return 0;
+  }
+
+  const byFile = new Map();
+  for (const finding of findings) {
+    const relative = path.relative(ROOT, finding.file);
+    if (!byFile.has(relative)) byFile.set(relative, []);
+    byFile.get(relative).push(finding);
+  }
+
+  const problemas = findings.length === 1 ? 'problema' : 'problemas';
+  const arquivos = byFile.size === 1 ? 'arquivo' : 'arquivos';
+  console.error(`✗ ${findings.length} ${problemas} em ${byFile.size} ${arquivos}\n`);
+
+  for (const [relative, list] of [...byFile.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    console.error(relative);
+    list.sort((a, b) => a.line - b.line || a.column - b.column);
+    for (const finding of list) {
+      console.error(
+        `  ${relative}:${finding.line}:${finding.column}  ${finding.candidate}  [${LABELS[finding.trava]}]`,
+      );
+      console.error(`      → ${HINTS[finding.trava]}`);
+    }
+    console.error('');
+  }
+
+  console.error('Regra do projeto: arbitrary value é proibido e toda classe precisa gerar CSS.');
+  console.error('O vocabulário da marca está em src/styles/global.css.');
+  return 1;
+}
+
+try {
+  process.exitCode = await main();
+} catch (error) {
+  console.error(`✗ check-utilities falhou: ${error instanceof Error ? error.message : error}`);
+  process.exitCode = 1;
+}
