@@ -84,8 +84,9 @@ sistema de tokens, não páginas. Componentes de UI (`src/components/ui/`) e a p
 - **Nenhum conteúdo real da clínica** (textos, endereço, telefone, horários, preços, fotos,
   nomes de profissionais) antes de ser levantado com a cliente e aprovado. Não inventar
   placeholder que pareça real.
-- **`site` no `astro.config.mjs` é placeholder** (`calupilates.com.br`) — o domínio ainda não
-  foi confirmado nem registrado.
+- **Domínio registrado:** `calupilates.com.br`, registrado no Registro.br em 2026-08-09. `site`
+  no `astro.config.mjs` deixou de ser placeholder — já reflete o domínio real. DNS e hospedagem
+  ainda em aberto (ver "Decisões em aberto").
 - **`typescript` fica em `~6.0.x`.** O `latest` do npm é 7.x e **quebra** duas dependências:
   `typescript-eslint` declara peer `<6.1.0` e `@astrojs/check` aceita `^5 || ^6`. Não trocar o
   til por caret.
@@ -109,7 +110,7 @@ sistema de tokens, não páginas. Componentes de UI (`src/components/ui/`) e a p
 
 ## Decisões em aberto (adiadas)
 
-- Domínio definitivo e registro; hospedagem e pipeline de deploy.
+- Hospedagem e pipeline de deploy (domínio já registrado — ver guardrails).
 - CMS e o fluxo de edição da cliente.
 - Formulário de contato / agendamento (e para onde as mensagens vão).
 - SEO local: Google Business Profile, JSON-LD (`MedicalBusiness` / `Physiotherapy`), sitemap.

@@ -3,8 +3,9 @@ import { defineConfig, fontProviders } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
-// Site estático, sem integrations. O domínio é um placeholder até o DNS ser decidido —
-// `site` alimenta URLs canônicas e sitemap quando o SEO for configurado.
+// Site estático, sem integrations. Domínio registrado no Registro.br em 2026-08-09; DNS e
+// hospedagem ainda em aberto — `site` alimenta URLs canônicas e sitemap quando o SEO for
+// configurado.
 export default defineConfig({
   site: 'https://calupilates.com.br',
 
