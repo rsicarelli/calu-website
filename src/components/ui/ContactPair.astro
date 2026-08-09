@@ -1,0 +1,84 @@
+---
+/**
+ * ContactPair — o par WhatsApp + telefone com o MESMO peso visual (DESIGN-SYSTEM §7:
+ * "telefone sempre ao lado do WhatsApp, mesmo peso, nenhum dos dois só ícone").
+ * Marcado com `data-contact-pair` no elemento que envolve o par (COMPONENTS.md § ContactPair).
+ *
+ * Usado em todo bloco de contato: header desktop, CtaBlock, topo do ContactForm, FamilyBlock,
+ * Footer, EmptyState.
+ *
+ * Props
+ *   whatsappHref   URL do wa.me (ou similar).
+ *   whatsappLabel  texto do link — padrão 'WhatsApp'. NUNCA vira só o número: a palavra é o
+ *                  que garante que o link não dependa de ícone (DESIGN-SYSTEM §6).
+ *   phoneHref      `tel:...`.
+ *   phoneLabel     texto formatado a exibir, ex. "(11) 4000-4000".
+ *   size           'body' (padrão, 19–20px) ou 'small' (17px, o piso do projeto).
+ *   as             tag do elemento raiz (padrão: um `div` neutro).
+ *   …              qualquer outro atributo válido para a tag escolhida é repassado ao elemento
+ *                  raiz (COMPONENTS.md: "todo componente aceita `class` e repassa atributos").
+ *
+ * GARANTIA ESTRUTURAL — o peso idêntico não é convenção, é construção: as duas âncoras
+ * consomem a MESMA variável `linkClass`, montada uma única vez. Não existe `whatsappClass`
+ * nem `phoneClass` na tipagem — não há por onde estilizar um diferente do outro. O teste
+ * (`tests/components/ContactPair.test.ts`) confirma que o `class` computado das duas é
+ * literalmente idêntico.
+ *
+ * Cor: as âncoras NÃO declaram `text-*` de cor nem `text-current`. O Preflight do Tailwind já
+ * reseta `a { color: inherit }` — o componente já herda a cor do contexto sem precisar de
+ * classe própria, e "não sabe onde está" (CtaBlock skin `brand`, Footer `deep`, ou superfície
+ * clara) continua verdadeiro. Uma classe `text-current` seria redundante com o que o Preflight
+ * já garante.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1 estoura
+ * em `Props` genérica acima de ~3KB de arquivo). Nenhum alvo plausível de `as` aqui (`div`,
+ * `dl`, `p`) tem atributo exclusivo de tag que o teto deixaria de fora.
+ *
+ *   <ContactPair whatsappHref="https://wa.me/55..." phoneHref="tel:+55..." phoneLabel="(11) 4000-4000" />
+ *   <ContactPair … size="small" as="dl" data-surface="deep" />   dentro de bloco escuro
+ *
+ * Quando NÃO usar: um WhatsApp ou telefone sozinho, sem o outro ao lado — a regra do projeto é
+ * o par, sempre os dois.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** URL do WhatsApp (ex. `https://wa.me/55...`). */
+  whatsappHref: string;
+  /** Texto do link do WhatsApp. Padrão `'WhatsApp'` — nunca só o número. */
+  whatsappLabel?: string;
+  /** `tel:...` */
+  phoneHref: string;
+  /** Texto formatado do telefone a exibir, ex. `"(11) 4000-4000"`. */
+  phoneLabel: string;
+  /** `'body'` (padrão, 19–20px) ou `'small'` (17px). */
+  size?: 'small' | 'body';
+  /** Tag do elemento raiz (padrão: um `div` neutro). */
+  as?: HTMLTag;
+}
+
+const {
+  whatsappHref,
+  whatsappLabel = 'WhatsApp',
+  phoneHref,
+  phoneLabel,
+  size = 'body',
+  as: Tag = 'div',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const sizeClass = size === 'small' ? 'text-small' : 'text-body';
+
+/** Uma string só, consumida pelas DUAS âncoras — é isso que torna o peso visual idêntico
+ *  garantido por construção, não por disciplina de quem chama o componente. */
+const linkClass = ['inline-flex', 'min-h-target', 'items-center', sizeClass, 'font-semibold'].join(
+  ' ',
+);
+---
+
+<Tag data-contact-pair class:list={['flex flex-wrap items-center gap-6', className]} {...rest}>
+  <a href={whatsappHref} class={linkClass}>{whatsappLabel}</a>
+  <a href={phoneHref} class={linkClass}>{phoneLabel}</a>
+</Tag>
