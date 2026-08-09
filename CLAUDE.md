@@ -28,8 +28,10 @@ que valida contraste e invariantes dos tokens direto no CSS.
 **Ainda não existe** — e a ausência é temporária, não uma decisão contra:
 CMS, hospedagem/deploy, CI, SEO, analytics, formulários, favicon/logo, e qualquer conteúdo real
 da clínica. O `index.astro` continua um placeholder com o nome e nada mais — a Fase 0 trouxe o
-sistema de tokens, não páginas. Componentes de UI (`src/components/ui/`) e a página `/lab`
-(Fase 1) são o próximo passo, não algo já implementado.
+sistema de tokens, não páginas. O próximo passo é a **Fase 1 — Fundação**: o chrome estrutural
+(`Header`, `Footer`, `MobileNav`, `WhatsAppFab`) e o SEO técnico que não depende de conteúdo real
+— nada disso está implementado ainda. A página `/lab` foi reordenada para depois dela (agora
+Fase 2).
 
 ## Restrições firmes
 
@@ -91,7 +93,7 @@ sistema de tokens, não páginas. Componentes de UI (`src/components/ui/`) e a p
   `typescript-eslint` declara peer `<6.1.0` e `@astrojs/check` aceita `^5 || ^6`. Não trocar o
   til por caret.
 - **Não adicionar CI/GitHub Actions** nesta fase — o gate é local por design. Isso é adiado de
-  propósito, não esquecido: CI entra na Fase 4 (endurecimento), não antes.
+  propósito, não esquecido: CI entra na Fase 5 (endurecimento), não antes.
 - **Proibido arbitrary value** — `p-[13px]`, `text-[#8F5E23]`, `min-h-[52px]`, `text-(--x)`.
   Valor que falta vira token nomeado no `@theme` de `src/styles/global.css`, nunca hard-code no
   componente. Travado por `scripts/check-utilities.mjs`, que roda em `task check` (via
@@ -113,22 +115,51 @@ sistema de tokens, não páginas. Componentes de UI (`src/components/ui/`) e a p
 - Hospedagem e pipeline de deploy (domínio já registrado — ver guardrails).
 - CMS e o fluxo de edição da cliente.
 - Formulário de contato / agendamento (e para onde as mensagens vão).
-- SEO local: Google Business Profile, JSON-LD (`MedicalBusiness` / `Physiotherapy`), sitemap.
+- SEO local: cadastro no Google Business Profile, e os dados reais que preenchem o JSON-LD
+  `MedicalBusiness`/`Physiotherapy` (a função construtora pura e o sitemap técnico nascem na
+  Fase 1 — falta só o conteúdo aprovado pela cliente para os consumir, depois).
 - Analytics.
 - Licença, se e quando o repositório se tornar público.
+
+## Pendências resolvidas nesta fase
+
+Registradas na Fase 0 como dívida pendente; fechadas na Fase 1 — Fundação. Cada bullet é somado
+pelo commit da sub-fase correspondente conforme ela é implementada.
 
 ## Fases seguintes
 
 Contexto para quem pegar o projeto depois da Fase 0 (tokens):
 
-- **Fase 1 — `/lab`.** Página kitchen sink com o conteúdo bruto de todas as telas do handoff,
-  `noindex`. Não é descartável: sobrevive como página viva de regressão visual.
-- **Fase 2 — extração de componentes.** Só extrai o que se repetiu de fato: 3 ocorrências, ou 2 +
-  variação de estado. Nada de componentizar por antecipação. É quando `src/components/blocks/`
-  passa a existir ao lado de `src/components/ui/`.
-- **Fase 3 — páginas reais.** Content collections com schema Zod espelhando `PAGES.md` do
-  handoff, substituindo o conteúdo bruto do `/lab` pelas páginas de verdade.
-- **Fase 4 — endurecimento.** A11y, performance, SEO local, e só então CI/GitHub Actions.
+> **Nota de reordenação (2026-08-09):** este roadmap já teve uma Fase 1 diferente — a página
+> `/lab` (kitchen sink). Ela foi empurrada para Fase 2, e uma nova Fase 1 entrou no lugar: o
+> chrome estrutural (`Header`, `MobileNav`, `Footer`, `WhatsAppFab`) e o SEO técnico (sitemap,
+> robots, meta tags, o construtor de JSON-LD). Motivo: Header/Footer/nav não são "conteúdo que se
+> repete e por isso é extraído depois" — a regra de espera de "3 ocorrências, ou 2 + variação" (ver
+> Fase 3) vale para blocos de CONTEÚDO como `ServiceCard`/`FaqItem`, não para a casca que envolve
+> TODA página, `/lab` incluída. Construir `/lab` sem Header/Footer reais produziria uma página de
+> regressão visual que nunca reflete a casca de verdade — o oposto do que ela existe para fazer.
+
+- **Fase 1 — Fundação.** Chrome estrutural que toda página usa: `Header` + `MobileNav`, `Footer`,
+  `WhatsAppFab`, os primitivos `ContactPair` e `EmptyState`, a página `/404`, e o SEO técnico que
+  não depende de conteúdo real (sitemap, `robots.txt`, meta tags OpenGraph/Twitter, JSON-LD
+  `MedicalBusiness`/`Physiotherapy` como função pura, ainda sem chamador). Também fecha 3
+  pendências registradas na Fase 0 (ver "Pendências resolvidas nesta fase"). `BaseLayout` sai
+  desta fase com a casca real — Header, Footer, `<main>` e FAB compostos — em vez do esqueleto de
+  hoje. `src/components/blocks/` passa a existir aqui.
+- **Fase 2 — `/lab`.** Página kitchen sink com o conteúdo bruto de todas as telas do handoff,
+  `noindex`, agora renderizada DENTRO da casca real da Fase 1 (não mais um documento solto). Não é
+  descartável: sobrevive como página viva de regressão visual.
+- **Fase 3 — extração de componentes.** Só extrai o que se repetiu de fato: 3 ocorrências, ou 2 +
+  variação de estado. Nada de componentizar por antecipação. `src/components/blocks/` já existe
+  desde a Fase 1 — esta fase continua populando a mesma pasta com conteúdo extraído (`ServiceCard`,
+  `Hero`, `FaqAccordion`, `CtaBlock`…).
+- **Fase 4 — páginas reais.** Content collections com schema Zod espelhando `PAGES.md` do handoff,
+  substituindo o conteúdo bruto do `/lab` pelas páginas de verdade — e é quando dado real da
+  clínica (endereço, telefone, horário, equipe) entra pela primeira vez, aprovado pela cliente.
+  `localBusinessLd` (Fase 1) ganha seu primeiro chamador aqui; `src/lib/site.ts` troca os
+  placeholders pelos dados reais.
+- **Fase 5 — endurecimento.** A11y, performance, SEO local (cadastro no Google Business Profile),
+  e só então CI/GitHub Actions.
 
 ## Convenções
 
@@ -141,8 +172,10 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   para nunca divergir do gate quando um novo check entrar.
 - Alias `@/*` → `src/*` (via `paths` no `tsconfig.json`; Astro/Vite resolvem sozinhos).
 - Estrutura de pastas: `src/components/ui/` (primitivos; `src/components/blocks/` chega na
-  Fase 2), `src/styles/global.css` (tokens e base), `tests/tokens/` (contraste e invariantes dos
-  tokens), `scripts/` (`check-utilities.mjs`, o gate de arbitrary value/utility morta).
+  Fase 1), `src/lib/` (helpers puros — `site.ts`, `seo.ts`, `jsonld.ts`), `src/styles/global.css`
+  (tokens e base), `tests/tokens/` (contraste e invariantes dos tokens), `tests/components/`
+  (Container API + axe-core), `tests/system/` (linkedom sobre `dist/**`), `scripts/`
+  (`check-utilities.mjs`, o gate de arbitrary value/utility morta).
 - `task --list` mostra todos os comandos disponíveis.
 
 > O `~/.claude/CLAUDE.md` global (RTK) continua valendo; este arquivo é aditivo e escopado ao projeto.
