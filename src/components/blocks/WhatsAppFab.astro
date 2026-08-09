@@ -1,0 +1,119 @@
+---
+/**
+ * WhatsAppFab — pílula fixa de WhatsApp no canto inferior direito (COMPONENTS.md § WhatsAppFab).
+ * "Bloco", não primitivo: ao contrário de `ContactPair`, este componente TEM posição e
+ * comportamento próprios (`position: fixed` + IntersectionObserver opcional).
+ *
+ * Props
+ *   href         URL do WhatsApp.
+ *   label        texto do link — padrão 'WhatsApp'. NUNCA só ícone (DESIGN-SYSTEM §6).
+ *   watchTarget  seletor CSS de um elemento a observar (o "CTA principal" da página). Quando
+ *                informado, um IntersectionObserver esconde o FAB enquanto o alvo está visível
+ *                — MAS nunca enquanto o próprio FAB tem foco (WCAG 2.4.12, Foco Não Obscurecido
+ *                — Aprimorado: esconder um elemento focado empurraria o foco de volta ao topo
+ *                do documento — perda de contexto pior que deixar o FAB sobreposto por um
+ *                instante). Sem `watchTarget`, o FAB nunca se esconde.
+ *
+ * MEDIÇÃO DE CONTRASTE DO ANEL DE FOCO (WCAG 1.4.11, ≥3:1) — não presumida, medida. O FAB pinta
+ * o próprio fundo com `bg-accent`, que não é `surface-deep` nem `surface-brand`: o mecanismo
+ * `[data-surface]` de `global.css` §6 não se aplica sozinho, porque `--color-accent` MUDA de
+ * claridade entre temas por desenho (claro: bronze escuro; escuro: dourado claro) — nem o anel
+ * padrão nem a variante `-on-dark` acompanham essa inversão, e as duas colidem com o accent
+ * igual nos dois temas (medido: ambos ~1.67–1.68:1, abaixo do piso).
+ *
+ * A solução é reaproveitar `--color-on-accent` — o token que já existe especificamente para ter
+ * contraste garantido contra `--color-accent` (é a cor do TEXTO que fica em cima do accent) e
+ * que inverte de polaridade exatamente do jeito certo entre os temas (branco no claro sobre
+ * bronze escuro, quase preto no escuro sobre dourado claro). `global.css` §6 ganhou um seletor
+ * dedicado, `[data-surface="accent"]`, que reaponta `--color-focus-ring` para
+ * `--color-on-accent`. Medido com um script Node solto (apagado depois de usar), reaproveitando
+ * a fórmula de contraste de `tests/tokens/parse.ts` contra os hex atuais de `global.css`:
+ *
+ *   tema claro  · --color-on-accent (#ffffff) × --color-accent (#8f5e23) = 5.54:1  PASSA
+ *   tema escuro · --color-on-accent (#16211b) × --color-accent (#d3b070) = 8.06:1  PASSA
+ *
+ * DECISÃO: `data-surface="accent"` está aplicado no elemento raiz — resolve os DOIS temas, sem
+ * token novo, reaproveitando o mesmo mecanismo `[data-surface]` já usado por Footer/CtaBlock.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'a'> {
+  /** URL do WhatsApp (ex. `https://wa.me/55...`). */
+  href: string;
+  /** Texto do link. Padrão `'WhatsApp'` — nunca só ícone. */
+  label?: string;
+  /** Seletor CSS do CTA principal da página; ver comentário de props acima. */
+  watchTarget?: string;
+}
+
+const { href, label = 'WhatsApp', watchTarget, class: className, ...rest } = Astro.props;
+---
+
+<a
+  href={href}
+  data-whatsapp-fab
+  data-watch-target={watchTarget}
+  data-surface="accent"
+  class:list={[
+    'fixed right-gutter bottom-gutter inline-flex min-h-target-primary items-center gap-2',
+    'rounded-full bg-accent px-6 shadow-float',
+    'font-body text-body font-semibold text-on-accent',
+    className,
+  ]}
+  {...rest}
+>
+  {label}
+</a>
+
+<style>
+  /* O [hidden] nativo some da árvore de acessibilidade e do fluxo — exatamente o que o
+     auto-hide precisa —, mas tem prioridade baixa (0,1,0) e perderia para as utilities do
+     Tailwind (`inline-flex` etc.), que vivem em `@layer utilities`. Este bloco de `<style>` do
+     componente NÃO está em nenhuma `@layer`: CSS sem camada sempre vence CSS em camada da mesma
+     origem, e é por isso que a regra abaixo (mesma especificidade) ainda assim vence — mesmo
+     mecanismo do `<style>` de ThemeToggle.astro. */
+  [data-whatsapp-fab][hidden] {
+    display: none;
+  }
+</style>
+
+{
+  /* O `<script>` abaixo é SEMPRE renderizado (Astro hospeda e dedupe por página, como em
+  ThemeToggle.astro) — o guard fica em `watchTarget` na RUNTIME, não na presença do elemento:
+  sem a prop, o FAB nunca ganha `data-watch-target`, o seletor `[data-watch-target]` abaixo
+  não casa com nada, e o `querySelectorAll` do topo devolve uma lista vazia — no-op. Tentar
+  condicionar o `<script>` no próprio template (`{watchTarget && <script>…}`) quebra o parser
+  TypeScript do `prettier-plugin-astro`: dentro de uma expressão, `document.
+  querySelectorAll<HTMLAnchorElement>(...)` vira ambíguo com sintaxe JSX (`<HTMLAnchorElement>`
+  lido como abertura de elemento) e o formatador derruba com `SyntaxError: Unexpected token`. */
+}
+<script>
+  // Idempotente por FAB, mesmo padrão do ThemeToggle: guarda no dataset para sobreviver a
+  // qualquer reexecução futura do módulo.
+  (() => {
+    const fabs = document.querySelectorAll<HTMLAnchorElement>(
+      'a[data-whatsapp-fab][data-watch-target]',
+    );
+
+    for (const fab of fabs) {
+      if (fab.dataset.whatsappFabBound === 'true') continue;
+      fab.dataset.whatsappFabBound = 'true';
+
+      const selector = fab.dataset.watchTarget;
+      const target = selector ? document.querySelector(selector) : null;
+      // Seletor que não casa com nada: fica como se `watchTarget` não tivesse sido passado —
+      // o FAB nunca se esconde, que é o padrão seguro.
+      if (!target) continue;
+
+      const observer = new IntersectionObserver(([entry]) => {
+        // WCAG 2.4.12 — checagem explícita ANTES de esconder: o FAB nunca pode desaparecer
+        // enquanto CARREGA o foco. Reexecuta a cada mudança de interseção, então o FAB volta
+        // a se esconder assim que o alvo ainda estiver visível numa próxima leitura.
+        const fabHasFocus = document.activeElement === fab;
+        fab.hidden = entry.isIntersecting && !fabHasFocus;
+      });
+
+      observer.observe(target);
+    }
+  })();
+</script>

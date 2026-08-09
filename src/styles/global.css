@@ -251,6 +251,11 @@
   --spacing-target: 3.25rem; /* 52px — mínimo de qualquer controle */
   --spacing-target-primary: 3.5rem; /* 56px — ação principal */
 
+  /* 20px (gutter) + 56px (target-primary) = 76px: padding-bottom que o <main> vai reservar pro
+     WhatsAppFab numa fase futura. pb-target-primary sozinho sub-reservaria por exatamente os 20px
+     do gutter, já que o FAB fica posicionado a `gutter` de distância da borda. */
+  --spacing-fab-offset: calc(var(--spacing-gutter) + var(--spacing-target-primary));
+
   /* ---- orçamento de rolagem do Header sticky ----
      Consumido por `scroll-padding-top` na §7. O projeto mira AAA, então o
      critério é o 2.4.12 (Foco Não Obscurecido — Aprimorado): NENHUMA parte do
@@ -504,6 +509,16 @@
 [data-surface='deep'],
 [data-surface='brand'] {
   --color-focus-ring: var(--color-focus-ring-on-dark);
+}
+
+/* Superfícies com fundo --color-accent (ex: WhatsAppFab) não são "escuras" nem "de marca" no
+   sentido dos seletores acima — --color-accent inverte de claro/escuro entre os temas, então o
+   anel de foco padrão e o -on-dark colidem com ele igual nos dois casos. --color-on-accent já
+   garante contraste contra --color-accent (é o texto que fica em cima dele) e inverte de
+   polaridade do jeito certo — reaproveitado aqui em vez de um token novo. Medido:
+   5.54:1 no tema claro (#ffffff sobre #8f5e23), 8.06:1 no tema escuro (#16211b sobre #d3b070). */
+[data-surface='accent'] {
+  --color-focus-ring: var(--color-on-accent);
 }
 
 /* ----------------------------------------------------------------------------

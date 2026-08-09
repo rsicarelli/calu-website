@@ -302,6 +302,16 @@
   --calu-focus-ring: var(--calu-focus-ring-on-dark);
 }
 
+/* Superfícies com fundo --calu-accent (ex: WhatsAppFab) não são "escuras" nem "de marca" no
+   sentido dos seletores acima — --calu-accent inverte de claro/escuro entre os temas, então o
+   anel de foco padrão e o -on-dark colidem com ele igual nos dois casos. --calu-on-accent já
+   garante contraste contra --calu-accent (é o texto que fica em cima dele) e inverte de
+   polaridade do jeito certo — reaproveitado aqui em vez de um token novo. Medido:
+   5.54:1 no tema claro (#FFFFFF sobre #8F5E23), 8.06:1 no tema escuro (#16211B sobre #D3B070). */
+[data-surface="accent"] {
+  --calu-focus-ring: var(--calu-on-accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root { --calu-transition: 0ms; }
 }
