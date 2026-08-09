@@ -126,6 +126,12 @@ Fase 2).
 Registradas na Fase 0 como dívida pendente; fechadas na Fase 1 — Fundação. Cada bullet é somado
 pelo commit da sub-fase correspondente conforme ela é implementada.
 
+- **Ponto cego do gate em variante arbitrária de breakpoint.** Verificado empiricamente com o
+  parser real do Tailwind: `scripts/check-utilities.mjs` passou a reprovar variante arbitrária de
+  media/container query (`@min-[…]:`, `min-[…]:`, `max-[…]:`, `@[…]:`) sem tocar nos usos legítimos
+  de variante arbitrária de atributo (`aria-[…]:`, `[&_…]:`, `has-[…]:`, `supports-[…]:`) que o
+  projeto já usa.
+
 ## Fases seguintes
 
 Contexto para quem pegar o projeto depois da Fase 0 (tokens):

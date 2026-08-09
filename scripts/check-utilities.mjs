@@ -10,8 +10,17 @@
    motivo específico: arbitrary em VARIANTE é legítimo e usado no projeto —
    `aria-[current=page]:underline`, `[&_summary]:hidden`, `has-[>svg]:pl-0`,
    `supports-[display:grid]:grid`. Um `grep -- -\[` não separa os dois casos;
-   o parser separa de graça, porque as variantes vivem em `candidate.variants`
-   e a trava nunca olha para lá.
+   o parser separa de graça, porque as variantes vivem em `candidate.variants`.
+
+   A trava OLHA para `candidate.variants`, sim — via `hasArbitraryBreakpointVariant`
+   em `./lib/arbitrary-checks.mjs` —, mas só para reprovar variante arbitrária de
+   media/container query (`@min-[30rem]:`, `min-[30rem]:`, `max-[30rem]:`,
+   `@[30rem]:`), que é exatamente o tipo de coisa que esta trava deveria pegar e
+   antes escapava por inteiro. Verificado empiricamente com `designSystem.
+   parseCandidate`: essas variantes chegam na MESMA forma que as legítimas acima
+   (`kind: 'functional'`, `value.kind: 'arbitrary'`) — só o `root` as separa
+   (`min`/`max`/`@min`/`@max`/`@` vs. `aria`/`has`/`supports`). Ver o módulo para
+   os detalhes e para o caso `compound` (`has-[…]:`), tratado recursivamente.
 
    TRAVA B — utility morta (a razão de o script existir).
    No Tailwind v4 uma utility inexistente NÃO quebra o build: vira no-op
@@ -56,6 +65,8 @@ import { fileURLToPath } from 'node:url';
 
 import { __unstable__loadDesignSystem } from 'tailwindcss';
 import { Scanner } from '@tailwindcss/oxide';
+
+import { hasArbitraryBreakpointVariant, isArbitraryUtility } from './lib/arbitrary-checks.mjs';
 
 /* ----------------------------------------------------------------------------
    Allowlist — VAZIA, e é para continuar assim.
@@ -294,18 +305,10 @@ async function loadDesignSystem() {
 
 /* ============================================================================
    5. As duas travas
+   `isArbitraryUtility` e `hasArbitraryBreakpointVariant` vêm de
+   `./lib/arbitrary-checks.mjs` — extraídas para lá para serem importáveis pelo
+   teste em `tests/scripts/check-utilities.test.ts` também.
    ========================================================================= */
-
-/**
- * TRAVA A. Olha a utility e o modificador; NUNCA `candidate.variants` —
- * arbitrary em variante é legítimo e a distinção é o ponto do script.
- */
-function isArbitraryUtility(candidate) {
-  if (candidate.kind === 'arbitrary') return true; // [color:red]
-  if (candidate.kind === 'functional' && candidate.value?.kind === 'arbitrary') return true; // p-[13px], bg-(--x)
-  if (candidate.modifier?.kind === 'arbitrary') return true; // text-body/[1.9]
-  return false;
-}
 
 const HINTS = {
   A: 'adicione um token nomeado no @theme de src/styles/global.css e use a utility gerada',
@@ -359,7 +362,7 @@ async function main() {
   const findings = [];
   for (const occurrence of occurrences) {
     const parsed = designSystem.parseCandidate(occurrence.candidate);
-    if (parsed.some(isArbitraryUtility)) {
+    if (parsed.some((c) => isArbitraryUtility(c) || hasArbitraryBreakpointVariant(c))) {
       findings.push({ ...occurrence, trava: 'A' });
       continue;
     }
