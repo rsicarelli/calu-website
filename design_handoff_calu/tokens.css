@@ -1,0 +1,286 @@
+/* Calu Pilates e Fisioterapia — design tokens
+   Fonte única de verdade. Nenhum valor de cor, tamanho ou espaço
+   deve aparecer hard-coded em componente. Se faltar um token, crie aqui.
+   Tema: :root = claro. [data-theme="dark"] = escuro. Sem terceiro tema.
+
+   Os números de contraste nos comentários abaixo (ex.: "8.31:1 sobre bg") são
+   verificados por tests/tokens/contrast.test.ts no repositório — essa suíte é
+   a fonte de verdade, recalculada por luminância relativa sRGB/WCAG 2.x a
+   cada mudança. Não edite valor de cor à mão confiando só no comentário;
+   rode o teste. */
+
+:root {
+  color-scheme: light;
+
+  /* ---- superfícies ---- */
+  --calu-bg:            #F6F2E9;
+  --calu-surface:       #FFFDF7;
+  --calu-surface-alt:   #EDE7D9;   /* faixa creme, blocos de destaque */
+  --calu-surface-brand: #3E4A3C;   /* verde profundo, bloco manifesto/CTA */
+  --calu-surface-deep:  #16211B;   /* verde-quase-preto, rodapé e CTA escuro */
+
+  /* ---- linhas ---- */
+  --calu-line:          #DED6C4;   /* divisória padrão */
+  --calu-line-strong:   #16211B;   /* régua de abertura de seção */
+  --calu-line-soft:     #D6CDB9;   /* divisória sobre surface-alt */
+
+  /* ---- texto ---- */
+  --calu-text:          #16211B;   /* títulos            14.83:1 sobre bg */
+  --calu-text-body:     #444B42;   /* corpo               8.1:1 sobre bg */
+  --calu-text-muted:    #454C43;   /* meta, rótulo        7.94:1 sobre bg / 7.0:1 sobre surface-alt */
+  --calu-text-on-brand: #F4F0E6;   /* ÚNICO texto sobre surface-brand  8.20:1 — ver abaixo */
+  --calu-text-on-deep:  #EDE7D9;   /* sobre surface-deep */
+  --calu-text-on-deep-2:#B9BDAE;   /* secundário sobre surface-deep. NUNCA sobre surface-brand:
+                                       lá dá 4.87:1 e reprova AAA nos dois temas */
+  --calu-text-on-deep-3:#A7ADA1;   /* meta sobre surface-deep  7.21:1 */
+  /* surface-brand (#3E4A3C) tem UM nível de texto só. Nenhum cinza-esverdeado chega a 7:1
+     sobre ela: #CED2C3 dá 6.06:1 e #D5D9CA dá 6.49:1 — o limite é a superfície, não a paleta.
+     Na skin `brand` do CtaBlock a hierarquia vem de tamanho e peso, não de tom. */
+
+  /* ---- marca ---- */
+  --calu-brand:         #414A38;   /* texto e link de marca   8.31:1 */
+  --calu-brand-tint:    #E4E7DA;   /* fundo de hover/foco */
+  --calu-sage:          #7E8368;   /* sálvia do logo — NUNCA em texto */
+  --calu-gold:          #C9A45C;   /* dourado do logo — só sobre escuro */
+
+  /* ---- ação ---- */
+  --calu-accent:        #8F5E23;   /* CTA no claro (bronze)   5.5:1 c/ branco */
+  /* como TEXTO --calu-accent dá só 4.96:1 e reprova AAA — é cor de fundo,
+     nunca de texto. Link de marca em texto corrido usa --calu-brand. */
+  --calu-accent-hover:  #74491A;
+  --calu-on-accent:     #FFFFFF;
+
+  /* ---- estados ---- */
+  --calu-focus-ring:    #414A38;   /* só sobre superfície CLARA. Sobre surface-brand dá 1.01:1 e
+                                       sobre surface-deep 1.78:1 — dentro de bloco escuro vale o
+                                       --calu-focus-ring-on-dark abaixo (ver "foco escopado") */
+  --calu-focus-ring-on-dark: #EDE7D9; /* 7.57:1 sobre surface-brand / 13.44:1 sobre surface-deep.
+                                       Mesmo hex de --calu-text-on-deep, com nome próprio para o
+                                       contrato de contraste conseguir medi-lo */
+  --calu-focus-halo:    #E4E7DA;   /* não precisa de escopo: 7.44:1 sobre surface-brand,
+                                       13.21:1 sobre surface-deep */
+  --calu-error:         #7D2C15;   /* 8.38:1 sobre bg / 9.20:1 sobre surface / 7.59:1 sobre surface-alt /
+                                       7.89:1 sobre error-bg; branco sobre ele 9.36:1. Era #863017, que
+                                       dava 6.96:1 sobre surface-alt e reprovava AAA por 0.04 */
+  --calu-error-bg:      #F7E9E2;
+  /* --calu-error-border foi REMOVIDO (era #D9A48D no claro, #7A4132 no escuro): reprovava a
+     WCAG 1.4.11 em 9 das 12 superfícies em que apareceria (1.95:1 sobre bg, 1.77:1 sobre
+     surface-alt, 1.74:1 sobre brand-tint, 1.17:1 sobre o brand-tint do escuro) e nenhum
+     documento o consumia — a borda de erro do campo é --calu-error, que dá 9.36:1 sobre
+     input-bg no claro e 7.78:1 no escuro. Ver COMPONENTS.md § FieldText. */
+  --calu-disabled-bg:   #EDE7D9;
+  --calu-disabled-text: #A8A296;
+  --calu-input-bg:      #FFFFFF;
+  --calu-input-border:  #847E6D;   /* 4.05:1 sobre branco (input-bg) / 3.62:1 sobre bg / 3.28:1 sobre
+                                       surface-alt / 3.23:1 sobre brand-tint — WCAG 1.4.11 (≥3:1 p/
+                                       componente de interface). Era #8A8474, que dava 2.97:1 sobre
+                                       brand-tint (fundo de hover de secondary/ghost); antes, #C9C0AC (1.81:1) */
+
+  /* ---- tipografia ---- */
+  --calu-font: "Source Serif 4", ui-serif, Georgia, "Times New Roman", serif;
+  --calu-font-label: -apple-system, "Segoe UI", system-ui, sans-serif;
+
+  --calu-fs-display: clamp(2.25rem, 1.5rem + 3.2vw, 3.75rem); /* 36 → 60 */
+  --calu-fs-h1:      clamp(2.125rem, 1.7rem + 1.9vw, 3rem);   /* 34 → 48 */
+  --calu-fs-h2:      clamp(1.75rem, 1.5rem + 1.1vw, 2.5rem);  /* 28 → 40 */
+  --calu-fs-h3:      clamp(1.375rem, 1.3rem + 0.4vw, 1.625rem);/* 22 → 26 */
+  /* Dois tamanhos que a escala de 8 do handoff original não cobria — os dois caíam entre
+     `lead` e `h3` e viravam arbitrary value na implementação. Ver src/styles/global.css. */
+  --calu-fs-lockup:  clamp(1.5625rem, 1.5rem + 0.3vw, 1.75rem); /* 25 → 28 — "CaLu" do lockup
+                                                                   (COMPONENTS.md § Header) */
+  --calu-fs-question:clamp(1.3125rem, 1.29rem + 0.1vw, 1.375rem);/* 21 → 22 — <summary> do FaqItem
+                                                                   (COMPONENTS.md § FaqAccordion) */
+  --calu-fs-lead:    clamp(1.25rem, 1.2rem + 0.2vw, 1.3125rem);/* 20 → 21 */
+  --calu-fs-body:    clamp(1.1875rem, 1.16rem + 0.15vw, 1.25rem); /* 19 → 20 */
+  --calu-fs-small:   1.0625rem;  /* 17px — PISO ABSOLUTO de texto legível */
+  --calu-fs-label:   0.9375rem;  /* 15px — só rótulo em caixa-alta, palavra curta.
+                                    A exceção ao piso NUNCA vem sozinha: o tamanho só é
+                                    legítimo acompanhado de `text-transform: uppercase` +
+                                    --calu-font-label + --calu-ls-label + peso 600. Na
+                                    implementação isso é a utility `label` de global.css,
+                                    e a utility `text-label` foi endurecida para emitir o
+                                    pacote inteiro — não existe forma de pedir 15px em
+                                    caixa normal sem escrever a declaração à mão. */
+
+  --calu-lh-tight: 1.12;
+  --calu-lh-heading: 1.2;
+  --calu-lh-body: 1.7;
+  --calu-ls-display: -0.015em;
+  --calu-ls-label: 0.08em;
+
+  --calu-weight-regular: 400;
+  --calu-weight-bold: 600;   /* só 2 pesos. Não use 500 nem 700. */
+
+  /* ---- espaço (escala 4) ---- */
+  --calu-space-1: 0.25rem;  /* 4  */
+  --calu-space-2: 0.5rem;   /* 8  */
+  --calu-space-3: 0.75rem;  /* 12 */
+  --calu-space-4: 1rem;     /* 16 */
+  --calu-space-5: 1.25rem;  /* 20 */
+  --calu-space-6: 1.5rem;   /* 24 */
+  --calu-space-8: 2rem;     /* 32 */
+  --calu-space-9: 2.25rem;  /* 36 */
+  --calu-space-12: 3rem;    /* 48 */
+  --calu-space-14: 3.5rem;  /* 56 */
+  --calu-space-18: 4.5rem;  /* 72 */
+  --calu-space-24: 6rem;    /* 96 */
+
+  /* ---- forma ---- */
+  --calu-radius-0: 0;
+  --calu-radius-1: 4px;     /* padrão de contêiner */
+  --calu-radius-2: 8px;     /* card externo, moldura */
+  --calu-radius-pill: 999px;/* elementos de marca: medalhão, botão flutuante, numeral */
+
+  --calu-shadow-lift: 0 10px 30px -14px rgba(22, 33, 27, 0.45);
+  --calu-shadow-float: 0 12px 30px -10px rgba(22, 33, 27, 0.7);
+  /* No escuro estes viram sombra TRANSPARENTE (`0 0 #0000`), nunca `none` — ver o bloco
+     [data-theme="dark"] abaixo. */
+
+  /* ---- alvo de toque (público 60+) ---- */
+  --calu-target: 3.25rem;      /* 52px — mínimo de qualquer controle */
+  --calu-target-primary: 3.5rem;/* 56px — ação principal */
+
+  /* ---- layout ---- */
+  --calu-measure: 68ch;        /* largura máxima de coluna de leitura — 68ch de TEXTO.
+                                  Com box-sizing: border-box o padding come a medida por
+                                  dentro, então o contêiner que aplica o gutter precisa somar
+                                  2×gutter ao max-width; sem isso a coluna real cai para ~59ch
+                                  e a resposta de FAQ de 64ch não cabe. Ver a utility
+                                  `container-measure` em src/styles/global.css */
+  --calu-answer: 64ch;         /* largura máxima da resposta de FaqItem (COMPONENTS.md
+                                  § FaqAccordion) — cabe dentro de --calu-measure */
+  --calu-page-max: 1280px;
+
+  /* ---- altura reservada do Header sticky ----
+     É o orçamento de scroll-padding-top da página: nenhuma parte de um elemento focado
+     pode ficar coberta pelo header (WCAG 2.4.12, AAA), venha o foco de âncora, de Tab, de
+     scrollIntoView() ou de restauração. Derivado da spec do Header: alvo de 52px do lockup e
+     do botão "Menu" + 12px de padding em cima e embaixo + 1px de linha = 77px, mais 5px do
+     anel de foco (3px + offset 2px) = 82px, arredondado para 88px. */
+  --calu-header-h: 5.5rem;     /* 88px */
+
+  /* ---- limiares de container query ----
+     Diferente de breakpoint: aqui quem responde é a largura do PRÓPRIO componente, e é
+     isso que permite o mesmo ServiceCard viver em 1 coluna na Home e em linha no índice
+     sem prop de variante. Nomeados pelo que o espaço permite, não pela medida. */
+  --calu-ct-thumb: 26rem;      /* 416px — cabe uma miniatura ao lado do texto: retrato de 112px
+                                  + 24px de gap + ~40ch. ProfessionalBio compacto. Acima de
+                                  360px de propósito ("nunca duas colunas espremidas em 360px") */
+  --calu-ct-row: 34rem;        /* 544px — cabe uma imagem 16/9 ao lado do texto: ~200px + 24px
+                                  de gap + ~45ch. ServiceCard vira linha no índice de serviços e
+                                  continua empilhado nas colunas de ~250–378px da Home */
+
+  --calu-gutter: var(--calu-space-5);   /* 20px no mobile */
+  --calu-gutter-lg: 2.5rem;              /* 40px no desktop. Era var(--calu-space-12) (48px);
+                                             a media query abaixo sempre resolvia para 40px porque
+                                             --calu-space-10 nunca existiu nesta escala, e a referência
+                                             visual confirma padding:0 40px em 7 lugares — nenhum com 48px */
+
+  --calu-transition: 150ms ease;
+}
+
+@media (min-width: 900px) {
+  /* --calu-space-10 nunca foi definido na escala de espaço acima (pula de -9 para -12) —
+     o fallback 2.5rem sempre foi o valor real em produção. Escrito aqui como literal
+     para não sugerir que o token existe. */
+  :root { --calu-gutter: 2.5rem; }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --calu-bg:            #16211B;
+  --calu-surface:       #1C2822;
+  --calu-surface-alt:   #1C2822;
+  --calu-surface-brand: #3E4A3C;
+  --calu-surface-deep:  #1C2822;
+
+  --calu-line:          #2E3C33;
+  --calu-line-strong:   #2E3C33;
+  --calu-line-soft:     #2E3C33;
+
+  --calu-text:          #EDE7D9;
+  --calu-text-body:     #C3C7B8;   /* 9.61:1 sobre bg / 8.85:1 sobre surface. Era #B9BDAE — subiu
+                                       junto com o muted abaixo para não achatar a hierarquia */
+  --calu-text-muted:    #B2B8AC;   /* 8.16:1 sobre bg / 7.52:1 sobre surface. Era #A7ADA1 (6.64:1
+                                       sobre surface) — reprovava AAA */
+  --calu-text-on-deep-3:#B2B8AC;   /* era herdado do :root (#A7ADA1) e nunca reconferido: sobre o
+                                       surface-deep do escuro (#1C2822, não #16211B) dava 6.64:1 e
+                                       reprovava no rodapé. Mesmo valor do text-muted acima */
+
+  --calu-brand:         #D3B070;   /* 8.06:1 sobre bg / 7.42:1 sobre surface (card). Era #C9A45C:
+                                       passava AAA por 0.06 (7.06:1) sobre bg e reprovava sobre o card (6.50:1) */
+  --calu-brand-tint:    #0E1411;   /* superfície de hover/foco de secondary e ghost. Era #24322A, que
+                                       reprovava AAA em TRÊS pares reais: --calu-brand 6.53:1,
+                                       --calu-text-muted 6.61:1 e --calu-error 6.30:1 sobre ele.
+                                       Agora 9.06 / 9.18 / 8.75, e --calu-input-border sobe de 3.23:1
+                                       para 4.49:1 na 1.4.11.
+                                       ATENÇÃO — no escuro o tint é REBAIXADO, não elevado: fica mais
+                                       escuro que o --calu-bg. Não é estética, é aritmética. Com frentes
+                                       claras (L≈0.44–0.47) o piso de 7:1 exige fundo com L ≤ 0.0204;
+                                       --calu-surface já ocupa 0.0188 e --calu-bg está em 0.0134, então
+                                       a faixa "mais claro que o bg e ainda AAA" tem 0.007 de largura e
+                                       já está tomada pelo card. O melhor valor elevado possível seria
+                                       #1D2822 — ΔE00 de 0.47 contra --calu-surface, ou seja, o hover
+                                       viraria o mesmo cinza-verde do card. Rebaixar mantém o matiz da
+                                       família (162°) e separa MELHOR: ΔE00 5.60 contra bg (era 5.35) e
+                                       7.29 contra surface (era 3.27). No claro nada muda: #E4E7DA
+                                       continua elevado e passa os três pares (7.40 / 7.07 / 7.46). */
+
+  /* dourado assume a ação: bronze some no escuro (2,1:1) */
+  --calu-accent:        #D3B070;   /* idem --calu-brand: 8.06 / 7.42 */
+  --calu-accent-hover:  #E2C48C;   /* acompanha o accent */
+  --calu-on-accent:     #16211B;
+
+  --calu-focus-ring:    #EDE7D9;   /* no escuro o anel já é claro: 13.44:1 sobre bg, 7.57:1 sobre
+                                       surface-brand. A regra de foco escopado é idempotente aqui */
+  --calu-focus-halo:    rgba(201, 164, 92, 0.25);
+  --calu-error:         #E9A08A;
+  --calu-error-bg:      #33221C;
+  --calu-disabled-bg:   #1C2822;
+  --calu-disabled-text: #66705F;
+  --calu-input-bg:      #16211B;
+  --calu-input-border:  #738071;   /* 3.99:1 sobre input-bg / 3.67:1 sobre surface / 3.23:1 sobre
+                                       brand-tint — WCAG 1.4.11. Era #6E7A6C, que dava 2.98:1 sobre
+                                       o brand-tint do escuro; antes, #45524A (2.02:1) */
+
+  /* --calu-control-border foi removido: era um patch que existia só no escuro, sem par
+     no claro. A causa raiz era o --calu-input-border quebrado, agora consertado nos dois
+     temas — use --calu-input-border. */
+
+  /* Sombra não funciona no escuro: elevação = superfície mais clara + linha.
+     O valor é uma sombra TRANSPARENTE, nunca `none`. A gramática de box-shadow é
+     `none | <shadow>#`, e o compilador do Tailwind injeta este token no meio de uma lista
+     (`box-shadow: var(--tw-inset-shadow), …, var(--tw-shadow)`): um `none` ali é inválido e
+     derruba a declaração INTEIRA. O "sem sombra" saía por acidente e levava junto qualquer
+     ring-* / inset-shadow-* do mesmo elemento — um card com sombra e halo de foco perdia o
+     halo no escuro. Ver src/styles/global.css §2. */
+  --calu-shadow-lift: 0 0 #0000;
+  --calu-shadow-float: 0 12px 30px -10px rgba(0, 0, 0, 0.8);
+}
+
+/* ---- foco escopado: superfície escura re-declara o anel ----
+   WCAG 1.4.11 (AA) e 2.4.13 (AAA). O foco tem `outline-offset: 2px`, então o anel cai na
+   superfície ATRÁS do controle. No tema claro isso matava o foco dentro de bloco escuro:
+   --calu-focus-ring (#414A38) dá 1.01:1 sobre surface-brand e 1.78:1 sobre surface-deep, e
+   há controle focável exatamente aí — Footer (links de 52px, ContactPair) e CtaBlock nas
+   skins `deep` e `brand`.
+
+   O mecanismo é o mesmo do tema, um nível abaixo: [data-theme] re-escopa token no <html>,
+   [data-surface] re-escopa no bloco que pinta o fundo. Custom property herda, então o
+   controle focado não precisa saber onde está — nem prop, nem variante, nem marcação
+   diferente. Quem pinta o fundo escuro declara o atributo:
+
+     <footer  data-surface="deep"  style="background: var(--calu-surface-deep)">
+     <section data-surface="brand" style="background: var(--calu-surface-brand)">
+
+   Vale nos dois temas — no escuro a regra é idempotente, o anel já é claro.
+   Implementação: src/styles/global.css §6. Medido em tests/tokens/pairs.ts. */
+[data-surface="deep"],
+[data-surface="brand"] {
+  --calu-focus-ring: var(--calu-focus-ring-on-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --calu-transition: 0ms; }
+}
