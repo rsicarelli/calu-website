@@ -25,13 +25,25 @@ a forma e os dois temas (claro/escuro) do handoff, sob os namespaces do Tailwind
 locais ganharam uma checagem própria de estilos (`check:styles`) e uma suíte de testes (Vitest)
 que valida contraste e invariantes dos tokens direto no CSS.
 
+✅ **Fase 1 — Fundação implementada e commitada** (13 commits, `48947ed` → `8d431d2`). O chrome
+estrutural que toda página usa já existe em `src/components/blocks/`: `Header.astro`,
+`MobileNav.astro`, `Footer.astro`, `WhatsAppFab.astro`, `EmptyState.astro`. O primitivo
+`ContactPair` entrou em `src/components/ui/`, e `src/components/content/JsonLd.astro` injeta o
+JSON-LD no `<head>`. O SEO técnico que não depende de conteúdo real também existe:
+`src/lib/site.ts`, `src/lib/seo.ts`, `src/lib/jsonld.ts`, os endpoints `src/pages/sitemap.xml.ts`
+e `src/pages/robots.txt.ts`, e a página `src/pages/404.astro`. `BaseLayout` deixou de ser
+esqueleto: agora compõe Header + `<main>` + Footer + FAB e emite as meta tags de SEO/canonical de
+verdade. A marca (`logo-mark`/`logo-lockup`) entrou junto, usada em `Header`, `Footer` e
+`EmptyState`. `tests/` cresceu na mesma proporção — `tests/components/`, `tests/lib/`,
+`tests/pages/`, `tests/scripts/`, `tests/system/` — 216 testes no total.
+
 **Ainda não existe** — e a ausência é temporária, não uma decisão contra:
-CMS, hospedagem/deploy, CI, SEO, analytics, formulários, favicon/logo, e qualquer conteúdo real
-da clínica. O `index.astro` continua um placeholder com o nome e nada mais — a Fase 0 trouxe o
-sistema de tokens, não páginas. O próximo passo é a **Fase 1 — Fundação**: o chrome estrutural
-(`Header`, `Footer`, `MobileNav`, `WhatsAppFab`) e o SEO técnico que não depende de conteúdo real
-— nada disso está implementado ainda. A página `/lab` foi reordenada para depois dela (agora
-Fase 2).
+CMS, hospedagem/deploy, CI, analytics, formulários, favicon, e qualquer conteúdo real da clínica
+— inclusive os dados que preenchem o JSON-LD e o cadastro no Google Business Profile (SEO local,
+ver "Decisões em aberto"). O `index.astro` continua um placeholder com o nome e nada mais — a
+Fase 1 trouxe a casca (Header, Footer, nav, FAB, SEO técnico), não o conteúdo das páginas, que só
+entra na Fase 4. O próximo passo é a **Fase 2 — `/lab`**: a página kitchen sink com o conteúdo
+bruto do handoff, renderizada dentro da casca real que a Fase 1 deixou pronta.
 
 ## Restrições firmes
 
