@@ -1,0 +1,79 @@
+---
+/**
+ * EmptyState — estado vazio genérico: símbolo de marca + título + mensagem opcional + CTA de
+ * contato (`ContactPair`) (COMPONENTS.md § EmptyState). Usado sempre que uma lista do CMS vem
+ * vazia (índice de serviços sem itens, índice do blog sem posts) ou quando uma PÁGINA INTEIRA
+ * ainda não tem conteúdo (ex.: `404.astro`) — nunca para uma seção vazia isolada dentro de uma
+ * página com conteúdo ao redor; a regra do projeto é "nenhuma seção vazia renderiza".
+ *
+ * Um único estado visual — texto e destino do CTA variam só por prop, nunca por variante.
+ *
+ * Props
+ *   heading      título curto explicando a situação.
+ *   headingAs    tag do heading (padrão `'h2'`). A página 404 passa `'h1'`, porque ali o
+ *                heading do EmptyState é o único `<h1>` da página.
+ *   message      texto de apoio opcional. Omitido → nenhum `<p>` é renderizado (nunca um
+ *                parágrafo vazio).
+ *   whatsappHref, phoneHref, phoneLabel  repassados direto para `ContactPair` — o par
+ *                WhatsApp + telefone é a saída obrigatória de toda tela vazia/erro
+ *                (DESIGN-SYSTEM §7).
+ *   …            qualquer outro atributo válido para `<div>` é repassado ao elemento raiz
+ *                (COMPONENTS.md: "todo componente aceita `class` e repassa atributos").
+ *
+ * O símbolo de marca (`logo-mark.png`) sai com `alt=""`: é decorativo — o `heading` ao lado já
+ * comunica o contexto, um alt que só repetiria "Calu" seria redundante, não informativo (mesmo
+ * raciocínio do medalhão em `Header.astro`). `width`/`height` explícitos zeram o CLS.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica — mesmo teto documentado em
+ * `Container.astro`/`ContactPair.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1
+ * estoura em `Props` genérica acima de ~3KB de arquivo). O elemento raiz é sempre um `div`
+ * neutro; só o heading interno muda de tag, via `headingAs`.
+ *
+ *   <EmptyState heading="Ainda não temos serviços cadastrados" whatsappHref={SITE.whatsapp.href}
+ *     phoneHref={SITE.phone.href} phoneLabel={SITE.phone.label} />
+ *   <EmptyState headingAs="h1" heading="Não encontramos esta página" message="…" … />   404
+ */
+import { Image } from 'astro:assets';
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+import logoMark from '@/assets/brand/logo-mark.png';
+import ContactPair from '@/components/ui/ContactPair.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Título curto explicando a situação. */
+  heading: string;
+  /** Tag do heading — padrão `'h2'`. A página 404 passa `'h1'` (único h1 da página). */
+  headingAs?: HTMLTag;
+  /** Texto de apoio opcional. Omitido → nenhum `<p>` é renderizado. */
+  message?: string;
+  /** URL do WhatsApp — repassada para `ContactPair`. */
+  whatsappHref: string;
+  /** `tel:...` — repassada para `ContactPair`. */
+  phoneHref: string;
+  /** Texto formatado do telefone — repassada para `ContactPair`. */
+  phoneLabel: string;
+}
+
+const {
+  heading,
+  headingAs: Tag = 'h2',
+  message,
+  whatsappHref,
+  phoneHref,
+  phoneLabel,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<div class:list={['flex flex-col items-center gap-6', className]} {...rest}>
+  <Image src={logoMark} alt="" width={64} height={64} />
+  <Tag class="text-center text-h3 text-ink">{heading}</Tag>
+  {message && <p class="text-center text-body text-ink-body">{message}</p>}
+  <ContactPair
+    whatsappHref={whatsappHref}
+    phoneHref={phoneHref}
+    phoneLabel={phoneLabel}
+    class="justify-center text-ink"
+  />
+</div>

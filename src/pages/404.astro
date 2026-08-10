@@ -1,0 +1,25 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import EmptyState from '@/components/blocks/EmptyState.astro';
+import { SITE } from '@/lib/site';
+---
+
+<BaseLayout title={`Página não encontrada · ${SITE.name}`} noindex>
+  <Container as="section" class="py-16 text-center">
+    <EmptyState
+      headingAs="h1"
+      heading="Não encontramos esta página"
+      message="O endereço pode ter mudado. Você pode voltar para o início ou falar com a gente pelo WhatsApp."
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+    <a
+      href="/"
+      class="mt-8 inline-flex min-h-target items-center justify-center rounded-control border border-line px-6 font-body text-body font-semibold text-ink"
+    >
+      Voltar para o início
+    </a>
+  </Container>
+</BaseLayout>
