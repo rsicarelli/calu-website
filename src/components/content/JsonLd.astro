@@ -1,0 +1,25 @@
+---
+/**
+ * JsonLd — serializa um ou mais nós schema.org num único `<script type="application/ld+json">`,
+ * agrupados sob `@graph`. Não sabe nada sobre a página que o usa: recebe o nó (ou nós) já
+ * prontos (ex.: `localBusinessLd()` de `@/lib/jsonld`) e só serializa. Pensado para ser
+ * passado via `<JsonLd slot="head" schema={...} />` a partir de uma página, sem que
+ * `BaseLayout` precise importar ou saber nada sobre JSON-LD (ver `<slot name="head" />` em
+ * `BaseLayout.astro`).
+ *
+ * `JSON.stringify` sozinho NÃO escapa `<` — um valor de conteúdo contendo `</script>` quebraria
+ * para fora da tag. `.replace(/</g, '\\u003c')` neutraliza isso.
+ */
+import type { JsonLdNode } from '@/lib/jsonld';
+
+interface Props {
+  schema: JsonLdNode | JsonLdNode[];
+}
+
+const { schema } = Astro.props;
+const graph = Array.isArray(schema) ? schema : [schema];
+const doc = { '@context': 'https://schema.org', '@graph': graph };
+const json = JSON.stringify(doc).replace(/</g, '\\u003c');
+---
+
+<script type="application/ld+json" is:inline set:html={json} />

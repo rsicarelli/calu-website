@@ -19,6 +19,7 @@ import { Font } from 'astro:assets';
 import Footer from '@/components/blocks/Footer.astro';
 import Header from '@/components/blocks/Header.astro';
 import WhatsAppFab from '@/components/blocks/WhatsAppFab.astro';
+import { buildSeoMeta, canonicalUrl } from '@/lib/seo';
 import { SITE, SITE_NAV } from '@/lib/site';
 
 interface Props {
@@ -31,6 +32,20 @@ interface Props {
 }
 
 const { title, description, noindex } = Astro.props;
+
+// `canonical`/`siteName` são computados aqui, não viram prop nova — toda página já passa
+// `title`/`description`/`noindex`, e o resto é derivado do próprio request (`Astro.url`) e de
+// `SITE` (fonte única de dados da clínica). Sem `image`: ainda não há OG image (1200×630)
+// pronta (ver `SeoInput` em `@/lib/seo`).
+//
+// `Astro.site ?? Astro.url` — no build real `Astro.site` vem sempre de `astro.config.mjs`
+// (`https://calupilates.com.br`), então o fallback nunca entra em jogo em produção. Ele existe
+// só para testes de componente que sobem `BaseLayout` via `experimental_AstroContainer` sem
+// configurar `site` (`tests/components/BaseLayout.test.ts`, `tests/pages/404.test.ts`) — nesse
+// caso `Astro.site` é `undefined`, mas `Astro.url` é sempre uma URL absoluta válida (o Container
+// usa `https://example.com/` como padrão), então `canonicalUrl` nunca recebe uma base inválida.
+const canonical = canonicalUrl(Astro.url.pathname, Astro.site ?? Astro.url);
+const seoMeta = buildSeoMeta({ title, description, canonical, siteName: SITE.name });
 ---
 
 <!doctype html>
@@ -85,6 +100,17 @@ const { title, description, noindex } = Astro.props;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <link rel="canonical" href={canonical} />
+    {
+      /* `m.property`/`m.name` — cada tag de `buildSeoMeta` sempre define exatamente um dos
+      dois, nunca os dois. Astro omite atributos cujo valor é `undefined` (confirmado em
+      `dist/index.html` pós-build), então o par `property={m.property} name={m.name}` não vaza
+      `property="undefined"`/`name="undefined"` para o HTML. */
+    }
+    {seoMeta.map((m) => <meta property={m.property} name={m.name} content={m.content} />)}
+
+    <slot name="head" />
   </head>
   <body class="min-h-dvh">
     {
