@@ -20,6 +20,11 @@ tasks:
     cmds:
       - pnpm dev
 
+  dev:stop:
+    desc: Derruba o servidor de desenvolvimento (o Astro o mantém em background)
+    cmds:
+      - pnpm exec astro dev stop
+
   build:
     desc: Gera o site de produção em dist/
     cmds:
@@ -29,6 +34,17 @@ tasks:
     desc: Serve o build de produção localmente
     cmds:
       - pnpm preview
+
+  preview:stop:
+    desc: Derruba o servidor de preview (o Astro o mantém em background)
+    cmds:
+      - pnpm exec astro preview stop
+
+  stop:
+    desc: Derruba os servidores de dev e de preview
+    cmds:
+      - task: dev:stop
+      - task: preview:stop
 
   typecheck:
     desc: Checagem de tipos de Astro + TypeScript (astro check)

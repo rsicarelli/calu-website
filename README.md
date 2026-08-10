@@ -29,12 +29,20 @@ verdade do código e do conteúdo.
 src/
   pages/           # rotas
   layouts/         # BaseLayout
-  components/      # (vazio)
-  content/         # (vazio)
-public/            # assets estáticos (vazio)
+  components/      # ui/, blocks/, content/
+  content/         # content collections
+  assets/          # brand/ — imagens processadas pelo Astro
+  lib/             # helpers
+  styles/          # tokens e estilos globais
+scripts/           # utilitários de build/checagem
+tests/             # Vitest
 
-astro.config.mjs   Taskfile.yml   mise.toml   eslint.config.js
+astro.config.mjs   Taskfile.yml   mise.toml   eslint.config.js   vitest.config.ts
 ```
+
+Não há diretório `public/`: os assets passam pelo pipeline do Astro (`src/assets/`, e a Fonts
+API gera `_astro/fonts/`). Crie um `public/` só se aparecer arquivo que precise ser servido
+sem processamento — `robots.txt` e afins.
 
 ## Desenvolvimento local
 
@@ -45,7 +53,17 @@ mise install      # provisiona Node + pnpm + task
 task install      # instala as dependências
 task dev          # sobe o dev server em localhost:4321
 task build        # gera o site em dist/
-task dod          # formata + typecheck + lint + build (rode antes de commitar)
+task preview      # serve o dist/ — o HTML real de produção
+task dod          # formata + gates + build + testes (rode antes de commitar)
+```
+
+O Astro mantém os servidores de `dev` e `preview` **em background**, então eles seguem no ar
+depois que o comando retorna. Para derrubá-los:
+
+```bash
+task dev:stop       # só o dev
+task preview:stop   # só o preview
+task stop           # os dois
 ```
 
 `task --list` mostra todos os comandos. Para ativar o gate de pre-commit:
