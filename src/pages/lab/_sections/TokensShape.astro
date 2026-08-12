@@ -1,0 +1,170 @@
+---
+/**
+ * Seção "Espaço e forma" da `/lab` — alvo de toque, gutter, raio, sombra, breakpoint e as duas
+ * larguras de container query.
+ *
+ * O alvo de toque é a régua mais importante desta seção e vem primeiro: 52px em qualquer controle,
+ * 56px na ação principal. `tests/system/touch-targets.test.ts` trava a presença da classe no HTML
+ * construído; o que ele NÃO consegue medir é o pixel (linkedom não computa CSS). É para isso que a
+ * régua visual existe — aqui dá para colocar o dedo na tela.
+ *
+ * A sombra aparece nos dois temas de propósito: no escuro `--elevation-lift` vira `0 0 #0000`
+ * (transparente, NÃO `none` — um `none` no meio da lista do Tailwind derrubaria a declaração
+ * inteira e levaria o halo de foco junto), então a elevação passa a ser superfície mais clara +
+ * linha. Sem ver os dois lados, a diferença parece bug.
+ */
+---
+
+<div class="container-page mt-8 flex flex-col gap-8">
+  <div>
+    <p class="label text-ink-muted">Alvo de toque</p>
+    <p class="mt-4 text-small text-ink-muted">
+      A altura mínima de qualquer controle, e a da ação principal. Vale inclusive no rodapé — não há
+      exceção para link pequeno.
+    </p>
+    <ul class="mt-4 flex flex-col gap-4">
+      <li class="flex items-center gap-4">
+        <span
+          class="flex min-h-target items-center rounded-control border border-line bg-surface px-6 text-small text-ink"
+          >min-h-target</span
+        >
+        <span class="text-small text-ink-muted">52px — qualquer controle</span>
+      </li>
+      <li class="flex items-center gap-4">
+        <span
+          class="flex min-h-target-primary items-center rounded-control bg-accent px-6 text-small font-semibold text-on-accent"
+          data-surface="accent">min-h-target-primary</span
+        >
+        <span class="text-small text-ink-muted">56px — ação principal</span>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Gutter e trilhos</p>
+    <p class="mt-4 text-small text-ink-muted">
+      O gutter vai de 20px para 40px a partir de 900px. As duas larguras de trilho são a coluna de
+      leitura, travada mesmo em tela larga, e o trilho de página.
+    </p>
+    <div class="mt-4 flex flex-col gap-4">
+      <div class="rounded-card bg-surface-alt py-4">
+        <div class="container-measure">
+          <p class="text-small text-ink">
+            container-measure — a coluna de leitura. Ela para de crescer bem antes da borda da tela,
+            porque linha longa demais cansa e faz o olho perder o começo da linha seguinte.
+          </p>
+        </div>
+      </div>
+      <div class="rounded-card bg-surface-alt py-4">
+        <div class="container-page">
+          <p class="text-small text-ink">
+            container-page — o trilho largo, para cabeçalho, rodapé e grade de seção.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Raio</p>
+    <ul class="mt-4 flex flex-wrap gap-6">
+      <li class="flex flex-col gap-4">
+        <span class="size-target rounded-control border border-line bg-surface"></span>
+        <span class="text-small text-ink-muted">rounded-control</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="size-target rounded-card border border-line bg-surface"></span>
+        <span class="text-small text-ink-muted">rounded-card</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="size-target rounded-full border border-line bg-surface"></span>
+        <span class="text-small text-ink-muted">rounded-full</span>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Sombra, nos dois temas</p>
+    <p class="mt-4 text-small text-ink-muted">
+      No tema escuro a elevação deixa de ser sombra e passa a ser superfície mais clara com linha. É
+      troca de valor do mesmo token, não componente diferente.
+    </p>
+    <div class="mt-4 grid gap-4 md:grid-cols-2">
+      <div class="rounded-card bg-bg p-6">
+        <p class="text-small text-ink-muted">Tema da página</p>
+        <div class="mt-4 flex flex-wrap gap-6">
+          <span
+            class="flex size-target items-center justify-center rounded-card bg-surface text-small text-ink shadow-lift"
+            >lift</span
+          >
+          <span
+            class="flex size-target items-center justify-center rounded-card bg-surface text-small text-ink shadow-float"
+            >float</span
+          >
+        </div>
+      </div>
+      <div data-theme="dark" class="rounded-card bg-bg p-6">
+        <p class="text-small text-ink-muted">Tema escuro, forçado</p>
+        <div class="mt-4 flex flex-wrap gap-6">
+          <span
+            class="flex size-target items-center justify-center rounded-card border border-line bg-surface text-small text-ink shadow-lift"
+            >lift</span
+          >
+          <span
+            class="flex size-target items-center justify-center rounded-card border border-line bg-surface text-small text-ink shadow-float"
+            >float</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Container query</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Duas larguras nomeadas, para o componente responder ao espaço que ele tem — não à largura da
+      janela. É o que permite o mesmo card servir a uma coluna na home e a uma linha no índice, sem
+      media query e sem variante nova.
+    </p>
+    <div class="mt-4 flex flex-col gap-6">
+      <div class="@container rounded-card border border-line-soft p-4">
+        <p class="text-small text-ink-muted">Caixa larga — passa dos dois limiares</p>
+        <div class="mt-4 flex flex-col gap-4 @thumb:flex-row @thumb:items-center">
+          <span class="size-target shrink-0 rounded-control bg-surface-alt"></span>
+          <p class="text-small text-ink">
+            Acima de 26rem o bloco vira linha; acima de 34rem ele ganha espaço para a imagem maior.
+          </p>
+        </div>
+      </div>
+      <div class="@container w-80 rounded-card border border-line-soft p-4">
+        <p class="text-small text-ink-muted">Caixa estreita — o mesmo bloco, empilhado</p>
+        <div class="mt-4 flex flex-col gap-4 @thumb:flex-row @thumb:items-center">
+          <span class="size-target shrink-0 rounded-control bg-surface-alt"></span>
+          <p class="text-small text-ink">
+            Mesma marcação, mesmo componente. O que mudou foi a largura disponível.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Breakpoints</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Três, e só o segundo muda estrutura de verdade. A base é 360px, e o conteúdo precisa funcionar
+      a 320px — que é o piso de refluxo da norma, não um tamanho de projeto.
+    </p>
+    <ul class="mt-4 flex flex-col gap-4">
+      <li class="border-t border-line-soft pt-4 text-small text-ink">
+        sm — 600px <span class="text-ink-muted">· lista de uma para duas colunas</span>
+      </li>
+      <li class="border-t border-line-soft pt-4 text-small text-ink">
+        md — 900px <span class="text-ink-muted">· mudança estrutural: nav inline, duas colunas</span
+        >
+      </li>
+      <li class="border-t border-line-soft pt-4 text-small text-ink">
+        lg — 1280px <span class="text-ink-muted">· a tela larga desenhada no handoff</span>
+      </li>
+    </ul>
+  </div>
+</div>

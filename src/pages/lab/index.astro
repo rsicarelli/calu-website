@@ -58,11 +58,17 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { SITE } from '@/lib/site';
 
 import TokensColor from './_sections/TokensColor.astro';
+import TokensShape from './_sections/TokensShape.astro';
+import TokensType from './_sections/TokensType.astro';
 
 /* Fonte única do índice E da ordem das seções: o mesmo array alimenta os dois, então âncora do
    sumário não tem como divergir do `id` da seção. `tests/pages/lab.test.ts` trava isso mesmo
    assim — o array protege contra descuido, o teste protege contra alguém abandonar o array. */
-const SECTIONS = [{ id: 'lab-cor', title: 'Cor', Section: TokensColor }];
+const SECTIONS = [
+  { id: 'lab-cor', title: 'Cor', Section: TokensColor },
+  { id: 'lab-tipografia', title: 'Tipografia', Section: TokensType },
+  { id: 'lab-espaco-e-forma', title: 'Espaço e forma', Section: TokensShape },
+];
 ---
 
 <BaseLayout title={`Laboratório do design system · ${SITE.name}`} noindex>
