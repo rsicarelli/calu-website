@@ -1,0 +1,174 @@
+---
+/**
+ * Tela "Home", segunda metade — Para a família, Estrutura e acesso, Como funciona, CTA escuro, FAQ
+ * resumido e Onde estamos. Continua de `ScreenHomeTop.astro`, na ordem fixada por `PAGES.md`.
+ *
+ * "Para a família" existe porque parte de quem decide não é quem vai ser atendido: é o filho adulto
+ * pesquisando pelo pai ou pela mãe. O bloco fala com ele diretamente, e termina com os dois canais
+ * de contato — não com um formulário.
+ *
+ * "Como funciona" tem TRÊS passos fixos, sempre. É diferente da lista de passos do template de
+ * serviço, que aceita de um a cinco; os dois campos têm nome qualificado no modelo de conteúdo
+ * justamente para não colidirem.
+ *
+ * "Estrutura e acesso" aceita de 2 a 8 itens vindos do CMS e fecha com o convite a avisar antes.
+ * A versão com 8 itens fica em `Resilience.astro`; aqui está a quantidade típica.
+ *
+ * O CTA escuro e a faixa de contato declaram `data-surface`, sem o qual o anel de foco dos links
+ * internos cai para menos de 2:1 no tema claro.
+ */
+import { Image } from 'astro:assets';
+
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+import logoMark from '@/assets/brand/logo-mark.png';
+---
+
+<div class="container-page mt-8 flex flex-col gap-12">
+  <!-- Para a família + Estrutura e acesso: lado a lado na tela larga -->
+  <div class="grid gap-6 md:grid-cols-2">
+    <div class="rounded-card bg-surface-alt p-6">
+      <p class="label text-ink-muted">Para a família</p>
+      <h3 class="mt-4 text-h3 text-ink">Está procurando para seu pai ou sua mãe?</h3>
+      <p class="mt-4 text-body text-ink-body">
+        Dá para conversar antes de marcar qualquer coisa, e a conversa não obriga a nada.
+      </p>
+      <ul class="mt-4 flex flex-col gap-4">
+        <li class="text-body text-ink-body">Quem responde é uma das profissionais da clínica.</li>
+        <li class="text-body text-ink-body">
+          A avaliação acontece antes de qualquer plano, sem compromisso de continuar.
+        </li>
+        <li class="text-body text-ink-body">
+          Acompanhante pode entrar junto na sessão, se for mais confortável.
+        </li>
+      </ul>
+      <ContactPair
+        class="mt-8"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+
+    <div class="rounded-card bg-surface-alt p-6">
+      <p class="label text-ink-muted">Estrutura e acesso</p>
+      <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
+      <ul class="mt-4 flex flex-col gap-4">
+        <li class="border-t border-line-soft pt-4 text-body text-ink-body">Entrada sem degrau</li>
+        <li class="border-t border-line-soft pt-4 text-body text-ink-body">Elevador no prédio</li>
+        <li class="border-t border-line-soft pt-4 text-body text-ink-body">Banheiro adaptado</li>
+        <li class="border-t border-line-soft pt-4 text-body text-ink-body">
+          Estacionamento por perto
+        </li>
+        <li class="border-t border-line-soft pt-4 text-body text-ink-body">
+          Acompanhante pode entrar junto
+        </li>
+      </ul>
+      <p class="mt-8 text-body font-semibold text-ink">
+        Precisa de alguma adaptação? Avise antes, a gente organiza.
+      </p>
+    </div>
+  </div>
+
+  <!-- Como funciona: três passos fixos -->
+  <div>
+    <p class="label text-ink-muted">Como funciona — sempre três passos</p>
+    <h3 class="mt-4 text-h2 text-ink">Como começa</h3>
+    <ol class="mt-8 grid gap-6 md:grid-cols-3">
+      <li class="rounded-card border border-line-soft p-6">
+        <p class="label text-ink-muted">Passo 1</p>
+        <h4 class="mt-4 text-h3 text-ink">Contato</h4>
+        <p class="mt-4 text-body text-ink-body">
+          Você escreve ou liga contando o que está sentindo. Não precisa saber o nome técnico de
+          nada.
+        </p>
+      </li>
+      <li class="rounded-card border border-line-soft p-6">
+        <p class="label text-ink-muted">Passo 2</p>
+        <h4 class="mt-4 text-h3 text-ink">Avaliação</h4>
+        <p class="mt-4 text-body text-ink-body">
+          Uma sessão individual para entender a queixa, o histórico e o que você quer voltar a
+          fazer.
+        </p>
+      </li>
+      <li class="rounded-card border border-line-soft p-6">
+        <p class="label text-ink-muted">Passo 3</p>
+        <h4 class="mt-4 text-h3 text-ink">Plano</h4>
+        <p class="mt-4 text-body text-ink-body">
+          A proposta de frequência e formato sai da avaliação, e é revista ao longo do
+          acompanhamento.
+        </p>
+      </li>
+    </ol>
+  </div>
+
+  <!-- CTA escuro -->
+  <div>
+    <p class="label text-ink-muted">CTA escuro</p>
+    <div data-surface="deep" class="mt-4 rounded-card bg-surface-deep p-6 text-ink-on-deep">
+      <h3 class="text-h2">Ainda em dúvida sobre qual atendimento procurar?</h3>
+      <p class="mt-4 text-body text-ink-on-deep-2">
+        Não precisa decidir sozinho. Conte o que está acontecendo e a gente ajuda a entender o
+        caminho.
+      </p>
+      <ContactPair
+        class="mt-8"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+  </div>
+
+  <!-- FAQ resumido + Onde estamos: dividem a linha na tela larga -->
+  <div class="grid gap-6 md:grid-cols-2">
+    <div>
+      <p class="label text-ink-muted">FAQ resumido</p>
+      <h3 class="mt-4 text-h3 text-ink">Dúvidas frequentes</h3>
+      <div class="mt-4 flex flex-col">
+        <details open class="border-t border-line-soft">
+          <summary class="flex min-h-target cursor-pointer items-center py-4">
+            <h4 class="text-question text-ink">Preciso de pedido médico?</h4>
+          </summary>
+          <p class="max-w-answer pb-4 text-body text-ink-body">
+            Não é obrigatório para começar. Se você já tem um, traga: ele ajuda a entender o
+            histórico.
+          </p>
+        </details>
+        <details class="border-t border-line-soft">
+          <summary class="flex min-h-target cursor-pointer items-center py-4">
+            <h4 class="text-question text-ink">Como funciona a avaliação inicial?</h4>
+          </summary>
+          <p class="max-w-answer pb-4 text-body text-ink-body">
+            É uma sessão individual. A conversa vem primeiro, depois a parte prática, e no fim você
+            já sai sabendo o que está sendo proposto.
+          </p>
+        </details>
+      </div>
+      <a
+        href="/duvidas"
+        class="mt-4 inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
+        >Todas as dúvidas</a
+      >
+    </div>
+
+    <div>
+      <p class="label text-ink-muted">Onde estamos</p>
+      <h3 class="mt-4 text-h3 text-ink">Onde estamos</h3>
+      <div
+        data-surface="brand"
+        class="mt-4 flex aspect-3/2 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
+      >
+        <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+      </div>
+      <p class="mt-4 text-body text-ink-body">{SITE.address}</p>
+      <p class="mt-4 text-body text-ink-body">{SITE.hours}</p>
+      <ContactPair
+        class="mt-4"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+  </div>
+</div>

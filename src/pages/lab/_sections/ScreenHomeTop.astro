@@ -1,0 +1,199 @@
+---
+/**
+ * Tela "Home", primeira metade — Hero, Manifesto, Serviços, Equipe (mockup §03 no celular e §05 na
+ * tela larga).
+ *
+ * A ordem das seções da home é a de `PAGES.md` e não é negociável por gosto:
+ * Hero → Manifesto → Serviços → Equipe → Para a família → Estrutura e acesso → Como funciona →
+ * CTA escuro → FAQ resumido → Onde estamos. Este arquivo cobre até Equipe;
+ * `ScreenHomeBottom.astro` continua daí.
+ *
+ * O que muda na tela larga, e por que quase tudo é `md:` e não `sm:`: o handoff desenhou 360px e
+ * 1280px, e 600px não tem tela desenhada. Em `sm:` só listas passam de uma para duas colunas;
+ * mudança estrutural de verdade (hero em duas colunas, serviços em três) acontece em `md:`.
+ *
+ * Cabeçalho: o `<h1>` da home vira `<h3>` aqui, com o tamanho `display` que o design pede — a
+ * página já tem um `<h1>` próprio. Ver a regra 1 no cabeçalho de `index.astro`.
+ */
+import { Image } from 'astro:assets';
+
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+import logoMark from '@/assets/brand/logo-mark.png';
+---
+
+<div class="container-page mt-8 flex flex-col gap-12">
+  <!-- Hero -->
+  <div>
+    <p class="label text-ink-muted">Hero</p>
+    <div class="mt-4 grid gap-8 md:grid-cols-2 md:items-center">
+      <div
+        data-surface="brand"
+        class="flex aspect-3/4 items-center justify-center overflow-hidden rounded-card bg-surface-brand md:aspect-4/5"
+      >
+        <Image src={logoMark} alt="" aria-hidden="true" width={96} height={96} />
+      </div>
+      <div>
+        <p class="label text-ink-muted">Vila Clementino · SP</p>
+        <h3 class="mt-4 text-display text-ink">Um plano para o seu corpo, não para a média</h3>
+        <p class="mt-4 text-lead text-ink-body">
+          Cada pessoa chega com uma história diferente. O primeiro passo é entender a sua, com
+          calma, antes de propor qualquer coisa.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a
+            href={SITE.whatsapp.href}
+            data-surface="accent"
+            class="inline-flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent hover:bg-accent-hover"
+            >Falar no WhatsApp</a
+          >
+          <a
+            href="/servicos"
+            class="inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
+            >Conhecer os serviços</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manifesto -->
+  <div>
+    <p class="label text-ink-muted">Manifesto — a faixa verde</p>
+    <div data-surface="brand" class="mt-4 rounded-card bg-surface-brand p-6 text-ink-on-brand">
+      <p class="label">Sobre a clínica</p>
+      <p class="mt-4 text-h3">
+        Atendimento que começa por ouvir, e continua por acompanhar de perto
+      </p>
+      <p class="mt-4 text-body">
+        Nesta faixa existe um único nível de texto. Não é limitação da paleta: é a superfície que
+        não permite um segundo tom com contraste suficiente, então a hierarquia vem de tamanho e
+        peso. Um parágrafo mais longo serve para conferir se a leitura continua confortável quando o
+        texto cresce, que é o caso comum quando o conteúdo vem do CMS.
+      </p>
+    </div>
+  </div>
+
+  <!-- Serviços -->
+  <div>
+    <p class="label text-ink-muted">Serviços — três colunas na tela larga</p>
+    <h3 class="mt-4 text-h2 text-ink">O que atendemos</h3>
+    <ul class="mt-8 grid gap-6 md:grid-cols-3">
+      <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
+        <div
+          data-surface="brand"
+          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
+        </div>
+        <p class="mt-4 text-small text-ink-muted">Estou com dor em algum lugar</p>
+        <h4 class="mt-4 text-h3 text-ink">Fisioterapia</h4>
+        <p class="mt-4 text-body text-ink-body">
+          Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento.
+        </p>
+        <a
+          href="/servicos"
+          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
+          >Ver detalhes</a
+        >
+      </li>
+      <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
+        <div
+          data-surface="brand"
+          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
+        </div>
+        <p class="mt-4 text-small text-ink-muted">Quero me mexer com orientação</p>
+        <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
+        <p class="mt-4 text-body text-ink-body">
+          Exercício conduzido em turma pequena, com o plano ajustado ao que a avaliação mostrou.
+        </p>
+        <a
+          href="/servicos"
+          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
+          >Ver detalhes</a
+        >
+      </li>
+      <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
+        <div
+          data-surface="brand"
+          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
+        </div>
+        <p class="mt-4 text-small text-ink-muted">Vou operar, ou acabei de operar</p>
+        <h4 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h4>
+        <p class="mt-4 text-body text-ink-body">
+          Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia.
+        </p>
+        <a
+          href="/servicos"
+          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
+          >Ver detalhes</a
+        >
+      </li>
+    </ul>
+    <a
+      href="/servicos"
+      class="mt-8 inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
+      >Todos os serviços</a
+    >
+  </div>
+
+  <!-- Equipe -->
+  <div>
+    <p class="label text-ink-muted">Equipe — destaque na home</p>
+    <h3 class="mt-4 text-h2 text-ink">Quem atende você</h3>
+    <ul class="mt-8 grid gap-6 md:grid-cols-2">
+      <li class="@container flex flex-col gap-4 rounded-card border border-line-soft p-6">
+        <div class="flex flex-col gap-4 @thumb:flex-row">
+          <div
+            data-surface="brand"
+            class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+          >
+            <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
+          </div>
+          <div>
+            <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
+            <p class="mt-4 text-small font-semibold text-ink-muted">
+              Fisioterapeuta · CREFITO-3/000000-F
+            </p>
+            <p class="mt-4 text-body text-ink-body">
+              Atende queixa de dor e limitação de movimento, com foco em retomar atividade do dia a
+              dia.
+            </p>
+          </div>
+        </div>
+      </li>
+      <li class="@container flex flex-col gap-4 rounded-card border border-line-soft p-6">
+        <div class="flex flex-col gap-4 @thumb:flex-row">
+          <div
+            data-surface="brand"
+            class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+          >
+            <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
+          </div>
+          <div>
+            <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
+            <p class="mt-4 text-small font-semibold text-ink-muted">
+              Fisioterapeuta · CREFITO-3/000000-F
+            </p>
+            <p class="mt-4 text-body text-ink-body">
+              Conduz as turmas de exercício e acompanha a progressão de carga ao longo do plano.
+            </p>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="mt-8">
+      <p class="text-small text-ink-muted">Contato com o mesmo peso visual nos dois canais</p>
+      <ContactPair
+        class="mt-4"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+  </div>
+</div>

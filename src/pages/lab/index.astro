@@ -52,11 +52,21 @@
  * E uma regra de `id`: TODO `id` desta página começa com `lab-`. A página renderiza o mesmo campo
  * de formulário várias vezes, e `conteudo`, `mobile-nav-toggle` e `mobile-nav-panel` já são da
  * casca (`BaseLayout`/`MobileNav`).
+ *
+ * REGRA DE LINK, que decorre da anterior: dentro de uma seção de TELA, todo link aponta para a
+ * ROTA REAL que ele teria em produção (`/servicos`, `/duvidas`, o WhatsApp de `SITE`) — nunca para
+ * uma âncora de outra seção do laboratório. Duas razões: a tela reproduzida fica igual à de
+ * verdade, que é o ponto de um kitchen sink; e âncora entre seções seria um link interno cujo alvo
+ * depende de qual seção já foi implementada, o que quebra a cada commit até a última.
+ * Essas rotas ainda não existem (chegam na Fase 4) — é a mesma situação, já documentada, do
+ * `SITE_NAV` em `src/lib/site.ts`. Navegação DENTRO do laboratório existe num lugar só: o sumário.
  */
 import Container from '@/components/ui/Container.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { SITE } from '@/lib/site';
 
+import ScreenHomeBottom from './_sections/ScreenHomeBottom.astro';
+import ScreenHomeTop from './_sections/ScreenHomeTop.astro';
 import StatesAction from './_sections/StatesAction.astro';
 import StatesForm from './_sections/StatesForm.astro';
 import StatesMedia from './_sections/StatesMedia.astro';
@@ -74,6 +84,12 @@ const SECTIONS = [
   { id: 'lab-acao', title: 'Ação e link', Section: StatesAction },
   { id: 'lab-campos', title: 'Campos de formulário', Section: StatesForm },
   { id: 'lab-imagem', title: 'Imagem e credencial', Section: StatesMedia },
+  {
+    id: 'lab-home-topo',
+    title: 'Home — hero, manifesto, serviços e equipe',
+    Section: ScreenHomeTop,
+  },
+  { id: 'lab-home-base', title: 'Home — família, acesso, CTA e mapa', Section: ScreenHomeBottom },
 ];
 ---
 
