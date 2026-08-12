@@ -15,6 +15,7 @@
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
+import RuledList from '@/components/ui/RuledList.astro';
 ---
 
 <div class="container-page mt-8 grid gap-8 md:grid-cols-2">
@@ -35,20 +36,17 @@ import { SITE } from '@/lib/site';
   <div>
     <p class="label text-ink-muted">Como é chegar aqui</p>
     <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
-    <ul class="mt-4 flex flex-col gap-4">
-      <li class="border-t border-line-soft pt-4 text-body text-ink-body">Entrada sem degrau</li>
-      <li class="border-t border-line-soft pt-4 text-body text-ink-body">Elevador no prédio</li>
-      <li class="border-t border-line-soft pt-4 text-body text-ink-body">Banheiro adaptado</li>
-      <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-        Estacionamento nas proximidades
-      </li>
-      <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-        Estação de metrô a curta caminhada
-      </li>
-      <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-        Acompanhante pode entrar junto
-      </li>
-    </ul>
+    <RuledList
+      class="mt-4"
+      items={[
+        'Entrada sem degrau',
+        'Elevador no prédio',
+        'Banheiro adaptado',
+        'Estacionamento nas proximidades',
+        'Estação de metrô a curta caminhada',
+        'Acompanhante pode entrar junto',
+      ]}
+    />
     <p class="mt-8 text-body font-semibold text-ink">
       Precisa de alguma adaptação? Avise antes, a gente organiza.
     </p>

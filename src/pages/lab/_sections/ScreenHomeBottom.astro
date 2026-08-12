@@ -23,6 +23,7 @@ import Action from '@/components/ui/Action.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
+import RuledList from '@/components/ui/RuledList.astro';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-12">
@@ -54,17 +55,16 @@ import { SITE } from '@/lib/site';
     <div class="rounded-card bg-surface-alt p-6">
       <p class="label text-ink-muted">Estrutura e acesso</p>
       <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
-      <ul class="mt-4 flex flex-col gap-4">
-        <li class="border-t border-line-soft pt-4 text-body text-ink-body">Entrada sem degrau</li>
-        <li class="border-t border-line-soft pt-4 text-body text-ink-body">Elevador no prédio</li>
-        <li class="border-t border-line-soft pt-4 text-body text-ink-body">Banheiro adaptado</li>
-        <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-          Estacionamento por perto
-        </li>
-        <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-          Acompanhante pode entrar junto
-        </li>
-      </ul>
+      <RuledList
+        class="mt-4"
+        items={[
+          'Entrada sem degrau',
+          'Elevador no prédio',
+          'Banheiro adaptado',
+          'Estacionamento por perto',
+          'Acompanhante pode entrar junto',
+        ]}
+      />
       <p class="mt-8 text-body font-semibold text-ink">
         Precisa de alguma adaptação? Avise antes, a gente organiza.
       </p>

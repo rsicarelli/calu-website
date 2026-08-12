@@ -26,6 +26,7 @@ import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
+import RuledList from '@/components/ui/RuledList.astro';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-12">
@@ -52,20 +53,15 @@ import { SITE } from '@/lib/site';
 
       <div class="mt-8">
         <h4 class="text-h2 text-ink">Para quem costuma ser indicado</h4>
-        <ul class="mt-4 flex flex-col gap-4">
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Dor que aparece em um movimento específico do dia a dia
-          </li>
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Limitação de movimento depois de uma lesão
-          </li>
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Retomada de atividade física com orientação
-          </li>
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Preparação ou retomada em torno de um procedimento cirúrgico
-          </li>
-        </ul>
+        <RuledList
+          class="mt-4"
+          items={[
+            'Dor que aparece em um movimento específico do dia a dia',
+            'Limitação de movimento depois de uma lesão',
+            'Retomada de atividade física com orientação',
+            'Preparação ou retomada em torno de um procedimento cirúrgico',
+          ]}
+        />
         <p class="mt-4 text-small font-semibold text-ink-muted">
           A indicação é definida na avaliação.
         </p>
