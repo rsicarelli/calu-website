@@ -1,0 +1,93 @@
+---
+/**
+ * BrandPlaceholder — o espaço de imagem quando NÃO há imagem cadastrada: o símbolo da marca
+ * centralizado sobre `surface-brand`, na proporção que a foto teria
+ * (COMPONENTS.md § AspectImage, "sem `src` → BrandPlaceholder na mesma proporção").
+ *
+ * Props
+ *   ratio    uma das quatro proporções canônicas do sistema. Obrigatória: a proporção é a razão
+ *            de o componente existir, e um padrão silencioso esconderia a escolha errada.
+ *   radius   `card` (padrão) para bloco autônomo — hero, mapa, topo do template de serviço;
+ *            `control` para miniatura DENTRO de um card — retrato de bio, imagem de ServiceCard.
+ *   …        qualquer outro atributo válido para `div` é repassado à raiz. É por aqui que entram
+ *            as restrições de largura do contexto (`w-40 shrink-0` num retrato, `w-full @row:w-64`
+ *            numa linha) e a proporção responsiva do hero (`md:aspect-4/5`) — largura e
+ *            breakpoint são decisão de quem posiciona, não do componente.
+ *
+ * SEMPRE DECORATIVO, e não é configurável: `alt=""` + `aria-hidden="true"`. Isto aqui representa
+ * a AUSÊNCIA de foto, não uma informação — descrever "o símbolo da Calu" para quem usa leitor de
+ * tela seria anunciar um detalhe de implementação no lugar do conteúdo que falta.
+ *
+ * `data-surface="brand"` é do COMPONENTE, e um `data-surface` do chamador é descartado — repare
+ * que ele sai do destructuring, não do spread. Não é estilo: é o contrato que reescopa o anel de
+ * foco dentro de superfície escura (`global.css` §6), e quem pinta o fundo é quem sabe qual
+ * superfície é. Um chamador que passasse `data-surface="deep"` por engano deixaria todo controle
+ * focado ali dentro com anel medindo menos de 2:1 no tema claro, em silêncio.
+ * Descartar no destructuring, e não confiar na ordem do template: verificado empiricamente que em
+ * Astro o `{...rest}` PREVALECE sobre o atributo literal mesmo escrito depois dele — a primeira
+ * versão deste componente escrevia `<div {...rest} data-surface="brand">` e o teste flagrou
+ * `deep` chegando ao DOM. `tests/pages/lab.test.ts` cobra o par (fundo escuro ⇒ `data-surface`)
+ * na página inteira; aqui ele é garantido por construção.
+ *
+ * TAMANHO DO SÍMBOLO: 64px, um só. As dezoito ocorrências que originaram este componente
+ * carregavam SEIS tamanhos diferentes (48, 56, 64, 72, 80, 96) sem nenhuma regra que os
+ * explicasse — dois blocos com a marcação byte a byte idêntica traziam 48 e 56. 64 é o valor que
+ * `EmptyState` já usa, então o sistema fica com um número só. `width`/`height` continuam
+ * explícitos, então o CLS segue zero.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1 estoura em
+ * `Props` genérica acima de ~3KB de arquivo). A raiz é sempre um `div`.
+ *
+ *   <BrandPlaceholder ratio="3/4" class="md:aspect-4/5" />        hero
+ *   <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />   retrato
+ *
+ * Quando NÃO usar: quando existe imagem de verdade. Aí o caminho é o `AspectImage` do handoff,
+ * que ainda não existe porque o projeto ainda não tem nenhuma foto aprovada — ele nasce na Fase 4,
+ * com este componente como seu fallback.
+ */
+import { Image } from 'astro:assets';
+import type { HTMLAttributes } from 'astro/types';
+
+import logoMark from '@/assets/brand/logo-mark.png';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Proporção do espaço reservado. Obrigatória. */
+  ratio: '3/4' | '4/5' | '16/9' | '3/2';
+  /** `card` (padrão) para bloco autônomo; `control` para miniatura dentro de um card. */
+  radius?: 'card' | 'control';
+}
+
+const { ratio, radius = 'card', class: className, ...rest } = Astro.props;
+
+/* `data-surface` do chamador é DESCARTADO — ver o cabeçalho. Removido aqui, e não por
+   destructuring, porque a variável descartada seria uma variável não usada e o ESLint do projeto
+   não tem padrão de ignorar por prefixo. `rest` já é um objeto novo, então o `delete` não toca em
+   `Astro.props`. */
+delete rest['data-surface'];
+
+/* Sufixo `Class` nos dois nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar
+   estes literais (ver "REGIÃO EXTRA" no cabeçalho do gate). Sem o sufixo eles gerariam CSS e
+   escapariam das duas travas — um typo viraria no-op silencioso. */
+const ratioClass = {
+  '3/4': 'aspect-3/4',
+  '4/5': 'aspect-4/5',
+  '16/9': 'aspect-16/9',
+  '3/2': 'aspect-3/2',
+}[ratio];
+
+const radiusClass = radius === 'control' ? 'rounded-control' : 'rounded-card';
+---
+
+<div
+  data-surface="brand"
+  {...rest}
+  class:list={[
+    'flex items-center justify-center overflow-hidden bg-surface-brand',
+    ratioClass,
+    radiusClass,
+    className,
+  ]}
+>
+  <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+</div>

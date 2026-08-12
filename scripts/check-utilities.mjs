@@ -54,6 +54,33 @@
         Tailwind (brackets, `/` de modificador, `!`, `[&_p]:`) e a posição para
         reportar `arquivo:linha:coluna`, sem o ruído do arquivo inteiro.
 
+   ---------------------------------------------------------------------------
+   REGIÃO EXTRA — a const de classe (`*Class` / `*Classes`).
+
+   Um componente com variante não escreve a classe no atributo: ele monta um
+   mapa ou um ternário e passa a variável adiante. Isso passava INTEIRO pelas
+   duas travas — `class:list={[VARIANT[v]]}` não tem literal nenhum dentro da
+   região de classe, e os literais do mapa ficam fora dela. Como o Tailwind varre
+   o arquivo CRU para gerar CSS, a classe até saía no bundle; só a VERIFICAÇÃO
+   sumia. Ou seja: exatamente o no-op silencioso que a trava B existe para pegar,
+   de volta pela porta dos fundos. Confirmado empiricamente antes da correção.
+
+   A regra adotada é a convenção que o projeto já seguia sem precisar dela:
+   classe fora de atributo mora numa ligação cujo nome termina em `Class` ou
+   `Classes` (`widthClass` em Container.astro, `sizeClass` e `linkClass` em
+   ContactPair.astro). O valor inteiro dessa declaração vira região de classe —
+   string, array, objeto de variantes, ternário, template literal.
+
+   Por que pelo NOME e não por "todo literal de string do arquivo": prosa em
+   pt-BR e dado de conteúdo produzem tokens que o extractor do oxide aceita e
+   `candidatesToCss` reprova. `CREFITO-3/000000-F` é o exemplo pronto — vira
+   candidato, não gera CSS, e viraria falso positivo. Restringir ao nome mantém
+   zero ruído e torna a regra greppável.
+
+   O preço: classe guardada numa const com outro nome continua invisível. É uma
+   convenção, não uma prova — mas agora é uma convenção COM gate, e o nome certo
+   é o caminho mais curto.
+
    Limitação conhecida e aceita: `class={estilos.card}` não tem literal de
    string, então não há o que verificar. Classe montada fora de literal escapa
    das duas travas — é o preço de não inventar análise de fluxo.
@@ -67,6 +94,7 @@ import { __unstable__loadDesignSystem } from 'tailwindcss';
 import { Scanner } from '@tailwindcss/oxide';
 
 import { hasArbitraryBreakpointVariant, isArbitraryUtility } from './lib/arbitrary-checks.mjs';
+import { collectClassSpans, maskContent } from './lib/class-spans.mjs';
 
 /* ----------------------------------------------------------------------------
    Allowlist — VAZIA, e é para continuar assim.
@@ -86,148 +114,13 @@ const SCAN_EXTENSIONS = new Set(['.astro', '.ts', '.js', '.md', '.mdx']);
 /* `design_handoff_calu` é material de referência do handoff, não código. */
 const IGNORED_DIRS = new Set(['node_modules', 'dist', '.astro', '.git', 'design_handoff_calu']);
 
-/* Início de um atributo de classe: class= / className= / class:list= */
-const CLASS_ATTR_START = /\b(?:class|className)\s*(?::list)?\s*=\s*/g;
-/* Argumentos de @apply dentro de <style> em componentes .astro */
-const APPLY = /@apply\s+([^;]+);/g;
-
 /* ============================================================================
    1. Delimitação das regiões que contêm classe
+
+   Vive em `./lib/class-spans.mjs` — importável por teste, ao contrário deste
+   arquivo, que roda `main()` no import. As três famílias de região estão
+   detalhadas no cabeçalho acima.
    ========================================================================= */
-
-/** Consome uma string entre aspas simples ou duplas e registra o miolo. */
-function scanQuoted(src, index, spans) {
-  const quote = src[index];
-  let i = index + 1;
-  while (i < src.length) {
-    const char = src[i];
-    if (char === '\\') {
-      i += 2;
-      continue;
-    }
-    if (char === quote || char === '\n') break;
-    i += 1;
-  }
-  spans.push([index + 1, i]);
-  return i + 1;
-}
-
-/**
- * Consome um template literal. Cada trecho de texto vira região de classe; as
- * interpolações `${...}` são varridas como código — os literais de string
- * dentro delas contam (`${ativo ? 'bg-surface' : 'bg-bg'}` são classes), o
- * resto não.
- */
-function scanTemplate(src, index, spans) {
-  let i = index + 1;
-  let segmentStart = i;
-  while (i < src.length) {
-    const char = src[i];
-    if (char === '\\') {
-      i += 2;
-      continue;
-    }
-    if (char === '`') {
-      spans.push([segmentStart, i]);
-      return i + 1;
-    }
-    if (char === '$' && src[i + 1] === '{') {
-      spans.push([segmentStart, i]);
-      i = scanBraced(src, i + 1, spans);
-      segmentStart = i;
-      continue;
-    }
-    i += 1;
-  }
-  spans.push([segmentStart, i]);
-  return i;
-}
-
-/**
- * Consome uma expressão delimitada por chaves a partir do `{` em `openIndex` e
- * devolve o índice logo depois da chave que fecha. Registra em `spans` só os
- * literais de string — identificadores como `ativo` ou `props.classe` ficam de
- * fora e por isso nunca viram falso positivo.
- */
-function scanBraced(src, openIndex, spans) {
-  let i = openIndex + 1;
-  let depth = 1;
-  while (i < src.length && depth > 0) {
-    const char = src[i];
-    if (char === '{') {
-      depth += 1;
-      i += 1;
-    } else if (char === '}') {
-      depth -= 1;
-      i += 1;
-    } else if (char === '"' || char === "'") {
-      i = scanQuoted(src, i, spans);
-    } else if (char === '`') {
-      i = scanTemplate(src, i, spans);
-    } else if (char === '/' && src[i + 1] === '/') {
-      const end = src.indexOf('\n', i);
-      i = end === -1 ? src.length : end;
-    } else if (char === '/' && src[i + 1] === '*') {
-      const end = src.indexOf('*/', i + 2);
-      i = end === -1 ? src.length : end + 2;
-    } else {
-      i += 1;
-    }
-  }
-  return i;
-}
-
-/** Todas as regiões do arquivo em que um token pode legitimamente ser classe. */
-function collectClassSpans(content) {
-  const spans = [];
-
-  CLASS_ATTR_START.lastIndex = 0;
-  let match;
-  while ((match = CLASS_ATTR_START.exec(content)) !== null) {
-    const start = match.index + match[0].length;
-    const char = content[start];
-    let next;
-    if (char === '"' || char === "'") {
-      next = scanQuoted(content, start, spans);
-    } else if (char === '{') {
-      next = scanBraced(content, start, spans);
-    } else if (char !== undefined && !/[\s>/]/.test(char)) {
-      /* Atributo sem aspas: class=destaque */
-      let end = start;
-      while (end < content.length && !/[\s>/]/.test(content[end])) end += 1;
-      spans.push([start, end]);
-      next = end;
-    } else {
-      next = start + 1;
-    }
-    /* Evita reprocessar o que já foi consumido (e laço infinito em `class=`). */
-    CLASS_ATTR_START.lastIndex = Math.max(next, match.index + match[0].length);
-  }
-
-  APPLY.lastIndex = 0;
-  while ((match = APPLY.exec(content)) !== null) {
-    const start = match.index + match[0].indexOf(match[1]);
-    spans.push([start, start + match[1].length]);
-  }
-
-  return spans;
-}
-
-/**
- * Devolve uma cópia do arquivo em que só as regiões de classe sobrevivem; todo
- * o resto vira espaço. Comprimento preservado ⇒ índice na máscara é índice no
- * arquivo original, e o `arquivo:linha:coluna` sai correto de graça.
- */
-function maskContent(content, spans) {
-  if (spans.length === 0) return '';
-  const masked = new Array(content.length).fill(' ');
-  for (const [start, end] of spans) {
-    for (let i = Math.max(0, start); i < Math.min(end, content.length); i += 1) {
-      masked[i] = content[i];
-    }
-  }
-  return masked.join('');
-}
 
 /* ============================================================================
    2. Posição → linha:coluna

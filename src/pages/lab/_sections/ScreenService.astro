@@ -21,11 +21,14 @@
  * depois do conteúdo. `top-header` reserva a altura do cabeçalho fixo, senão o conteúdo com foco
  * de teclado fica escondido atrás dele.
  */
-import { Image } from 'astro:assets';
 
+import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
+import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
-import logoMark from '@/assets/brand/logo-mark.png';
+import RuledList from '@/components/ui/RuledList.astro';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-12">
@@ -39,12 +42,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
         exercitar.
       </p>
 
-      <div
-        data-surface="brand"
-        class="mt-8 flex aspect-16/9 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-      >
-        <Image src={logoMark} alt="" aria-hidden="true" width={80} height={80} />
-      </div>
+      <BrandPlaceholder ratio="16/9" class="mt-8" />
 
       <div class="mt-8" data-prose>
         <h4 class="text-h2 text-ink">O que é</h4>
@@ -57,20 +55,15 @@ import logoMark from '@/assets/brand/logo-mark.png';
 
       <div class="mt-8">
         <h4 class="text-h2 text-ink">Para quem costuma ser indicado</h4>
-        <ul class="mt-4 flex flex-col gap-4">
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Dor que aparece em um movimento específico do dia a dia
-          </li>
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Limitação de movimento depois de uma lesão
-          </li>
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Retomada de atividade física com orientação
-          </li>
-          <li class="border-t border-line-soft pt-4 text-body text-ink-body">
-            Preparação ou retomada em torno de um procedimento cirúrgico
-          </li>
-        </ul>
+        <RuledList
+          class="mt-4"
+          items={[
+            'Dor que aparece em um movimento específico do dia a dia',
+            'Limitação de movimento depois de uma lesão',
+            'Retomada de atividade física com orientação',
+            'Preparação ou retomada em torno de um procedimento cirúrgico',
+          ]}
+        />
         <p class="mt-4 text-small font-semibold text-ink-muted">
           A indicação é definida na avaliação.
         </p>
@@ -105,20 +98,12 @@ import logoMark from '@/assets/brand/logo-mark.png';
 
       <div class="mt-8">
         <h4 class="text-h2 text-ink">Quem conduz</h4>
-        <div class="@container mt-4 flex flex-col gap-4 @thumb:flex-row">
-          <div
-            data-surface="brand"
-            class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-          >
-            <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
-          </div>
-          <div>
-            <h5 class="text-h3 text-ink">[Nome da profissional]</h5>
-            <p class="mt-4 text-small font-semibold text-ink-muted">
-              Fisioterapeuta · CREFITO-3/000000-F
-            </p>
-          </div>
-        </div>
+        <ProfessionalBio
+          class="mt-4"
+          name="[Nome da profissional]"
+          nameAs="h5"
+          credential="Fisioterapeuta · CREFITO-3/000000-F"
+        />
       </div>
     </div>
 
@@ -160,9 +145,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
         <div class="mt-8 border-t border-line-soft pt-4">
           <p class="label text-ink-muted">Quem conduz</p>
           <p class="mt-4 text-body text-ink">[Nome da profissional]</p>
-          <p class="mt-4 text-small font-semibold text-ink-muted">
-            Fisioterapeuta · CREFITO-3/000000-F
-          </p>
+          <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
         </div>
 
         <ContactPair
@@ -235,24 +218,20 @@ import logoMark from '@/assets/brand/logo-mark.png';
   <div>
     <p class="label text-ink-muted">Relacionados</p>
     <ul class="mt-4 grid gap-6 md:grid-cols-2">
-      <li class="relative rounded-card border border-line-soft bg-surface p-6">
-        <p class="text-small text-ink-muted">Quero me mexer com orientação</p>
-        <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
-      <li class="relative rounded-card border border-line-soft bg-surface p-6">
-        <p class="text-small text-ink-muted">Vou operar, ou acabei de operar</p>
-        <h4 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h4>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
+      <ServiceCard
+        eyebrow="Quero me mexer com orientação"
+        title="Pilates clínico"
+        titleAs="h4"
+        href="/servicos"
+        media={false}
+      />
+      <ServiceCard
+        eyebrow="Vou operar, ou acabei de operar"
+        title="Acompanhamento no pós-operatório"
+        titleAs="h4"
+        href="/servicos"
+        media={false}
+      />
     </ul>
   </div>
 </div>

@@ -1,0 +1,55 @@
+---
+/**
+ * RuledList — lista de itens curtos separados por régua, um por linha
+ * (COMPONENTS.md § AccessList; o mesmo desenho serve à lista de indicações do template de
+ * Serviço).
+ *
+ * Props
+ *   items  os textos, na ordem. Lista VAZIA não renderiza `<ul>` nenhum — nunca uma moldura
+ *          sem conteúdo dentro (mesma disciplina do `message` opcional em `EmptyState`).
+ *   …      qualquer outro atributo válido para `<ul>` é repassado à raiz.
+ *
+ * A régua é `border-t` no ITEM, não `divide-y` no `<ul>`: com a borda no item, o primeiro também
+ * ganha a linha de cima, que é o que separa a lista do cabeçalho acima dela. É a diferença entre
+ * uma lista que começa e uma lista que flutua.
+ *
+ * AGUENTA DE 2 A 8 ITENS sem mudar de forma, que é o intervalo declarado no modelo de conteúdo.
+ * Por isso `flex flex-col` e não uma grade de três colunas: grade fixa quebra com qualquer número
+ * que não seja múltiplo dela, e o CMS vai produzir 2 e 8 no mesmo site.
+ *
+ * NÃO SE CHAMA `AccessList` de propósito. O mesmo markup serve à lista "Como é chegar aqui" e à
+ * lista de indicações do serviço, e as duas fecham com frases diferentes, em classes diferentes.
+ * A frase de fechamento fica com quem chama: é copy, e copy não entra em componente antes da
+ * Fase 4.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'ul'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro`. A raiz é sempre um `<ul>`.
+ *
+ *   <RuledList class="mt-4" items={['Entrada sem degrau', 'Elevador no prédio']} />
+ *
+ * Quando NÃO usar: para lista com texto longo ou com estrutura interna (título + descrição). Esta
+ * lista é de linhas curtas; item que precisa de dois níveis é outro bloco.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'ul'> {
+  /** Textos dos itens. Vazio ⇒ nada é renderizado. */
+  items: string[];
+}
+
+const { items, class: className, ...rest } = Astro.props;
+
+/* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar este literal
+   (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const itemClass = 'border-t border-line-soft pt-4 text-body text-ink-body';
+---
+
+{
+  items.length > 0 && (
+    <ul class:list={['flex flex-col gap-4', className]} {...rest}>
+      {items.map((item) => (
+        <li class={itemClass}>{item}</li>
+      ))}
+    </ul>
+  )
+}

@@ -1,0 +1,75 @@
+---
+/**
+ * CtaBlock — o convite a falar com a clínica: título, apoio e os dois canais de contato
+ * (COMPONENTS.md § CtaBlock).
+ *
+ * Props
+ *   heading      a pergunta ou convite ("Sua dúvida não estava aqui?").
+ *   headingAs    tag do título — padrão `h2`. A `/lab` passa `h4` porque lá a seção já gastou
+ *                níveis.
+ *   message      o texto de apoio.
+ *   whatsappHref, phoneHref, phoneLabel  repassados direto para `ContactPair`.
+ *   …            qualquer outro atributo válido para `div` é repassado à raiz.
+ *
+ * UM ÚNICO ESTADO VISUAL, sem prop de skin — mesma disciplina de `EmptyState`. As três ocorrências
+ * que originaram este bloco são idênticas e vivem sobre `surface-alt`. O CTA escuro da home e a
+ * faixa verde do manifesto aparecem UMA vez cada: virar skin agora seria antecipar uma variante a
+ * partir de uma ocorrência só. Quando um segundo bloco escuro aparecer, ele traz a skin junto — e
+ * traz também o `data-surface` que ela exige.
+ *
+ * O PAR DE CONTATO É OBRIGATÓRIO e não é configurável: telefone sempre ao lado do WhatsApp, com o
+ * mesmo peso visual (DESIGN-SYSTEM §7). Parte do público liga em vez de escrever, e um CTA que
+ * oferecesse só um dos dois deixaria essas pessoas sem saída. Por isso o `ContactPair` entra por
+ * construção, não por slot.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica — ver o comentário equivalente em
+ * `Container.astro`. A raiz é sempre um `div`; só o título muda de tag, via `headingAs`.
+ *
+ *   <CtaBlock heading="Sua dúvida não estava aqui?" message="Escreva ou ligue."
+ *     whatsappHref={SITE.whatsapp.href} phoneHref={SITE.phone.href} phoneLabel={SITE.phone.label} />
+ *
+ * Quando NÃO usar: quando não há conteúdo nenhum na página — aí é `EmptyState`, que explica a
+ * ausência antes de convidar. E quando o bloco precisa de mais que um parágrafo de apoio: texto
+ * longo pede uma seção, não um CTA.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+import ContactPair from '@/components/ui/ContactPair.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Pergunta ou convite. */
+  heading: string;
+  /** Tag do título — padrão `'h2'`. */
+  headingAs?: HTMLTag;
+  /** Texto de apoio. */
+  message: string;
+  /** URL do WhatsApp — repassada para `ContactPair`. */
+  whatsappHref: string;
+  /** `tel:...` — repassada para `ContactPair`. */
+  phoneHref: string;
+  /** Texto formatado do telefone — repassado para `ContactPair`. */
+  phoneLabel: string;
+}
+
+const {
+  heading,
+  headingAs: Heading = 'h2',
+  message,
+  whatsappHref,
+  phoneHref,
+  phoneLabel,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<div class:list={['rounded-card bg-surface-alt p-6', className]} {...rest}>
+  <Heading class="text-h3 text-ink">{heading}</Heading>
+  <p class="mt-4 text-body text-ink-body">{message}</p>
+  <ContactPair
+    class="mt-8"
+    whatsappHref={whatsappHref}
+    phoneHref={phoneHref}
+    phoneLabel={phoneLabel}
+  />
+</div>

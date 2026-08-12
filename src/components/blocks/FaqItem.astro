@@ -1,0 +1,74 @@
+---
+/**
+ * FaqItem — uma pergunta e sua resposta, com `<details>`/`<summary>` nativo
+ * (COMPONENTS.md § FaqAccordion / FaqItem).
+ *
+ * Props
+ *   question    o texto da pergunta.
+ *   questionAs  tag do cabeçalho DENTRO do `<summary>` — padrão `h3`. A `/lab` passa `h4`/`h5`
+ *               porque lá a seção já gastou níveis; numa página real o padrão serve.
+ *   answer      o texto da resposta.
+ *   open        item já aberto ao carregar. O primeiro de cada grupo abre.
+ *   …           qualquer outro atributo válido para `<details>` é repassado à raiz.
+ *
+ * NATIVO, não botão + `aria-expanded`/`aria-controls`. Os dois padrões são mutuamente exclusivos,
+ * e o nativo funciona sem JavaScript — coerente com o inviolável "nada depende de framework JS
+ * para funcionar". O trade-off aceito é menos controle sobre a animação de abrir e fechar.
+ *
+ * O ANINHAMENTO É O MOTIVO DE ESTE COMPONENTE EXISTIR. `<details><summary><h_>` — o cabeçalho
+ * DENTRO do summary, nunca o contrário. O handoff pedia o inverso e o inverso não funciona: o
+ * modelo de conteúdo de `<details>` exige `<summary>` como PRIMEIRO FILHO, então com um cabeçalho
+ * no meio o elemento fica sem summary nenhum, o navegador sintetiza o próprio marcador, e o texto
+ * da pergunta some junto com a resposta quando o item está fechado. A Fase 2 corrigiu isso no
+ * handoff e travou com teste; aqui a correção vira estrutura — não há como escrever errado.
+ *
+ * NÃO É EXCLUSIVO: nenhum `<details>` leva atributo `name`, e o componente não oferece prop para
+ * isso. Abrir uma pergunta não fecha as outras — quem chega com duas dúvidas quer ler as duas.
+ *
+ * O painel fechado sai do fluxo pelo comportamento NATIVO do elemento. Nunca `height: 0` com
+ * `overflow: hidden`, que deixaria a resposta alcançável por Tab e por leitor de tela mesmo
+ * invisível — é por isso que a resposta é conteúdo do componente e não um slot livre.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'details'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro`. A raiz é sempre um `<details>`.
+ *
+ *   <FaqItem open question="Preciso de pedido médico?" answer="Não é obrigatório…" />
+ *   <FaqItem questionAs="h5" question="…" answer="…" />
+ *
+ * Quando NÃO usar: para conteúdo que precisa estar sempre visível. Resposta escondida atrás de um
+ * clique é decisão editorial, não de layout.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+interface Props extends HTMLAttributes<'details'> {
+  /** Texto da pergunta. */
+  question: string;
+  /** Tag do cabeçalho dentro do `<summary>` — padrão `'h3'`. */
+  questionAs?: HTMLTag;
+  /** Texto da resposta. */
+  answer: string;
+  /** Item aberto ao carregar — o primeiro de cada grupo. */
+  open?: boolean;
+}
+
+const {
+  question,
+  questionAs: Heading = 'h3',
+  answer,
+  open = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes literais
+   (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const summaryClass = 'flex min-h-target cursor-pointer items-center py-4';
+const answerClass = 'max-w-answer pb-4 text-body text-ink-body';
+---
+
+<details open={open} class:list={['border-t border-line-soft', className]} {...rest}>
+  <summary class={summaryClass}>
+    <Heading class="text-question text-ink">{question}</Heading>
+  </summary>
+  <p class={answerClass}>{answer}</p>
+</details>

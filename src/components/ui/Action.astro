@@ -1,0 +1,116 @@
+---
+/**
+ * Action — a ação da tela, como link ou como botão (COMPONENTS.md § Button / ButtonLink).
+ *
+ * Props
+ *   variant   `secondary` (padrão) = borda + texto de marca; `primary` = fundo de ação.
+ *   size      `md` (padrão, 52px — mínimo de qualquer controle) ou `lg` (56px — ação principal).
+ *   as        `button` (padrão) ou `a`. Com `a`, `href` é obrigatório na prática.
+ *   href      destino, só faz sentido com `as="a"` (ver "Tipagem" abaixo).
+ *   loading   estado "enviando": `aria-busy` + `aria-disabled`, NUNCA `disabled` (ver abaixo).
+ *   …         qualquer outro atributo válido é repassado — inclusive `type`, `disabled`,
+ *             `data-*` e o `class` de posicionamento.
+ *
+ * O TEXTO É OBRIGATÓRIO e entra por slot. Não existe variante só-ícone: nada no site depende de
+ * ícone sem palavra nem de passar o cursor por cima (DESIGN-SYSTEM §6).
+ *
+ * "ENVIANDO" NÃO USA `disabled`, e esta é a regra que o componente existe para travar.
+ * `COMPONENTS.md § ContactForm` marca como "não reintroduzir": o atributo `disabled` tira o botão
+ * da ordem de foco NO MEIO DO ENVIO, e quem navega por teclado perde o lugar na página. O sinal
+ * correto é `aria-disabled` + `aria-busy`, com o submit barrado no handler. `loading` emite os
+ * dois e não emite o atributo — `tests/components/Action.test.ts` cobra as duas metades.
+ * `disabled` de verdade continua possível via repasse, para o caso legítimo (controle que ainda
+ * não faz sentido); ele não precisa de prop porque é atributo nativo, e a aparência sai da
+ * variante `disabled:` na classe base.
+ *
+ * `cursor-pointer` só quando a raiz é `<button>`: verificado que o Preflight do Tailwind 4.3.3
+ * não declara `cursor` nenhum, então `<a href>` já recebe `pointer` da folha do navegador e
+ * `<button>` não recebe. Era essa assimetria que fazia o markup cru ter a classe em alguns e não
+ * em outros.
+ *
+ * `data-surface="accent"` acompanha a variante `primary` e é do COMPONENTE — descartado se vier do
+ * chamador, pelo mesmo motivo (e com a mesma verificação empírica sobre a precedência do spread)
+ * documentado em `BrandPlaceholder.astro`: o atributo reescopa o anel de foco sobre o fundo que o
+ * próprio componente pinta.
+ *
+ * DUAS VARIANTES, NÃO QUATRO. O handoff prevê também `ghost` e a ação dourada sobre fundo escuro.
+ * Nenhuma das duas tem consumidor: as três ocorrências de `ghost` e as quatro de `accent-deep` na
+ * `/lab` vivem todas em galeria de estado ou de token, onde a utility crua É o assunto exibido.
+ * Construí-las agora seria antecipação — elas entram quando uma tela precisar delas.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'button'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1 estoura em
+ * `Props` genérica acima de ~3KB, e este arquivo passa disso só de comentário). O preço é
+ * conhecido: `href` é exclusivo de `<a>` e por isso está declarado à mão.
+ *
+ *   <Action as="a" href={SITE.whatsapp.href} variant="primary" size="lg">Falar no WhatsApp</Action>
+ *   <Action as="a" href="/servicos" class="mt-8">Conhecer os serviços</Action>
+ *   <Action type="submit" variant="primary" size="lg">Enviar mensagem</Action>
+ *   <Action loading size="lg">Enviando…</Action>
+ *
+ * Quando NÃO usar: para o link "Ver detalhes" de um card — aquele é o link estendido do
+ * `ServiceCard`, cuja área clicável depende de um ancestral `relative` que ele não enxerga.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'button'> {
+  /** `secondary` (padrão) ou `primary`. */
+  variant?: 'primary' | 'secondary';
+  /** `md` (52px, padrão) ou `lg` (56px, ação principal). */
+  size?: 'md' | 'lg';
+  /** Tag raiz — `button` (padrão) ou `a`. */
+  as?: 'a' | 'button';
+  /** Destino, com `as="a"`. Declarado à mão: `href` é exclusivo de `<a>`. */
+  href?: string;
+  /** Estado "enviando" — `aria-busy` + `aria-disabled`, nunca o atributo `disabled`. */
+  loading?: boolean;
+}
+
+const {
+  variant = 'secondary',
+  size = 'md',
+  as: Tag = 'button',
+  loading = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* Ver `BrandPlaceholder.astro`: o spread do Astro prevalece sobre o atributo literal, então o
+   descarte precisa ser explícito. */
+delete rest['data-surface'];
+
+/* Sufixo `Class` nos nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const sizeClass = size === 'lg' ? 'min-h-target-primary' : 'min-h-target';
+
+/* Uma variante de fundo por vez. `loading` pinta por cima porque o estado em andamento não é a
+   variante: é a suspensão dela. */
+const variantClass = loading
+  ? 'bg-disabled-bg text-disabled-ink'
+  : {
+      primary: 'bg-accent text-on-accent hover:bg-accent-hover',
+      secondary: 'border border-line text-brand hover:bg-brand-tint',
+    }[variant];
+
+const baseClass = 'inline-flex items-center justify-center rounded-control px-6 font-semibold';
+
+/* Só em `<button>`: `:disabled` não casa em `<a>`, então num link estas três classes gerariam
+   CSS que nunca se aplica. E `cursor-pointer` só aqui pelo motivo inverso — o link já recebe
+   `pointer` do navegador (ver o cabeçalho). */
+const buttonClass =
+  Tag === 'button'
+    ? 'disabled:cursor-not-allowed disabled:bg-disabled-bg disabled:text-disabled-ink'
+    : undefined;
+
+const cursorClass = Tag === 'button' && !loading ? 'cursor-pointer' : undefined;
+---
+
+<Tag
+  data-surface={variant === 'primary' && !loading ? 'accent' : undefined}
+  aria-disabled={loading ? 'true' : undefined}
+  aria-busy={loading ? 'true' : undefined}
+  {...rest}
+  class:list={[baseClass, sizeClass, variantClass, buttonClass, cursorClass, className]}
+>
+  <slot />
+</Tag>
