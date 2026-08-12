@@ -16,11 +16,11 @@
  * página já tem um `<h1>` próprio. Ver a regra 1 no cabeçalho de `index.astro`.
  */
 
+import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
 import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import Action from '@/components/ui/Action.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
-import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
 ---
 
@@ -100,29 +100,20 @@ import { SITE } from '@/lib/site';
     <h3 class="mt-4 text-h2 text-ink">Quem atende você</h3>
     <ul class="mt-8 grid gap-6 md:grid-cols-2">
       <li class="@container flex flex-col gap-4 rounded-card border border-line-soft p-6">
-        <div class="flex flex-col gap-4 @thumb:flex-row">
-          <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
-          <div>
-            <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
-            <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
-            <p class="mt-4 text-body text-ink-body">
-              Atende queixa de dor e limitação de movimento, com foco em retomar atividade do dia a
-              dia.
-            </p>
-          </div>
-        </div>
+        <ProfessionalBio
+          name="[Nome da profissional]"
+          nameAs="h4"
+          credential="Fisioterapeuta · CREFITO-3/000000-F"
+          description="Atende queixa de dor e limitação de movimento, com foco em retomar atividade do dia a dia."
+        />
       </li>
       <li class="@container flex flex-col gap-4 rounded-card border border-line-soft p-6">
-        <div class="flex flex-col gap-4 @thumb:flex-row">
-          <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
-          <div>
-            <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
-            <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
-            <p class="mt-4 text-body text-ink-body">
-              Conduz as turmas de exercício e acompanha a progressão de carga ao longo do plano.
-            </p>
-          </div>
-        </div>
+        <ProfessionalBio
+          name="[Nome da profissional]"
+          nameAs="h4"
+          credential="Fisioterapeuta · CREFITO-3/000000-F"
+          description="Conduz as turmas de exercício e acompanha a progressão de carga ao longo do plano."
+        />
       </li>
     </ul>
     <div class="mt-8">

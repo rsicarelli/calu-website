@@ -1,0 +1,95 @@
+---
+/**
+ * ProfessionalBio — retrato, nome, credencial, o que a profissional atende e sua formação
+ * (COMPONENTS.md § ProfessionalBio).
+ *
+ * Props
+ *   name         nome da profissional.
+ *   nameAs       tag do nome — padrão `h3`. A `/lab` passa `h4`/`h5` conforme o nível gasto.
+ *   credential   a linha de registro — vai para o primitivo `Credential`, que impõe as regras dela.
+ *   description  o que ela atende. Ausente ⇒ nenhum parágrafo vazio.
+ *   education    formação, de 1 a 6 linhas. Ausente ou vazia ⇒ nem a lista nem o rótulo aparecem.
+ *   …            qualquer outro atributo válido para `div` é repassado à raiz.
+ *
+ * O RETRATO É SEMPRE O ESPAÇO RESERVADO, nunca uma foto: o projeto não tem nenhuma foto aprovada
+ * (guardrail: nada de conteúdo real da clínica antes de aprovado), e este bloco precisa funcionar
+ * exatamente igual com e sem ela — "sem foto cadastrada" é o estado que o CMS vai produzir no
+ * primeiro dia. Quando fotos existirem, quem muda é o `BrandPlaceholder`, virando o fallback do
+ * `AspectImage`; este bloco não muda de forma.
+ *
+ * EMPILHA NO ESTREITO, LADO A LADO NO LARGO, e a decisão é do ESPAÇO DISPONÍVEL, não da janela:
+ * `@container` na raiz e `@thumb:` no interior. É isso que deixa a mesma bio servir a uma coluna
+ * na home e a duas na página de equipe sem variante nova — e é por isso que o `@container` fica na
+ * raiz do bloco, e não na linha do flex. Uma container query de tamanho resolve contra a caixa de
+ * conteúdo do contêiner, e a caixa de borda deste bloco coincide com a de conteúdo do `<li>` que o
+ * envolve: o limiar vira na mesma largura de antes.
+ *
+ * FORMAÇÃO DE 1 A 6 LINHAS é o intervalo declarado, e os dois extremos existem na `/lab`. Nada na
+ * forma pode depender da quantidade.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica — ver o comentário equivalente em
+ * `Container.astro`. A raiz é sempre um `div`; só o nome muda de tag, via `nameAs`.
+ *
+ *   <ProfessionalBio name="[Nome da profissional]" nameAs="h4"
+ *     credential="Fisioterapeuta · CREFITO-3/000000-F" description="Atende…"
+ *     education={['Graduação em Fisioterapia']} />
+ *
+ * Quando NÃO usar: para a menção curta de "quem conduz" dentro de um aside, que é só nome +
+ * credencial sem retrato — ali o `Credential` sozinho basta.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
+import Credential from '@/components/ui/Credential.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Nome da profissional. */
+  name: string;
+  /** Tag do nome — padrão `'h3'`. */
+  nameAs?: HTMLTag;
+  /** Linha de registro profissional. */
+  credential: string;
+  /** O que ela atende. Ausente ⇒ nenhum parágrafo é renderizado. */
+  description?: string;
+  /** Formação, 1 a 6 linhas. Ausente/vazia ⇒ nem lista nem rótulo. */
+  education?: string[];
+}
+
+const {
+  name,
+  nameAs: Name = 'h3',
+  credential,
+  description,
+  education = [],
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes literais
+   (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const rootClass = '@container';
+const rowClass = 'flex flex-col gap-6 @thumb:flex-row';
+---
+
+<div class:list={[rootClass, className]} {...rest}>
+  <div class={rowClass}>
+    <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
+    <div>
+      <Name class="text-h3 text-ink">{name}</Name>
+      <Credential class="mt-4">{credential}</Credential>
+      {description && <p class="mt-4 text-body text-ink-body">{description}</p>}
+      {
+        education.length > 0 && (
+          <>
+            <p class="mt-4 label text-ink-muted">Formação</p>
+            <ul class="mt-4 flex flex-col gap-4">
+              {education.map((item) => (
+                <li class="text-small text-ink-body">{item}</li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </div>
+  </div>
+</div>

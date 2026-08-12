@@ -22,6 +22,7 @@
  * de teclado fica escondido atrás dele.
  */
 
+import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
 import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
@@ -97,13 +98,12 @@ import RuledList from '@/components/ui/RuledList.astro';
 
       <div class="mt-8">
         <h4 class="text-h2 text-ink">Quem conduz</h4>
-        <div class="@container mt-4 flex flex-col gap-4 @thumb:flex-row">
-          <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
-          <div>
-            <h5 class="text-h3 text-ink">[Nome da profissional]</h5>
-            <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
-          </div>
-        </div>
+        <ProfessionalBio
+          class="mt-4"
+          name="[Nome da profissional]"
+          nameAs="h5"
+          credential="Fisioterapeuta · CREFITO-3/000000-F"
+        />
       </div>
     </div>
 
