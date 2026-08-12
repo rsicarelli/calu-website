@@ -151,3 +151,70 @@ describe('/lab — contratos estruturais', () => {
     expect(offenders, `sem data-surface: ${offenders.join(', ')}`).toEqual([]);
   });
 });
+
+/* Contratos de COMPORTAMENTO do formulário de contato. Chegam junto da seção que os torna
+   mensuráveis (`_sections/ScreenContact.astro`), não antes: teste sobre seleção vazia passa em
+   silêncio. Cada um trava uma decisão que `COMPONENTS.md` marca como "não reintroduzir". */
+describe('/lab — contratos do formulário de contato', () => {
+  it('o botão "Enviando…" usa aria-disabled/aria-busy e NUNCA o atributo `disabled`', () => {
+    const enviando = Array.from(document.querySelectorAll('button[aria-busy="true"]'));
+    expect(enviando.length, 'nenhum botão em estado "enviando" na página').toBeGreaterThan(0);
+
+    for (const botao of enviando) {
+      expect(botao.getAttribute('aria-disabled')).toBe('true');
+      // `disabled` tiraria o botão da ordem de foco no meio do envio, e a pessoa perderia o lugar.
+      expect(botao.hasAttribute('disabled'), 'botão "enviando" com atributo disabled').toBe(false);
+    }
+  });
+
+  /* O honeypot precisa ficar fora da árvore de acessibilidade DE VERDADE. `sr-only`/`clip-path`
+     escondem só visualmente: quem usa leitor de tela encontra o campo, preenche, e é barrado como
+     spam. `hidden` (que é `display: none`) é o único esconderijo que vale aqui. */
+  it('o honeypot está escondido de fato, não só visualmente', () => {
+    const honeypots = Array.from(document.querySelectorAll('input[aria-hidden="true"]'));
+    expect(honeypots.length, 'nenhum honeypot encontrado').toBeGreaterThan(0);
+
+    for (const campo of honeypots) {
+      const escondidoDeFato =
+        campo.hasAttribute('hidden') || /display:\s*none/i.test(campo.getAttribute('style') ?? '');
+
+      expect(escondidoDeFato, 'honeypot sem display:none — sr-only não serve').toBe(true);
+      expect(campo.getAttribute('tabindex')).toBe('-1');
+      expect(campo.getAttribute('autocomplete')).toBe('off');
+      expect(campo.className, 'honeypot escondido por classe visual').not.toMatch(/sr-only/);
+    }
+  });
+
+  /* No Chrome, um contêiner com `tabindex="-1"` focado por script NÃO casa `:focus-visible` — o
+     resumo de erro ficaria sem anel nenhum justamente no momento em que recebe o foco. Por isso o
+     estilo precisa vir de `focus:`, não de `focus-visible:`. */
+  it('o resumo de erro é focável por script e tem estilo em :focus, não só :focus-visible', () => {
+    const resumo = document.querySelector('[tabindex="-1"].border-error');
+    expect(resumo, 'resumo de erro não encontrado').not.toBeNull();
+
+    const classes = resumo!.getAttribute('class') ?? '';
+    expect(classes).toMatch(/(^|\s)focus:outline-3(\s|$)/);
+    expect(classes).toMatch(/(^|\s)focus:outline-focus-ring(\s|$)/);
+  });
+
+  /* "Campo obrigatório" não diz QUAL campo. Quem navega por leitor de tela ouve a mensagem fora do
+     contexto visual, então ela precisa nomear o campo (WCAG 3.3.1). */
+  it('toda mensagem de erro de campo nomeia o campo', () => {
+    const invalidos = Array.from(document.querySelectorAll('[aria-invalid="true"]'));
+    expect(invalidos.length, 'nenhum campo em erro na página').toBeGreaterThan(0);
+
+    for (const campo of invalidos) {
+      const id = campo.getAttribute('aria-describedby');
+      expect(id, `campo ${campo.id} sem aria-describedby`).not.toBeNull();
+
+      const mensagem = document.getElementById(id!);
+      expect(mensagem, `aria-describedby aponta para id inexistente: ${id}`).not.toBeNull();
+
+      const texto = mensagem!.textContent?.trim() ?? '';
+      expect(texto.length).toBeGreaterThan(0);
+      expect(texto, 'mensagem genérica — precisa nomear o campo').not.toMatch(
+        /^campo obrigat[óo]rio\.?$/i,
+      );
+    }
+  });
+});

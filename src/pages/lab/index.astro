@@ -65,6 +65,8 @@ import Container from '@/components/ui/Container.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { SITE } from '@/lib/site';
 
+import ScreenContact from './_sections/ScreenContact.astro';
+import ScreenContactPlace from './_sections/ScreenContactPlace.astro';
 import ScreenHomeBottom from './_sections/ScreenHomeBottom.astro';
 import ScreenService from './_sections/ScreenService.astro';
 import ScreenHomeTop from './_sections/ScreenHomeTop.astro';
@@ -92,6 +94,8 @@ const SECTIONS = [
   },
   { id: 'lab-home-base', title: 'Home — família, acesso, CTA e mapa', Section: ScreenHomeBottom },
   { id: 'lab-servico', title: 'Serviço — o template', Section: ScreenService },
+  { id: 'lab-contato', title: 'Contato — o formulário e seus estados', Section: ScreenContact },
+  { id: 'lab-lugar', title: 'Contato — onde estamos e acesso', Section: ScreenContactPlace },
 ];
 ---
 
