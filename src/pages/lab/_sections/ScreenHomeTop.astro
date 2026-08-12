@@ -16,6 +16,7 @@
  * página já tem um `<h1>` próprio. Ver a regra 1 no cabeçalho de `index.astro`.
  */
 
+import Action from '@/components/ui/Action.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import Credential from '@/components/ui/Credential.astro';
@@ -36,17 +37,10 @@ import { SITE } from '@/lib/site';
           calma, antes de propor qualquer coisa.
         </p>
         <div class="mt-8 flex flex-wrap gap-4">
-          <a
-            href={SITE.whatsapp.href}
-            data-surface="accent"
-            class="inline-flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent hover:bg-accent-hover"
-            >Falar no WhatsApp</a
+          <Action as="a" href={SITE.whatsapp.href} variant="primary" size="lg"
+            >Falar no WhatsApp</Action
           >
-          <a
-            href="/servicos"
-            class="inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
-            >Conhecer os serviços</a
-          >
+          <Action as="a" href="/servicos">Conhecer os serviços</Action>
         </div>
       </div>
     </div>
@@ -114,11 +108,7 @@ import { SITE } from '@/lib/site';
         >
       </li>
     </ul>
-    <a
-      href="/servicos"
-      class="mt-8 inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
-      >Todos os serviços</a
-    >
+    <Action as="a" href="/servicos" class="mt-8">Todos os serviços</Action>
   </div>
 
   <!-- Equipe -->

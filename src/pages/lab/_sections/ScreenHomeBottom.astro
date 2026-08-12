@@ -18,6 +18,7 @@
  * internos cai para menos de 2:1 no tema claro.
  */
 
+import Action from '@/components/ui/Action.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
@@ -144,11 +145,7 @@ import { SITE } from '@/lib/site';
           </p>
         </details>
       </div>
-      <a
-        href="/duvidas"
-        class="mt-4 inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
-        >Todas as dúvidas</a
-      >
+      <Action as="a" href="/duvidas" class="mt-4">Todas as dúvidas</Action>
     </div>
 
     <div>

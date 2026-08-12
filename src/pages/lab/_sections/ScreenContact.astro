@@ -30,6 +30,7 @@
  * Os quatro estados são renderizados lado a lado, então cada `id` é namespaced pelo estado —
  * `lab-contato-<estado>-<campo>`. `tests/pages/lab.test.ts` reprova repetição.
  */
+import Action from '@/components/ui/Action.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
 ---
@@ -176,12 +177,7 @@ import { SITE } from '@/lib/site';
         autocomplete="off"
       />
 
-      <button
-        type="submit"
-        data-surface="accent"
-        class="inline-flex min-h-target-primary cursor-pointer items-center justify-center rounded-control bg-accent px-6 font-semibold text-on-accent hover:bg-accent-hover"
-        >Enviar mensagem</button
-      >
+      <Action type="submit" variant="primary" size="lg">Enviar mensagem</Action>
     </form>
   </div>
 
@@ -251,13 +247,7 @@ import { SITE } from '@/lib/site';
       atributo <span class="font-semibold">disabled</span>: isso o tiraria da ordem de foco no meio
       do envio.
     </p>
-    <button
-      type="button"
-      aria-disabled="true"
-      aria-busy="true"
-      class="mt-4 inline-flex min-h-target-primary items-center justify-center rounded-control bg-disabled-bg px-6 font-semibold text-disabled-ink"
-      >Enviando…</button
-    >
+    <Action type="button" loading size="lg" class="mt-4">Enviando…</Action>
   </div>
 
   <!-- Estado enviado -->
