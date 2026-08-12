@@ -30,6 +30,7 @@
  * Os quatro estados são renderizados lado a lado, então cada `id` é namespaced pelo estado —
  * `lab-contato-<estado>-<campo>`. `tests/pages/lab.test.ts` reprova repetição.
  */
+import Field from '@/components/ui/Field.astro';
 import Action from '@/components/ui/Action.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
@@ -59,42 +60,29 @@ import { SITE } from '@/lib/site';
     <p class="label text-ink-muted">Formulário — parado</p>
     <h4 class="mt-4 text-h3 text-ink">Ou escreva por aqui</h4>
     <form class="mt-4 flex max-w-answer flex-col gap-6">
-      <div class="flex flex-col">
-        <label for="lab-contato-parado-nome" class="text-small font-semibold text-ink">Nome</label>
-        <input
-          type="text"
-          id="lab-contato-parado-nome"
-          name="nome"
-          autocomplete="name"
-          required
-          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
-        />
-      </div>
-      <div class="flex flex-col">
-        <label for="lab-contato-parado-telefone" class="text-small font-semibold text-ink"
-          >Telefone ou WhatsApp</label
-        >
-        <input
-          type="tel"
-          id="lab-contato-parado-telefone"
-          name="telefone"
-          autocomplete="tel"
-          required
-          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
-        />
-      </div>
-      <div class="flex flex-col">
-        <label for="lab-contato-parado-email" class="text-small font-semibold text-ink"
-          >E-mail (opcional)</label
-        >
-        <input
-          type="email"
-          id="lab-contato-parado-email"
-          name="email"
-          autocomplete="email"
-          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
-        />
-      </div>
+      <Field
+        id="lab-contato-parado-nome"
+        label="Nome"
+        name="nome"
+        type="text"
+        autocomplete="name"
+        required
+      />
+      <Field
+        id="lab-contato-parado-telefone"
+        label="Telefone ou WhatsApp"
+        name="telefone"
+        type="tel"
+        autocomplete="tel"
+        required
+      />
+      <Field
+        id="lab-contato-parado-email"
+        label="E-mail (opcional)"
+        name="email"
+        type="email"
+        autocomplete="email"
+      />
 
       <fieldset class="rounded-card border border-line-soft p-6">
         <legend class="text-small font-semibold text-ink">Para quem é o atendimento</legend>
@@ -134,33 +122,20 @@ import { SITE } from '@/lib/site';
         </div>
       </fieldset>
 
-      <div class="flex flex-col">
-        <label for="lab-contato-parado-interesse" class="text-small font-semibold text-ink"
-          >Interesse</label
-        >
-        <select
-          id="lab-contato-parado-interesse"
-          name="interesse"
-          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
-        >
-          <option>Ainda não sei</option>
-          <option>Fisioterapia</option>
-          <option>Pilates clínico</option>
-          <option>Acompanhamento no pós-operatório</option>
-        </select>
-      </div>
+      <Field id="lab-contato-parado-interesse" label="Interesse" name="interesse" control="select">
+        <option>Ainda não sei</option>
+        <option>Fisioterapia</option>
+        <option>Pilates clínico</option>
+        <option>Acompanhamento no pós-operatório</option>
+      </Field>
 
-      <div class="flex flex-col">
-        <label for="lab-contato-parado-mensagem" class="text-small font-semibold text-ink"
-          >Mensagem</label
-        >
-        <textarea
-          id="lab-contato-parado-mensagem"
-          name="mensagem"
-          rows="4"
-          class="mt-4 rounded-control border border-field-border bg-field-bg px-5 py-4 text-body text-ink"
-        ></textarea>
-      </div>
+      <Field
+        id="lab-contato-parado-mensagem"
+        label="Mensagem"
+        name="mensagem"
+        control="textarea"
+        rows={4}
+      />
 
       {
         /* Honeypot: escondido com `display: none` via `hidden`, mais `tabindex="-1"`,
@@ -206,36 +181,23 @@ import { SITE } from '@/lib/site';
         </ul>
       </div>
 
-      <div class="flex flex-col">
-        <label for="lab-contato-erro-nome" class="text-small font-semibold text-ink">Nome</label>
-        <input
-          type="text"
-          id="lab-contato-erro-nome"
-          name="nome"
-          autocomplete="name"
-          required
-          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
-        />
-      </div>
-      <div class="flex flex-col">
-        <label for="lab-contato-erro-telefone" class="text-small font-semibold text-ink"
-          >Telefone ou WhatsApp</label
-        >
-        <input
-          type="tel"
-          id="lab-contato-erro-telefone"
-          name="telefone"
-          autocomplete="tel"
-          required
-          aria-invalid="true"
-          aria-describedby="lab-contato-erro-telefone-mensagem"
-          class="mt-4 min-h-target rounded-control border-2 border-error bg-field-bg px-5 text-body text-ink"
-        />
-        <span
-          id="lab-contato-erro-telefone-mensagem"
-          class="mt-4 text-small font-semibold text-error">Informe um telefone com DDD.</span
-        >
-      </div>
+      <Field
+        id="lab-contato-erro-nome"
+        label="Nome"
+        name="nome"
+        type="text"
+        autocomplete="name"
+        required
+      />
+      <Field
+        id="lab-contato-erro-telefone"
+        label="Telefone ou WhatsApp"
+        name="telefone"
+        type="tel"
+        autocomplete="tel"
+        required
+        errorMessage="Informe um telefone com DDD."
+      />
     </div>
   </div>
 

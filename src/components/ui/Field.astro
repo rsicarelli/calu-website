@@ -1,0 +1,119 @@
+---
+/**
+ * Field — um campo de formulário com rótulo visível, nos três controles do sistema
+ * (COMPONENTS.md § FieldText / FieldSelect / FieldTextarea).
+ *
+ * Props
+ *   id            obrigatório: casa `<label for>` com o controle e deriva o `id` da mensagem de
+ *                 erro. Sem ele não há associação, e associação é o ponto de um campo.
+ *   label         texto do rótulo. O "(opcional)" vem escrito AQUI, dentro do texto — ver abaixo.
+ *   control       `input` (padrão), `select` ou `textarea`.
+ *   errorMessage  mensagem de erro. Presente ⇒ o campo entra em estado de erro inteiro.
+ *   …             qualquer outro atributo do controle é repassado a ELE, não à raiz: `name`,
+ *                 `type`, `autocomplete`, `required`, `rows`, `placeholder`.
+ *
+ * TRÊS COMPONENTES VIRARAM UM, e o motivo é o gate de estilos. A classe do controle é idêntica
+ * nos três; em arquivos separados ela viraria um módulo compartilhado, e classe fora de um
+ * atributo `class=` ou de uma const `*Class` escapa das duas travas de
+ * `scripts/check-utilities.mjs`. Um arquivo só mantém o literal onde ele é verificado.
+ *
+ * ROTULO SEMPRE VISÍVEL, nunca placeholder no lugar dele: o placeholder some assim que a pessoa
+ * começa a digitar, e some justamente para quem mais precisa dele. Não existe prop para escondê-lo.
+ *
+ * O "(OPCIONAL)" É TEXTO DO RÓTULO, não prop booleana, e a assimetria é deliberada: o sinal
+ * PROGRAMÁTICO de obrigatório é o atributo `required`, repassado ao controle; a marcação visual
+ * cobre o caso OPOSTO (o opcional), e não substitui o atributo. Uma prop `optional` sugeriria que
+ * os dois são simétricos — e produziria "Nome *", que o handoff proíbe (asterisco solto).
+ *
+ * ERRO É A SOMA DE TRÊS SINAIS, nunca cor sozinha: a mensagem, a borda mais grossa e
+ * `aria-invalid`, ligados por `aria-describedby`. Passar `errorMessage` emite os três de uma vez —
+ * é impossível acender um e esquecer os outros. E a mensagem precisa NOMEAR o campo ("Informe um
+ * telefone com DDD"), nunca "Campo obrigatório": quem usa leitor de tela ouve a mensagem fora do
+ * contexto visual do campo (WCAG 3.3.1). Isso o componente não força — é copy —, mas
+ * `tests/pages/lab.test.ts` reprova a forma genérica na página.
+ *
+ * Não existe token de borda de erro: a borda é o próprio `--color-error`, porque
+ * `--calu-error-border` foi removido do handoff por reprovar contraste em quase toda superfície.
+ *
+ * O ESTADO DE FOCO NÃO É PROP. Foco é do navegador; congelá-lo numa prop só serviria à galeria de
+ * estados da `/lab`, e demo não entra na API de um primitivo. A galeria continua escrevendo as
+ * classes de foco à mão, que é o que ela existe para exibir.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'input'>`, não genérica — ver o comentário equivalente em
+ * `Container.astro`. `rows` (exclusivo de `<textarea>`) está declarado à mão pelo mesmo motivo que
+ * `href` em `Action.astro`.
+ *
+ *   <Field id="contato-nome" label="Nome" name="nome" autocomplete="name" required />
+ *   <Field id="contato-email" label="E-mail (opcional)" name="email" type="email" />
+ *   <Field id="contato-tel" label="Telefone" name="tel" errorMessage="Informe um telefone com DDD." />
+ *   <Field id="contato-interesse" label="Interesse" control="select"><option>…</option></Field>
+ *
+ * Quando NÃO usar: para um grupo de rádio ou checkbox — ali a pergunta é uma `<legend>` dentro de
+ * um `<fieldset>`, não um `<label>`, e a estrutura é outra.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'input'> {
+  /** Obrigatório: casa `<label for>` e deriva o id da mensagem de erro. */
+  id: string;
+  /** Texto do rótulo. O "(opcional)" vem escrito aqui. */
+  label: string;
+  /** Controle renderizado — padrão `'input'`. */
+  control?: 'input' | 'select' | 'textarea';
+  /** Mensagem de erro. Presente ⇒ borda 2px + `aria-invalid` + `aria-describedby`. */
+  errorMessage?: string;
+  /** Linhas do `<textarea>`. Declarado à mão: é exclusivo dessa tag. */
+  rows?: number;
+}
+
+const { id, label, control = 'input', errorMessage, class: className, ...rest } = Astro.props;
+
+const invalid = errorMessage !== undefined;
+const messageId = `${id}-mensagem`;
+
+/* Sufixo `Class` nos nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const labelClass = 'text-small font-semibold text-ink';
+const borderClass = invalid ? 'border-2 border-error' : 'border border-field-border';
+/* `<textarea>` não leva `min-h-target`: ele já é mais alto que o piso por causa de `rows`, e
+   `py-4` é o que dá o respiro interno que os controles de uma linha ganham do `min-h`. */
+const controlClass =
+  control === 'textarea'
+    ? 'mt-4 rounded-control bg-field-bg px-5 py-4 text-body text-ink'
+    : 'mt-4 min-h-target rounded-control bg-field-bg px-5 text-body text-ink';
+const messageClass = 'mt-4 text-small font-semibold text-error';
+
+/* `as const` no `'true'`: `aria-invalid` é uma união de literais na tipagem do Astro
+   (`boolean | 'true' | 'false' | 'grammar' | 'spelling'`), e um ternário sem isso alarga para
+   `string`, que não é atribuível. */
+const controlProps = {
+  id,
+  'aria-invalid': invalid ? ('true' as const) : undefined,
+  'aria-describedby': invalid ? messageId : undefined,
+  ...rest,
+};
+---
+
+<div class:list={['flex flex-col', className]}>
+  <label for={id} class={labelClass}>{label}</label>
+  {
+    control === 'select' && (
+      <select {...controlProps} class:list={[controlClass, borderClass]}>
+        <slot />
+      </select>
+    )
+  }
+  {
+    control === 'textarea' && (
+      <textarea {...controlProps} class:list={[controlClass, borderClass]} />
+    )
+  }
+  {control === 'input' && <input {...controlProps} class:list={[controlClass, borderClass]} />}
+  {
+    invalid && (
+      <span id={messageId} class={messageClass}>
+        {errorMessage}
+      </span>
+    )
+  }
+</div>
