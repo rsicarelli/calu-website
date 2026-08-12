@@ -18,6 +18,7 @@
  * internos cai para menos de 2:1 no tema claro.
  */
 
+import FaqItem from '@/components/blocks/FaqItem.astro';
 import Action from '@/components/ui/Action.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
@@ -126,24 +127,17 @@ import { SITE } from '@/lib/site';
       <p class="label text-ink-muted">FAQ resumido</p>
       <h3 class="mt-4 text-h3 text-ink">Dúvidas frequentes</h3>
       <div class="mt-4 flex flex-col">
-        <details open class="border-t border-line-soft">
-          <summary class="flex min-h-target cursor-pointer items-center py-4">
-            <h4 class="text-question text-ink">Preciso de pedido médico?</h4>
-          </summary>
-          <p class="max-w-answer pb-4 text-body text-ink-body">
-            Não é obrigatório para começar. Se você já tem um, traga: ele ajuda a entender o
-            histórico.
-          </p>
-        </details>
-        <details class="border-t border-line-soft">
-          <summary class="flex min-h-target cursor-pointer items-center py-4">
-            <h4 class="text-question text-ink">Como funciona a avaliação inicial?</h4>
-          </summary>
-          <p class="max-w-answer pb-4 text-body text-ink-body">
-            É uma sessão individual. A conversa vem primeiro, depois a parte prática, e no fim você
-            já sai sabendo o que está sendo proposto.
-          </p>
-        </details>
+        <FaqItem
+          open
+          questionAs="h4"
+          question="Preciso de pedido médico?"
+          answer="Não é obrigatório para começar. Se você já tem um, traga: ele ajuda a entender o histórico."
+        />
+        <FaqItem
+          questionAs="h4"
+          question="Como funciona a avaliação inicial?"
+          answer="É uma sessão individual. A conversa vem primeiro, depois a parte prática, e no fim você já sai sabendo o que está sendo proposto."
+        />
       </div>
       <Action as="a" href="/duvidas" class="mt-4">Todas as dúvidas</Action>
     </div>
