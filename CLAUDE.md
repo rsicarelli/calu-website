@@ -37,13 +37,25 @@ verdade. A marca (`logo-mark`/`logo-lockup`) entrou junto, usada em `Header`, `F
 `EmptyState`. `tests/` cresceu na mesma proporção — `tests/components/`, `tests/lib/`,
 `tests/pages/`, `tests/scripts/`, `tests/system/` — 216 testes no total.
 
+✅ **Fase 2 — `/lab` implementada e commitada** (16 commits a partir de `1306178`; os três
+primeiros são correção de deriva de documentação, `c6d192f` é o último de código, e este parágrafo
+fecha a fase). A rota
+`src/pages/lab/index.astro` é o kitchen sink do handoff: `noindex`, fora do sitemap, renderizada
+DENTRO da casca real da Fase 1. Ela tem doze seções, cada uma num partial de
+`src/pages/lab/_sections/` (prefixo `_`, que o Astro não roteia — verificado no fonte da 7.2.0,
+não presumido): a grade dos 31 tokens de cor nos dois temas, a escala tipográfica de dez tamanhos,
+espaço e forma, os três matrizes de estado (ação, campo, imagem) e as telas de Home, Serviço,
+Contato, Equipe, Índice e FAQ, fechando com os casos-limite de resiliência de conteúdo.
+`tests/pages/lab.test.ts` trava sete contratos estruturais e mais oito de comportamento
+(formulário e accordion); a suíte foi de 216 para 253 testes.
+
 **Ainda não existe** — e a ausência é temporária, não uma decisão contra:
-CMS, hospedagem/deploy, CI, analytics, formulários, favicon, e qualquer conteúdo real da clínica
-— inclusive os dados que preenchem o JSON-LD e o cadastro no Google Business Profile (SEO local,
-ver "Decisões em aberto"). O `index.astro` continua um placeholder com o nome e nada mais — a
-Fase 1 trouxe a casca (Header, Footer, nav, FAB, SEO técnico), não o conteúdo das páginas, que só
-entra na Fase 4. O próximo passo é a **Fase 2 — `/lab`**: a página kitchen sink com o conteúdo
-bruto do handoff, renderizada dentro da casca real que a Fase 1 deixou pronta.
+CMS, hospedagem/deploy, CI, analytics, formulários que de fato enviem, favicon, e qualquer
+conteúdo real da clínica — inclusive os dados que preenchem o JSON-LD e o cadastro no Google
+Business Profile (SEO local, ver "Decisões em aberto"). O `index.astro` continua um placeholder
+com o nome e nada mais: a `/lab` é laboratório, não página pública, e o conteúdo das páginas de
+verdade só entra na Fase 4. O próximo passo é a **Fase 3 — extração de componentes**, e a `/lab`
+é o teste dela: substituir markup cru por componente sem que nada mude de aparência.
 
 ## Restrições firmes
 
@@ -133,7 +145,31 @@ bruto do handoff, renderizada dentro da casca real que a Fase 1 deixou pronta.
 - Analytics.
 - Licença, se e quando o repositório se tornar público.
 
-## Pendências resolvidas nesta fase
+## Defeitos encontrados e fechados na Fase 2
+
+Nenhum dos dois estava registrado como pendência: os dois apareceram ao construir a `/lab` e valem
+registro porque a mesma classe de erro pode voltar.
+
+- **Ponto cego do varredor de CLS em proporção fracionária.** `tests/system/cls.test.ts` aceitava
+  `width`+`height` OU uma classe de `aspect-ratio`, e o regex da classe era
+  `/(?:^|\s)aspect-[\w-]+(?:\s|$)/`. A barra da sintaxe de fração do Tailwind v4 não pertence a
+  `[\w-]`, então `aspect-video` casava e `aspect-3/4`, `aspect-4/5`, `aspect-16/9` e `aspect-3/2` —
+  as CINCO proporções canônicas do handoff — não casavam. Nada era afetado na época (nenhuma
+  classe de proporção existia no projeto), e é justamente por isso que valia corrigir antes: a
+  primeira imagem a usar uma delas teria `aspect-ratio` real no CSS e ainda assim contaria como
+  "sem sinal de dimensão". Mesma família do anel de foco que chegou a 1.01:1 sem teste vermelho —
+  checagem que parece cobertura e não é. Corrigido, com um bloco de regressão do próprio
+  reconhecedor, no espírito do que `typography.test.ts` já fazia com sua extração de família.
+- **Aninhamento inválido de `<details>`/`<summary>` no handoff.** `COMPONENTS.md § FaqAccordion`
+  pedia o `<summary>` DENTRO de um `<h3>`. O modelo de conteúdo de `<details>` exige o `<summary>`
+  como primeiro filho: com um cabeçalho no meio, o `<details>` fica sem `summary` nenhum, o
+  navegador sintetiza o próprio marcador e o texto da pergunta some junto com a resposta quando o
+  item está fechado. O mockup não tem nenhum `<details>`, então a divergência nunca apareceu na
+  referência visual. Corrigido nos dois lugares — o handoff é documento vivo — invertendo para
+  `<details><summary><h3>…</h3></summary>`, que é válido (o modelo de conteúdo de `<summary>`
+  aceita cabeçalho) e preserva a navegação por cabeçalhos que era a intenção original.
+
+## Pendências resolvidas na Fase 1
 
 Registradas na Fase 0 como dívida pendente; fechadas na Fase 1 — Fundação. Cada bullet é somado
 pelo commit da sub-fase correspondente conforme ela é implementada.
@@ -188,9 +224,14 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   pendências registradas na Fase 0 (ver "Pendências resolvidas nesta fase"). `BaseLayout` sai
   desta fase com a casca real — Header, Footer, `<main>` e FAB compostos — em vez do esqueleto de
   hoje. `src/components/blocks/` passa a existir aqui.
-- **Fase 2 — `/lab`.** Página kitchen sink com o conteúdo bruto de todas as telas do handoff,
-  `noindex`, agora renderizada DENTRO da casca real da Fase 1 (não mais um documento solto). Não é
-  descartável: sobrevive como página viva de regressão visual.
+- ~~**Fase 2 — `/lab`.**~~ ✅ Feita. Página kitchen sink com o conteúdo bruto de todas as telas do
+  handoff, `noindex`, renderizada DENTRO da casca real da Fase 1. Não é descartável: sobrevive como
+  página viva de regressão visual, e é o teste de refatoração da Fase 3.
+  Duas convenções que ela fixou, e que valem para quem for mexer nela:
+  o texto é prosa pt-BR de verdade que não afirma NADA verificável sobre a clínica (dado de contato
+  vem de `SITE`, nome próprio sai como `[Nome da profissional]`); e link dentro de uma seção de
+  tela aponta para a ROTA REAL de produção (`/servicos`, `/duvidas`), nunca para âncora de outra
+  seção — navegação interna existe só no sumário.
 - **Fase 3 — extração de componentes.** Só extrai o que se repetiu de fato: 3 ocorrências, ou 2 +
   variação de estado. Nada de componentizar por antecipação. `src/components/blocks/` já existe
   desde a Fase 1 — esta fase continua populando a mesma pasta com conteúdo extraído (`ServiceCard`,
