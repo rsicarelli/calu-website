@@ -1,0 +1,89 @@
+---
+/**
+ * Seção "Cor" da `/lab` — as amostras dos 31 tokens `--color-*` e os pares em uso.
+ *
+ * ASSIMETRIA DELIBERADA ENTRE OS DOIS TEMAS, e vale entender antes de "consertar":
+ *
+ * `[data-theme='dark']` em `global.css` §4 é um seletor de ATRIBUTO nu, não `:root[data-theme=…]`.
+ * Isso é o que permite forçar o tema escuro num pedaço da árvore: as custom properties do bloco
+ * escuro passam a valer para a subárvore inteira, incluindo `--elevation-*` e o próprio variante
+ * `dark:`. O inverso NÃO é possível hoje: os valores claros só existem no `@theme static`, que sai
+ * como `:root, :host` — `data-theme="light"` num `<div>` não redeclara nada.
+ *
+ * Então a grade aparece duas vezes: uma HERDANDO o tema da página, outra com o escuro FORÇADO. No
+ * tema claro dá para ver os dois lados de uma vez; no escuro, os dois blocos ficam escuros e a
+ * comparação se faz alternando o tema no cabeçalho. A alternativa seria declarar um bloco
+ * `[data-theme='light']` em `global.css` — uma terceira cópia de ~30 declarações e mais um braço
+ * para o invariante nº 7 de `tests/tokens/invariants.test.ts` comparar — o que é mexer no design
+ * system para conveniência de uma página de laboratório. Fica como está, documentado.
+ *
+ * O bloco escuro forçado precisa pintar o próprio `bg-bg`: sem isso o fundo da página (claro)
+ * apareceria por baixo das amostras e a comparação seria mentirosa.
+ *
+ * Os números de contraste NÃO são repetidos aqui de propósito. Quem mede é
+ * `tests/tokens/contrast.test.ts`, contra `tests/tokens/pairs.ts`, lendo o CSS direto. Número
+ * copiado à mão numa página vira mentira silenciosa no dia em que o token muda.
+ */
+import ColorSwatches from './_ColorSwatches.astro';
+---
+
+<div class="mt-8">
+  <p class="container-page text-body text-ink-body">
+    Trocar de tema é trocar o valor da mesma custom property: nenhuma marcação muda, nenhum
+    componente ganha variante. Por isso a mesma grade aparece duas vezes abaixo.
+  </p>
+
+  <h3 class="container-page mt-8 text-h3">Tema da página</h3>
+  <div class="container-page mt-4">
+    <ColorSwatches />
+  </div>
+
+  <h3 class="container-page mt-12 text-h3">Tema escuro, forçado</h3>
+  <p class="container-page mt-4 text-small text-ink-muted">
+    O mesmo bloco dentro de uma subárvore com o tema escuro fixo. Com a página no tema claro, os
+    dois convivem lado a lado; com a página já escura, os dois ficam iguais.
+  </p>
+  <div data-theme="dark" class="mt-4 bg-bg py-8 text-ink-body">
+    <div class="container-page">
+      <ColorSwatches />
+    </div>
+  </div>
+
+  <h3 class="container-page mt-12 text-h3">Pares em uso</h3>
+  <p class="container-page mt-4 text-small text-ink-muted">
+    Cada bloco de fundo escuro declara <span class="font-semibold">data-surface</span>, que reescopa
+    o anel de foco. Sem ele, o foco de teclado dentro do bloco cai para menos de 2:1 no tema claro —
+    invisível para quem navega por teclado.
+  </p>
+
+  <div class="container-page mt-4 flex flex-col gap-4">
+    <div data-surface="brand" class="rounded-card bg-surface-brand p-6 text-ink-on-brand">
+      <p class="label">Skin brand</p>
+      <p class="mt-4 text-h3">Um único nível de texto</p>
+      <p class="mt-4 text-body">
+        Nenhum cinza esverdeado do sistema chega a 7:1 sobre esta superfície, então a hierarquia
+        aqui vem de tamanho e peso, não de tom. Todo o texto usa a mesma cor.
+      </p>
+      <a
+        href="#lab-cor"
+        class="mt-4 inline-flex min-h-target items-center rounded-control bg-accent-deep px-6 font-semibold text-on-accent-deep"
+        >Exemplo de ação</a
+      >
+    </div>
+
+    <div data-surface="deep" class="rounded-card bg-surface-deep p-6 text-ink-on-deep">
+      <p class="label text-ink-on-deep-3">Skin deep</p>
+      <p class="mt-4 text-h3">A escada de três tons continua valendo</p>
+      <p class="mt-4 text-body text-ink-on-deep-2">
+        Nesta superfície há três níveis de texto: principal, secundário e meta. É a diferença que
+        permite separar apoio de informação de rodapé sem mudar o tamanho.
+      </p>
+      <p class="mt-4 text-small text-ink-on-deep-3">Terceiro nível, para dado de apoio.</p>
+      <a
+        href="#lab-cor"
+        class="mt-4 inline-flex min-h-target items-center rounded-control bg-accent-deep px-6 font-semibold text-on-accent-deep"
+        >Exemplo de ação</a
+      >
+    </div>
+  </div>
+</div>
