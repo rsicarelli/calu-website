@@ -3,8 +3,12 @@
 Site institucional da **Calu Pilates e Fisioterapia** — estúdio de Pilates e clínica de
 fisioterapia na Vila Clementino, São Paulo.
 
-> **Status:** 🚧 Bootstrap — só a casca. Esqueleto Astro, toolchain e gates de qualidade locais.
-> **O setup de CMS e de deploy ainda não foi feito**, e não há conteúdo, design nem hospedagem.
+> **Status:** 🚧 Em construção — o design system e a casca estrutural existem; o conteúdo, não.
+> Já implementados: os tokens do handoff de design (cor, tipografia, espaço, forma, tema claro e
+> escuro) em `src/styles/global.css`, o chrome que toda página usa (`Header` + `MobileNav`,
+> `Footer`, `WhatsAppFab`, `EmptyState`), a página `/404` e o SEO técnico (sitemap, `robots.txt`,
+> meta tags, JSON-LD). **Ainda não existem:** CMS, hospedagem/deploy, CI, analytics, formulários,
+> favicon e qualquer conteúdo real da clínica.
 
 ## O que é isto
 
@@ -19,9 +23,11 @@ verdade do código e do conteúdo.
 | Toolchain  | **mise** (Node + pnpm + go-task)                   |
 | Qualidade  | ESLint 10 + Prettier 3 + `astro check`, via `task` |
 | Idioma     | **pt-BR** apenas                                   |
+| CSS        | **Tailwind v4 CSS-first** — tokens em `@theme`     |
+| Design     | handoff em `design_handoff_calu/`, implementado    |
+| Testes     | **Vitest** — tokens, componentes, páginas, sistema |
 | CMS        | _a decidir_ — Git-based, com interface visual      |
 | Hospedagem | _a decidir_ — provavelmente Cloudflare Pages       |
-| Design     | _a decidir_                                        |
 
 ## Estrutura
 
@@ -54,8 +60,16 @@ task install      # instala as dependências
 task dev          # sobe o dev server em localhost:4321
 task build        # gera o site em dist/
 task preview      # serve o dist/ — o HTML real de produção
+task check        # typecheck + lint + fmt:check + check:styles
+task check:styles # reprova arbitrary value e classe que não gera CSS
+task test         # Vitest (depende de build — os testes de sistema leem dist/)
 task dod          # formata + gates + build + testes (rode antes de commitar)
 ```
+
+O `check:styles` é específico deste projeto: **arbitrary value é proibido** (`p-[13px]`,
+`text-[#8F5E23]`). Valor que falta vira token nomeado no `@theme` de `src/styles/global.css`.
+O mesmo script também reprova classe que não gera CSS — no Tailwind v4 uma utility inexistente
+não quebra o build, vira no-op silencioso.
 
 O Astro mantém os servidores de `dev` e `preview` **em background**, então eles seguem no ar
 depois que o comando retorna. Para derrubá-los:
