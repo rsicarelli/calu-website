@@ -1,0 +1,182 @@
+---
+/**
+ * Tela "Dúvidas frequentes" (mockup §10) — três grupos de perguntas e o índice lateral.
+ *
+ * `<details>`/`<summary>` NATIVO, não o par botão + `aria-expanded`/`aria-controls`. Os dois são
+ * mutuamente exclusivos, e o nativo funciona sem JavaScript — coerente com o inviolável "nada
+ * depende de framework JS para funcionar". O trade-off aceito é menos controle sobre a animação de
+ * abrir e fechar.
+ *
+ * ANINHAMENTO: `<details><summary><h4>…</h4></summary>`, com o cabeçalho DENTRO do `<summary>`.
+ * O handoff pedia o contrário, e o contrário não funciona: o modelo de conteúdo de `<details>`
+ * exige `<summary>` como PRIMEIRO FILHO, então com um cabeçalho no meio o `<details>` fica sem
+ * `summary` nenhum, o navegador sintetiza o próprio marcador e o texto da pergunta some junto com
+ * a resposta quando o item está fechado. A correção está registrada em `COMPONENTS.md`.
+ * (Aqui é `<h4>` e não `<h3>` porque a seção já gasta um nível — ver a regra 1 em `index.astro`.)
+ *
+ * NÃO É EXCLUSIVO: nenhum `<details>` leva atributo `name`, então abrir um não fecha os outros.
+ * Quem chega com duas dúvidas quer ler as duas. O primeiro item de cada grupo nasce `open`.
+ *
+ * O painel fechado sai do fluxo pelo comportamento NATIVO do elemento — nunca `height: 0` com
+ * `overflow: hidden`, que deixaria a resposta alcançável por Tab e por leitor de tela mesmo
+ * invisível.
+ *
+ * "Quanto custa?" responde SEM número. Preço em destaque é proibido pelo design system, inclusive
+ * como campo opcional de CMS, e `tests/system/cff-denylist.test.ts` varre o texto construído.
+ *
+ * O índice lateral tem `aria-label` PRÓPRIO ("Índice das dúvidas"): a página já tem os três `<nav>`
+ * da casca mais o sumário do laboratório, e dois landmarks de navegação com o mesmo nome reprovam
+ * `landmark-unique` do axe e a varredura de sistema.
+ */
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+---
+
+<div class="container-page mt-8 flex flex-col gap-12">
+  <h3 class="text-h1 text-ink">Dúvidas frequentes</h3>
+
+  <div class="grid gap-8 md:grid-cols-3">
+    <!-- Índice lateral: some no celular, onde a navegação é rolar pelos grupos -->
+    <nav
+      aria-label="Índice das dúvidas"
+      class="hidden md:sticky md:top-header md:block md:self-start"
+    >
+      <p class="label text-ink-muted">Grupos</p>
+      <ul class="mt-4 flex flex-col">
+        <li>
+          <a
+            href="#lab-faq-antes"
+            class="inline-flex min-h-target items-center text-body text-brand">Antes de começar</a
+          >
+        </li>
+        <li>
+          <a
+            href="#lab-faq-dia-a-dia"
+            class="inline-flex min-h-target items-center text-body text-brand"
+            >No dia a dia do tratamento</a
+          >
+        </li>
+        <li>
+          <a
+            href="#lab-faq-pagamento"
+            class="inline-flex min-h-target items-center text-body text-brand">Pagamento e recibo</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <div class="flex flex-col gap-8 md:col-span-2">
+      <div id="lab-faq-antes" data-faq-group class="scroll-mt-header">
+        <h4 class="text-h2 text-ink">Antes de começar</h4>
+        <div class="mt-4 flex flex-col">
+          <details open class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Preciso de pedido médico?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              Não é obrigatório para começar. Se você já tem um, traga: ele ajuda a entender o
+              histórico e o que já foi investigado.
+            </p>
+          </details>
+          <details class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Como funciona a avaliação inicial?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              É uma sessão individual. Primeiro a conversa sobre o que está acontecendo, depois o
+              exame do movimento. No fim você já sai sabendo o que está sendo proposto.
+            </p>
+          </details>
+          <details class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">
+                Minha mãe tem 78 anos e usa bengala. Ela pode fazer?
+              </h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              A avaliação existe justamente para responder isso, e ela leva em conta o equilíbrio, o
+              histórico e o que sua mãe quer voltar a fazer. Acompanhante pode entrar junto.
+            </p>
+          </details>
+          <details class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Nunca fiz exercício na vida. Tem problema?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              Não. O ponto de partida é o seu, e a progressão é combinada a partir dele.
+            </p>
+          </details>
+        </div>
+      </div>
+
+      <div id="lab-faq-dia-a-dia" data-faq-group class="scroll-mt-header">
+        <h4 class="text-h2 text-ink">No dia a dia do tratamento</h4>
+        <div class="mt-4 flex flex-col">
+          <details open class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Posso acompanhar a sessão do meu pai?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              Pode. Basta avisar antes, para a sala ser organizada com espaço para os dois.
+            </p>
+          </details>
+          <details class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Quantas vezes por semana preciso vir?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              A frequência sai da avaliação e é revista ao longo do acompanhamento. Ela muda quando
+              faz sentido mudar.
+            </p>
+          </details>
+          <details class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">O que devo vestir?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              Roupa confortável, que permita movimento. Nada específico além disso.
+            </p>
+          </details>
+        </div>
+      </div>
+
+      <div id="lab-faq-pagamento" data-faq-group class="scroll-mt-header">
+        <h4 class="text-h2 text-ink">Pagamento e recibo</h4>
+        <div class="mt-4 flex flex-col">
+          <details open class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Vocês atendem convênio?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              Vale confirmar direto com a gente antes de marcar, porque isso muda de plano para
+              plano.
+            </p>
+          </details>
+          <details class="border-t border-line-soft">
+            <summary class="flex min-h-target cursor-pointer items-center py-4">
+              <h5 class="text-question text-ink">Quanto custa?</h5>
+            </summary>
+            <p class="max-w-answer pb-4 text-body text-ink-body">
+              Depende do formato e da frequência que saírem da avaliação, então a conta muda de
+              pessoa para pessoa. A gente explica tudo antes de qualquer combinação, e o recibo é
+              emitido normalmente.
+            </p>
+          </details>
+        </div>
+      </div>
+
+      <div class="rounded-card bg-surface-alt p-6">
+        <h4 class="text-h3 text-ink">Sua dúvida não estava aqui?</h4>
+        <p class="mt-4 text-body text-ink-body">
+          Escreva ou ligue. Quem responde é uma das profissionais da clínica.
+        </p>
+        <ContactPair
+          class="mt-8"
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      </div>
+    </div>
+  </div>
+</div>

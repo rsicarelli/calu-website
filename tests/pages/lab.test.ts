@@ -218,3 +218,61 @@ describe('/lab — contratos do formulário de contato', () => {
     }
   });
 });
+
+/* Contratos do accordion. Chegam junto de `_sections/ScreenFaq.astro`, pelo mesmo motivo dos
+   contratos do formulário. */
+describe('/lab — contratos do accordion', () => {
+  const detalhes = (): HTMLDetailsElement[] =>
+    Array.from(document.querySelectorAll('details')) as HTMLDetailsElement[];
+
+  /* O defeito que motivou a correção do handoff: `<details><h3><summary>` deixa o `<details>` sem
+     `summary` NENHUM (o modelo de conteúdo exige o `<summary>` como primeiro filho). O navegador
+     sintetiza o próprio marcador, e o texto da pergunta some junto com a resposta quando o item
+     está fechado. Sem este teste, o erro é invisível no HTML e só aparece no navegador. */
+  it('todo <summary> é o primeiro filho do seu <details>', () => {
+    const todos = detalhes();
+    expect(todos.length, 'nenhum <details> na página').toBeGreaterThan(0);
+
+    const offenders = todos
+      .filter((d) => d.firstElementChild?.tagName.toLowerCase() !== 'summary')
+      .map((d) => d.textContent?.trim().slice(0, 40) ?? '(vazio)');
+
+    expect(offenders, `<details> sem <summary> como primeiro filho: ${offenders}`).toEqual([]);
+  });
+
+  /* Sem `name` compartilhado, abrir um item não fecha os outros — quem chega com duas dúvidas quer
+     ler as duas. É o oposto do accordion exclusivo, e a diferença é um atributo só. */
+  it('nenhum <details> é exclusivo (sem atributo `name`)', () => {
+    const offenders = detalhes()
+      .filter((d) => d.hasAttribute('name'))
+      .map((d) => d.getAttribute('name')!);
+
+    expect(offenders, `<details> exclusivo: ${offenders.join(', ')}`).toEqual([]);
+  });
+
+  it('cada pergunta é um cabeçalho dentro do <summary>', () => {
+    const offenders = detalhes()
+      .map((d) => d.querySelector('summary'))
+      .filter((s) => s !== null && s.querySelector('h2, h3, h4, h5, h6') === null)
+      .map((s) => s!.textContent?.trim().slice(0, 40) ?? '(vazio)');
+
+    expect(offenders, `<summary> sem cabeçalho: ${offenders.join(' | ')}`).toEqual([]);
+  });
+
+  /* Um item aberto por grupo, e não zero: a página não deve abrir vazia, com todas as respostas
+     escondidas. O primeiro de cada grupo nasce `open`.
+
+     Os grupos são selecionados por `data-faq-group`, não por prefixo de `id`. A primeira versão
+     usava `[id^="lab-faq-"]` e pescava junto o `lab-faq-titulo` que a casca de `index.astro` gera
+     para o `aria-labelledby` da seção — um elemento que nunca teve `<details>` dentro e sempre
+     falharia. Prefixo de `id` é convenção; atributo é contrato. */
+  it('há exatamente um <details> aberto por grupo de perguntas', () => {
+    const grupos = Array.from(document.querySelectorAll('[data-faq-group]'));
+    expect(grupos.length, 'nenhum grupo de FAQ encontrado').toBeGreaterThan(0);
+
+    for (const grupo of grupos) {
+      const abertos = grupo.querySelectorAll('details[open]');
+      expect(abertos.length, `grupo ${grupo.id} sem nenhum item aberto`).toBe(1);
+    }
+  });
+});
