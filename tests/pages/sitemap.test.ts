@@ -46,6 +46,16 @@ describe('dist/sitemap.xml', () => {
     expect(xml).not.toContain('404');
   });
 
+  /* Segunda exceção permanente, ao lado de /404: a `/lab` EXISTE em `src/pages/` e mesmo assim
+     nunca entra aqui. Ela é servida com `noindex, follow` e é kitchen sink do design system, não
+     página do site. O comentário de `ROUTES` em `src/pages/sitemap.xml.ts` diz a mesma coisa em
+     prosa; este teste é o que impede alguém de "consertar" a ausência. */
+  it('NÃO contém /lab — kitchen sink noindex, fora do índice de propósito', () => {
+    const xml = readSitemap();
+
+    expect(xml).not.toContain('/lab');
+  });
+
   it('NÃO contém rotas de SITE_NAV que ainda não têm arquivo em src/pages/ (/servicos, /equipe, /duvidas, /contato)', () => {
     const xml = readSitemap();
 
