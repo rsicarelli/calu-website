@@ -1,0 +1,101 @@
+---
+/**
+ * PageSection — uma seção de página: `<section>` nomeado como marco, trilho de largura,
+ * rótulo opcional e cabeçalho. É o bloco mais repetido do site (≈30 usos nas seis páginas
+ * reais, mais as telas da `/lab`).
+ *
+ * Props
+ *   id        âncora e base do `aria-labelledby`. Obrigatório: um `<section>` sem nome é uma
+ *             `<div>` disfarçada para quem navega por marcos, e sem `id` não há como nomeá-lo.
+ *   titulo    o cabeçalho. Ausente ⇒ nenhum cabeçalho, e a seção deixa de ser marco (ver abaixo).
+ *   tituloAs  nível do cabeçalho — `h2` (padrão). A `/lab` desce tudo um nível e passa `h3`.
+ *   label     rótulo curto acima do cabeçalho, no máximo 3 palavras. Ver "RÓTULO".
+ *   width     largura do trilho, repassada ao `Container` — `page` (padrão) ou `measure`.
+ *   …         qualquer atributo de `section` vai para a raiz, inclusive `data-surface`.
+ *
+ * POR QUE ISTO É COMPONENTE, E NÃO COPY-PASTE
+ * ---------------------------------------------------------------------------------------
+ * A repetição é o motivo menor. O motivo maior é que `PAGES.md` tem uma regra transversal
+ * fácil de cumprir 29 vezes e esquecer na trigésima: "todo `<section>` que funciona como
+ * marco leva `aria-labelledby` apontando para o `id` do cabeçalho que a introduz". Aqui o
+ * `aria-labelledby` é DERIVADO do `id` da seção e o cabeçalho recebe exatamente esse id, então
+ * o par não tem como divergir — o erro deixa de ser possível em vez de ser detectável.
+ *
+ * O contrapositivo também é respeitado: seção SEM `titulo` não recebe `aria-labelledby`, porque
+ * apontar para um id inexistente é pior que não apontar (o marco fica com nome vazio e o axe
+ * reprova em `aria-valid-attr-value`). `tests/components/PageSection.test.ts` trava os dois lados.
+ *
+ * RÓTULO — e por que `SectionLabel` não existe
+ * ---------------------------------------------------------------------------------------
+ * O `CLAUDE.md` registrou na Fase 3 que `SectionLabel` foi ADIADO: a string `label
+ * text-ink-muted` aparecia 76 vezes, mas ~63 eram andaime de demonstração da própria `/lab`.
+ * Extrair naquele momento carimbaria o andaime dentro de um componente de site.
+ *
+ * A Fase 4 resolve por outro caminho: o rótulo vira PROP daqui. Todo uso real de rótulo
+ * acontece dentro de uma seção, então o componente que já embrulha a seção é o dono natural
+ * dele — e o andaime da `/lab`, que não usa `PageSection`, continua com o `<p class="label">`
+ * cru que sempre teve. Nenhum componente novo, e a pendência fecha.
+ *
+ * O rótulo sai em `<p>`, nunca em cabeçalho: ele não é um nível da hierarquia do documento, e
+ * um `<h3>` decorativo acima de um `<h2>` inverteria a ordem que `PAGES.md` exige sem pular
+ * nível. O texto vem em caixa NORMAL do conteúdo — a caixa-alta é a utility `label` do
+ * `global.css`, e é assim porque o VoiceOver soletra texto guardado em maiúsculas.
+ *
+ *   <PageSection id="servicos" label="Serviços" titulo="O que a gente atende">…</PageSection>
+ *   <PageSection id="mapa" titulo="Onde estamos" width="measure">…</PageSection>
+ *   <PageSection id="faixa" data-surface="brand" class="bg-surface-brand">…</PageSection>
+ *
+ * Tipagem: `Props extends HTMLAttributes<'section'>`, não genérica — ver `Container.astro`.
+ *
+ * Quando NÃO usar: para o cabeçalho da PÁGINA (o `h1` e seu lead). Esse é o `PageHeader`, que
+ * não é marco nomeado nem repete rótulo.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+import Container from '@/components/ui/Container.astro';
+
+interface Props extends HTMLAttributes<'section'> {
+  /** Âncora da seção e base do `aria-labelledby`. Obrigatório. */
+  id: string;
+  /** Cabeçalho da seção. Ausente ⇒ sem cabeçalho e sem `aria-labelledby`. */
+  titulo?: string;
+  /** Nível do cabeçalho — padrão `'h2'`. */
+  tituloAs?: HTMLTag;
+  /** Rótulo curto acima do cabeçalho, máximo 3 palavras, em caixa normal. */
+  label?: string;
+  /** Largura do trilho — `page` (padrão) ou `measure`. */
+  width?: 'page' | 'measure';
+}
+
+const {
+  id,
+  titulo,
+  tituloAs: Titulo = 'h2',
+  label,
+  width = 'page',
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* O id do cabeçalho é derivado do id da seção — é o que impede o par de divergir. */
+const headingId = `${id}-titulo`;
+---
+
+<section
+  id={id}
+  aria-labelledby={titulo ? headingId : undefined}
+  class:list={['scroll-mt-header', className]}
+  {...rest}
+>
+  <Container width={width}>
+    {label && <p class="label text-ink-muted">{label}</p>}
+    {
+      titulo && (
+        <Titulo id={headingId} class:list={['text-h2', label && 'mt-2']}>
+          {titulo}
+        </Titulo>
+      )
+    }
+    <slot />
+  </Container>
+</section>

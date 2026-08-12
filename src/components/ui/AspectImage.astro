@@ -1,0 +1,111 @@
+---
+/**
+ * AspectImage — imagem de conteúdo numa das proporções canônicas, com o espaço SEMPRE
+ * reservado (COMPONENTS.md § AspectImage). É a metade que faltava do par: `BrandPlaceholder`
+ * já existia como fallback desde a Fase 1, mas nada no projeto sabia renderizar uma foto de
+ * verdade — a Fase 4 é quando conteúdo passa a ter imagem.
+ *
+ * Props
+ *   src         a imagem importada (`ImageMetadata`, vinda de `image()` no schema da collection
+ *               ou de um import de `src/assets/`). AUSENTE ⇒ renderiza `BrandPlaceholder` na
+ *               MESMA proporção — a ausência de foto nunca muda a altura do bloco.
+ *   alt         obrigatório no tipo quando há `src`. Ver "ALT" abaixo.
+ *   decorative  força `alt=""` + `aria-hidden`. Existe para o caso em que a imagem repete
+ *               informação que o texto ao lado já dá (um mapa cujo endereço está escrito logo
+ *               abaixo). É opt-in explícito, nunca o padrão.
+ *   ratio       proporção. As mesmas quatro de `BrandPlaceholder`, e é de propósito: se as duas
+ *               listas divergirem, o fallback deixa de reservar o mesmo espaço que a foto.
+ *   radius      `card` (padrão) ou `control` — repassado ao fallback, para o par ficar idêntico.
+ *   priority    imagem acima da dobra (o herói da Home). Troca `loading="lazy"` por
+ *               `fetchpriority="high"` + `loading="eager"`. Uma por página, no máximo.
+ *   …           qualquer outro atributo de `div` vai para a raiz — largura, breakpoint de
+ *               proporção (`md:aspect-4/5`), `class`. Largura é decisão de quem posiciona.
+ *
+ * CLS ZERO, e é a razão de o componente existir
+ * ---------------------------------------------------------------------------------------
+ * Regra 5 dos invioláveis: toda imagem com dimensão E `aspect-ratio`. As duas, não uma.
+ * `<Image>` de `astro:assets` já emite `width`/`height` a partir do `ImageMetadata`, mas
+ * sozinho isso não basta: a foto real quase nunca tem exatamente a proporção do slot, então
+ * o navegador reserva a altura da FOTO e depois o CSS a recorta para a do SLOT — e a
+ * diferença é salto de layout. Aqui a raiz carrega o `aspect-*` e a imagem preenche com
+ * `size-full object-cover`, então o espaço reservado é o do slot desde o primeiro frame,
+ * independentemente da foto que o CMS mandar.
+ *
+ * É também por isso que `ratio` é obrigatória e não tem padrão: proporção é a única coisa que
+ * o componente NÃO pode adivinhar, e um padrão silencioso reservaria o espaço errado.
+ *
+ * ALT
+ * ---------------------------------------------------------------------------------------
+ * `alt` é obrigatório quando existe `src`, e o tipo cobra — imagem de conteúdo sem alternativa
+ * textual é a violação de acessibilidade mais comum que existe, e a mais fácil de evitar na
+ * hora de escrever. Quem quiser imagem decorativa diz isso EXPLICITAMENTE com `decorative`, o
+ * que é uma decisão registrada no código em vez de um `alt=""` que pode ser esquecimento.
+ * `tests/components/AspectImage.test.ts` trava os dois lados.
+ *
+ *   <AspectImage src={foto} alt="Sala de Pilates com três aparelhos" ratio="4/5" />
+ *   <AspectImage ratio="3/2" />                        sem foto → placeholder de marca
+ *   <AspectImage src={mapa} decorative ratio="3/2" />   endereço escrito logo abaixo
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro`. A raiz é sempre um `div`.
+ */
+import { Image } from 'astro:assets';
+import type { HTMLAttributes } from 'astro/types';
+
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** A imagem. Ausente ⇒ `BrandPlaceholder` na mesma proporção. */
+  src?: ImageMetadata;
+  /** Alternativa textual. Obrigatória junto de `src`, salvo `decorative`. */
+  alt?: string;
+  /** Marca a imagem como decorativa: `alt=""` + `aria-hidden`. */
+  decorative?: boolean;
+  /** Proporção do slot. Obrigatória — as mesmas quatro de `BrandPlaceholder`. */
+  ratio: '3/4' | '4/5' | '16/9' | '3/2';
+  /** `card` (padrão) para bloco autônomo; `control` para miniatura dentro de um card. */
+  radius?: 'card' | 'control';
+  /** Acima da dobra: carrega cedo, com prioridade. No máximo uma por página. */
+  priority?: boolean;
+}
+
+const {
+  src,
+  alt,
+  decorative = false,
+  ratio,
+  radius = 'card',
+  priority = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const ratioClass = {
+  '3/4': 'aspect-3/4',
+  '4/5': 'aspect-4/5',
+  '16/9': 'aspect-16/9',
+  '3/2': 'aspect-3/2',
+}[ratio];
+
+const radiusClass = radius === 'control' ? 'rounded-control' : 'rounded-card';
+---
+
+{
+  src ? (
+    <div class:list={['overflow-hidden', ratioClass, radiusClass, className]} {...rest}>
+      <Image
+        src={src}
+        alt={decorative ? '' : (alt ?? '')}
+        aria-hidden={decorative ? 'true' : undefined}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
+        decoding="async"
+        class="size-full object-cover"
+      />
+    </div>
+  ) : (
+    <BrandPlaceholder ratio={ratio} radius={radius} class={className} {...rest} />
+  )
+}

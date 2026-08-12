@@ -7,9 +7,21 @@
  *   question    o texto da pergunta.
  *   questionAs  tag do cabeçalho DENTRO do `<summary>` — padrão `h3`. A `/lab` passa `h4`/`h5`
  *               porque lá a seção já gastou níveis; numa página real o padrão serve.
- *   answer      o texto da resposta.
+ *   answer      o texto da resposta, quando ela é uma frase só. Ignorado se houver slot.
  *   open        item já aberto ao carregar. O primeiro de cada grupo abre.
+ *   slot        a resposta como conteúdo rico. Ver abaixo.
  *   …           qualquer outro atributo válido para `<details>` é repassado à raiz.
+ *
+ * DUAS FORMAS DE RESPOSTA, e a segunda nasceu na Fase 4. Até aqui a resposta era sempre uma
+ * string — servia para a `/lab`, cujo texto é ilustrativo. Com content collections, a resposta
+ * real vive no CORPO MARKDOWN da entrada, e corpo markdown não é string: é um componente que o
+ * `render()` do `astro:content` devolve. Por isso o slot, e por isso `answer` virou opcional.
+ * Quando há slot, ele ganha; o `<p>` do `answer` nem é renderizado, para não sair parágrafo
+ * vazio ao lado do conteúdo.
+ *
+ * O slot sai dentro de `[data-prose]` — é o que faz a regra `:where([data-prose]) a` de
+ * `global.css` §7 sublinhar link de texto corrido (regra 9 do DESIGN-SYSTEM: link em texto
+ * corrido é sublinhado, não só colorido). O `answer` string não precisa: é uma frase, sem link.
  *
  * NATIVO, não botão + `aria-expanded`/`aria-controls`. Os dois padrões são mutuamente exclusivos,
  * e o nativo funciona sem JavaScript — coerente com o inviolável "nada depende de framework JS
@@ -45,8 +57,8 @@ interface Props extends HTMLAttributes<'details'> {
   question: string;
   /** Tag do cabeçalho dentro do `<summary>` — padrão `'h3'`. */
   questionAs?: HTMLTag;
-  /** Texto da resposta. */
-  answer: string;
+  /** Texto da resposta, quando é uma frase só. Ignorado se houver slot. */
+  answer?: string;
   /** Item aberto ao carregar — o primeiro de cada grupo. */
   open?: boolean;
 }
@@ -60,6 +72,8 @@ const {
   ...rest
 } = Astro.props;
 
+const hasRichAnswer = Astro.slots.has('default');
+
 /* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes literais
    (ver "REGIÃO EXTRA" no cabeçalho do gate). */
 const summaryClass = 'flex min-h-target cursor-pointer items-center py-4';
@@ -70,5 +84,13 @@ const answerClass = 'max-w-answer pb-4 text-body text-ink-body';
   <summary class={summaryClass}>
     <Heading class="text-question text-ink">{question}</Heading>
   </summary>
-  <p class={answerClass}>{answer}</p>
+  {
+    hasRichAnswer ? (
+      <div data-prose class={answerClass}>
+        <slot />
+      </div>
+    ) : (
+      <p class={answerClass}>{answer}</p>
+    )
+  }
 </details>
