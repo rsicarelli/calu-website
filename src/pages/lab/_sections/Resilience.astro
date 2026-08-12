@@ -21,6 +21,7 @@
  * inteira não renderiza — não é para aparecer um título órfão em cima de um vazio. Por isso o que
  * está abaixo é a explicação, e não um bloco vazio: um bloco vazio seria justamente o defeito.
  */
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import EmptyState from '@/components/blocks/EmptyState.astro';
 import { SITE } from '@/lib/site';
 import RuledList from '@/components/ui/RuledList.astro';
@@ -34,132 +35,124 @@ import RuledList from '@/components/ui/RuledList.astro';
       perfeitamente escrever. Nenhum dos dois pode vazar a caixa nem empurrar a ação para fora.
     </p>
     <div class="mt-4 grid gap-6 md:grid-cols-2">
-      <div class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <p class="text-small text-ink-muted">Tamanho previsto</p>
-        <h3 class="mt-4 text-h3 text-ink">Fisioterapia</h3>
-        <p class="mt-4 text-body text-ink-body">
-          Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento.
-        </p>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </div>
-      <div class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <p class="text-small text-ink-muted">Três vezes maior</p>
-        <h3 class="mt-4 text-h3 text-ink">
-          Acompanhamento fisioterapêutico individualizado para dor e limitação de movimento em
-          ombro, joelho e coluna
-        </h3>
-        <p class="mt-4 text-body text-ink-body">
-          Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento.
-        </p>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <p class="label text-ink-muted">Lista com 2 e com 8 itens</p>
-    <p class="mt-4 text-small text-ink-muted">
-      O modelo de conteúdo aceita de 2 a 8. Os dois extremos precisam ficar de pé sem grade fixa de
-      três colunas, que quebraria com qualquer número que não fosse múltiplo dela.
-    </p>
-    <div class="mt-4 grid gap-6 md:grid-cols-2">
-      <div class="rounded-card bg-surface-alt p-6">
-        <p class="text-small text-ink-muted">Dois itens</p>
-        <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
-        <RuledList class="mt-4" items={['Entrada sem degrau', 'Elevador no prédio']} />
-        <p class="mt-8 text-body font-semibold text-ink">
-          Precisa de alguma adaptação? Avise antes, a gente organiza.
-        </p>
-      </div>
-      <div class="rounded-card bg-surface-alt p-6">
-        <p class="text-small text-ink-muted">Oito itens</p>
-        <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
-        <RuledList
-          class="mt-4"
-          items={[
-            'Entrada sem degrau',
-            'Elevador no prédio',
-            'Banheiro adaptado',
-            'Estacionamento nas proximidades',
-            'Estação de metrô a curta caminhada',
-            'Acompanhante pode entrar junto',
-            'Corrimão nos dois lados da escada',
-            'Cadeira para esperar sentado na recepção',
-          ]}
-        />
-        <p class="mt-8 text-body font-semibold text-ink">
-          Precisa de alguma adaptação? Avise antes, a gente organiza.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <p class="label text-ink-muted">Refluxo a 320px</p>
-    <p class="mt-4 text-small text-ink-muted">
-      A base de desenho é 360px, mas a norma exige que o conteúdo funcione a 320px — que é mais
-      estreito que qualquer tela do mockup. A caixa abaixo tem largura fixa e reproduz o
-      empilhamento e a quebra de palavra. Ela não substitui arrastar a janela até lá: faça isso
-      também, porque só assim o cabeçalho fixo, o FAB e a barra de rolagem entram na conta.
-    </p>
-    <div class="mt-4 w-80 rounded-card border border-line-soft p-4">
-      <p class="text-small text-ink-muted">Estou com dor em algum lugar</p>
-      <h3 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h3>
-      <p class="mt-4 text-body text-ink-body">
-        Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia.
-      </p>
-      <a
+      <ServiceCard
+        as="div"
+        eyebrow="Tamanho previsto"
+        title="Fisioterapia"
+        titleAs="h3"
+        description="Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento."
         href="/servicos"
-        class="mt-4 inline-flex min-h-target items-center font-semibold text-brand">Ver detalhes</a
-      >
-    </div>
-  </div>
-
-  <div>
-    <p class="label text-ink-muted">Página inteira sem conteúdo</p>
-    <p class="mt-4 text-small text-ink-muted">
-      Quando não há nada cadastrado, a página não fica em branco nem mostra um título sozinho: entra
-      o estado vazio, com os dois canais de contato. É o mesmo bloco que a `/404` usa.
-    </p>
-    <div class="mt-4 rounded-card border border-line-soft p-6">
-      <EmptyState
-        headingAs="h4"
-        heading="Estamos organizando esta página"
-        message="Enquanto isso, fale com a gente — dá para tirar dúvida por telefone ou WhatsApp."
-        whatsappHref={SITE.whatsapp.href}
-        phoneHref={SITE.phone.href}
-        phoneLabel={SITE.phone.label}
+        media={false}
+      />
+      <ServiceCard
+        as="div"
+        eyebrow="Três vezes maior"
+        title="Acompanhamento fisioterapêutico individualizado para dor e limitação de movimento em ombro, joelho e coluna"
+        titleAs="h3"
+        description="Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento."
+        href="/servicos"
+        media={false}
       />
     </div>
-  </div>
 
-  <div>
-    <p class="label text-ink-muted">Seção vazia</p>
-    <p class="mt-4 text-body text-ink-body">
-      Este é o único caso que se demonstra por ausência. Quando a lista de uma seção vem vazia, a
-      seção inteira não renderiza — nem o título, nem a moldura. Um título sozinho em cima de um
-      espaço vazio é exatamente o defeito que a regra evita, então mostrar um bloco vazio aqui seria
-      demonstrar o erro em vez da regra.
-    </p>
-  </div>
+    <div>
+      <p class="label text-ink-muted">Lista com 2 e com 8 itens</p>
+      <p class="mt-4 text-small text-ink-muted">
+        O modelo de conteúdo aceita de 2 a 8. Os dois extremos precisam ficar de pé sem grade fixa
+        de três colunas, que quebraria com qualquer número que não fosse múltiplo dela.
+      </p>
+      <div class="mt-4 grid gap-6 md:grid-cols-2">
+        <div class="rounded-card bg-surface-alt p-6">
+          <p class="text-small text-ink-muted">Dois itens</p>
+          <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
+          <RuledList class="mt-4" items={['Entrada sem degrau', 'Elevador no prédio']} />
+          <p class="mt-8 text-body font-semibold text-ink">
+            Precisa de alguma adaptação? Avise antes, a gente organiza.
+          </p>
+        </div>
+        <div class="rounded-card bg-surface-alt p-6">
+          <p class="text-small text-ink-muted">Oito itens</p>
+          <h3 class="mt-4 text-h3 text-ink">Como é chegar aqui</h3>
+          <RuledList
+            class="mt-4"
+            items={[
+              'Entrada sem degrau',
+              'Elevador no prédio',
+              'Banheiro adaptado',
+              'Estacionamento nas proximidades',
+              'Estação de metrô a curta caminhada',
+              'Acompanhante pode entrar junto',
+              'Corrimão nos dois lados da escada',
+              'Cadeira para esperar sentado na recepção',
+            ]}
+          />
+          <p class="mt-8 text-body font-semibold text-ink">
+            Precisa de alguma adaptação? Avise antes, a gente organiza.
+          </p>
+        </div>
+      </div>
+    </div>
 
-  <div>
-    <p class="label text-ink-muted">Texto colado de editor de texto</p>
-    <p class="mt-4 text-small text-ink-muted">
-      Espaço duplo, aspas curvas e travessão longo chegam junto quando alguém cola de um editor. O
-      texto abaixo tem os três e precisa continuar legível.
-    </p>
-    <p class="mt-4 max-w-answer text-body text-ink-body">
-      A avaliação — que é sempre individual — começa por uma conversa. “Não sei explicar direito o
-      que eu sinto” é uma frase comum, e ela basta para começar.
-    </p>
+    <div>
+      <p class="label text-ink-muted">Refluxo a 320px</p>
+      <p class="mt-4 text-small text-ink-muted">
+        A base de desenho é 360px, mas a norma exige que o conteúdo funcione a 320px — que é mais
+        estreito que qualquer tela do mockup. A caixa abaixo tem largura fixa e reproduz o
+        empilhamento e a quebra de palavra. Ela não substitui arrastar a janela até lá: faça isso
+        também, porque só assim o cabeçalho fixo, o FAB e a barra de rolagem entram na conta.
+      </p>
+      <div class="mt-4 w-80 rounded-card border border-line-soft p-4">
+        <p class="text-small text-ink-muted">Estou com dor em algum lugar</p>
+        <h3 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h3>
+        <p class="mt-4 text-body text-ink-body">
+          Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia.
+        </p>
+        <a
+          href="/servicos"
+          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand"
+          >Ver detalhes</a
+        >
+      </div>
+    </div>
+
+    <div>
+      <p class="label text-ink-muted">Página inteira sem conteúdo</p>
+      <p class="mt-4 text-small text-ink-muted">
+        Quando não há nada cadastrado, a página não fica em branco nem mostra um título sozinho:
+        entra o estado vazio, com os dois canais de contato. É o mesmo bloco que a `/404` usa.
+      </p>
+      <div class="mt-4 rounded-card border border-line-soft p-6">
+        <EmptyState
+          headingAs="h4"
+          heading="Estamos organizando esta página"
+          message="Enquanto isso, fale com a gente — dá para tirar dúvida por telefone ou WhatsApp."
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      </div>
+    </div>
+
+    <div>
+      <p class="label text-ink-muted">Seção vazia</p>
+      <p class="mt-4 text-body text-ink-body">
+        Este é o único caso que se demonstra por ausência. Quando a lista de uma seção vem vazia, a
+        seção inteira não renderiza — nem o título, nem a moldura. Um título sozinho em cima de um
+        espaço vazio é exatamente o defeito que a regra evita, então mostrar um bloco vazio aqui
+        seria demonstrar o erro em vez da regra.
+      </p>
+    </div>
+
+    <div>
+      <p class="label text-ink-muted">Texto colado de editor de texto</p>
+      <p class="mt-4 text-small text-ink-muted">
+        Espaço duplo, aspas curvas e travessão longo chegam junto quando alguém cola de um editor. O
+        texto abaixo tem os três e precisa continuar legível.
+      </p>
+      <p class="mt-4 max-w-answer text-body text-ink-body">
+        A avaliação — que é sempre individual — começa por uma conversa. “Não sei explicar direito o
+        que eu sinto” é uma frase comum, e ela basta para começar.
+      </p>
+    </div>
   </div>
 </div>

@@ -6,23 +6,18 @@
  * queixa em português comum ("estou com dor no ombro"), não com o nome técnico do atendimento.
  * Forçar a escolha antes de conversar é o jeito mais fácil de perder o contato.
  *
- * ORDEM OBRIGATÓRIA DENTRO DO CARD: frase em português comum → nome técnico → descrição →
- * "Ver detalhes". A frase popular vem primeiro porque é ela que a pessoa reconhece.
- *
- * LINK ESTENDIDO, e por que não é um `<a>` em volta do card: envolver o card inteiro daria ao link
- * um nome acessível formado por frase + nome técnico + descrição, lidos de uma vez só. O padrão
- * certo é `relative` no card + `after:absolute after:inset-0` no "Ver detalhes" — a área clicável
- * cobre o card, e o nome acessível continua sendo só o texto da ação. No Tailwind v4 não é preciso
- * (nem permitido) escrever a utility de `content`: ela já vem com valor inicial vazio, e a versão
- * arbitrária seria reprovada pelo gate de estilos.
+ * Os cards usam o bloco `ServiceCard`, que é dono da ordem obrigatória (frase comum → nome
+ * técnico → descrição → ação) e do link estendido. As dez ocorrências que existiam aqui, na home,
+ * no template de serviço e na seção de resiliência viraram chamadas; o porquê de cada regra está
+ * no cabeçalho de `src/components/blocks/ServiceCard.astro`.
  *
  * O ESTADO VAZIO usa o `EmptyState` de verdade, o mesmo componente da `/404`. É o que a página
  * mostra quando o CMS não tem nenhum serviço cadastrado — situação garantida no dia em que a
  * cliente começar a editar.
  */
 
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import EmptyState from '@/components/blocks/EmptyState.astro';
-import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
 ---
@@ -49,58 +44,35 @@ import { SITE } from '@/lib/site';
   <div>
     <p class="label text-ink-muted">Lista — linha na tela larga, coluna no celular</p>
     <ul class="mt-4 flex flex-col gap-6">
-      <li
-        class="@container relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6 @row:flex-row"
-      >
-        <BrandPlaceholder ratio="16/9" radius="control" class="w-full shrink-0 @row:w-64" />
-        <div>
-          <p class="text-small text-ink-muted">Estou com dor em algum lugar</p>
-          <h4 class="mt-4 text-h3 text-ink">Fisioterapia</h4>
-          <p class="mt-4 text-body text-ink-body">
-            Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento.
-          </p>
-          <a
-            href="/servicos"
-            class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-            >Ver detalhes</a
-          >
-        </div>
-      </li>
+      <ServiceCard
+        eyebrow="Estou com dor em algum lugar"
+        title="Fisioterapia"
+        titleAs="h4"
+        description="Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento."
+        href="/servicos"
+        layout="row"
+      />
 
-      <li
-        class="@container relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6 @row:flex-row"
-      >
-        <BrandPlaceholder ratio="16/9" radius="control" class="w-full shrink-0 @row:w-64" />
-        <div>
-          <p class="text-small text-ink-muted">Quero me mexer com orientação</p>
-          <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
-          <p class="mt-4 text-body text-ink-body">
-            Exercício conduzido em turma pequena, com o plano ajustado ao que a avaliação mostrou.
-          </p>
-          <a
-            href="/servicos"
-            class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-            >Ver detalhes</a
-          >
-        </div>
-      </li>
+      <ServiceCard
+        eyebrow="Quero me mexer com orientação"
+        title="Pilates clínico"
+        titleAs="h4"
+        description="Exercício conduzido em turma pequena, com o plano ajustado ao que a avaliação mostrou."
+        href="/servicos"
+        layout="row"
+      />
 
-      <li class="relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6">
+      <li class="flex flex-col gap-4">
         <p class="label text-ink-muted">Sem imagem cadastrada · título de três linhas</p>
-        <div>
-          <p class="text-small text-ink-muted">Vou operar, ou acabei de operar</p>
-          <h4 class="mt-4 text-h3 text-ink">
-            Acompanhamento no pós-operatório de ombro, joelho e coluna
-          </h4>
-          <p class="mt-4 text-body text-ink-body">
-            Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia.
-          </p>
-          <a
-            href="/servicos"
-            class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-            >Ver detalhes</a
-          >
-        </div>
+        <ServiceCard
+          as="div"
+          eyebrow="Vou operar, ou acabei de operar"
+          title="Acompanhamento no pós-operatório de ombro, joelho e coluna"
+          titleAs="h4"
+          description="Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia."
+          href="/servicos"
+          media={false}
+        />
       </li>
     </ul>
   </div>

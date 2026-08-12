@@ -16,6 +16,7 @@
  * página já tem um `<h1>` próprio. Ver a regra 1 no cabeçalho de `index.astro`.
  */
 
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import Action from '@/components/ui/Action.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
@@ -68,45 +69,27 @@ import { SITE } from '@/lib/site';
     <p class="label text-ink-muted">Serviços — três colunas na tela larga</p>
     <h3 class="mt-4 text-h2 text-ink">O que atendemos</h3>
     <ul class="mt-8 grid gap-6 md:grid-cols-3">
-      <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <BrandPlaceholder ratio="16/9" radius="control" />
-        <p class="mt-4 text-small text-ink-muted">Estou com dor em algum lugar</p>
-        <h4 class="mt-4 text-h3 text-ink">Fisioterapia</h4>
-        <p class="mt-4 text-body text-ink-body">
-          Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento.
-        </p>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
-      <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <BrandPlaceholder ratio="16/9" radius="control" />
-        <p class="mt-4 text-small text-ink-muted">Quero me mexer com orientação</p>
-        <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
-        <p class="mt-4 text-body text-ink-body">
-          Exercício conduzido em turma pequena, com o plano ajustado ao que a avaliação mostrou.
-        </p>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
-      <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <BrandPlaceholder ratio="16/9" radius="control" />
-        <p class="mt-4 text-small text-ink-muted">Vou operar, ou acabei de operar</p>
-        <h4 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h4>
-        <p class="mt-4 text-body text-ink-body">
-          Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia.
-        </p>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
+      <ServiceCard
+        eyebrow="Estou com dor em algum lugar"
+        title="Fisioterapia"
+        titleAs="h4"
+        description="Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento."
+        href="/servicos"
+      />
+      <ServiceCard
+        eyebrow="Quero me mexer com orientação"
+        title="Pilates clínico"
+        titleAs="h4"
+        description="Exercício conduzido em turma pequena, com o plano ajustado ao que a avaliação mostrou."
+        href="/servicos"
+      />
+      <ServiceCard
+        eyebrow="Vou operar, ou acabei de operar"
+        title="Acompanhamento no pós-operatório"
+        titleAs="h4"
+        description="Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia."
+        href="/servicos"
+      />
     </ul>
     <Action as="a" href="/servicos" class="mt-8">Todos os serviços</Action>
   </div>

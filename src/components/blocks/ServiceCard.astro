@@ -1,0 +1,105 @@
+---
+/**
+ * ServiceCard — o card de um atendimento (COMPONENTS.md § ServiceCard).
+ *
+ * Props
+ *   eyebrow      a frase em português comum ("Estou com dor em algum lugar").
+ *   title        o nome técnico do atendimento.
+ *   titleAs      tag do título — padrão `h3`. A `/lab` passa `h3`/`h4` conforme o nível gasto.
+ *   description  texto de apoio. Ausente ⇒ nenhum `<p>` vazio (bloco "relacionados" não tem).
+ *   href         destino do card.
+ *   actionLabel  texto do link — padrão "Ver detalhes".
+ *   media        reserva o espaço de imagem — padrão `true`. `false` = sem imagem cadastrada.
+ *   layout       `stack` (padrão, coluna) ou `row` (imagem à esquerda a partir de 34rem).
+ *   as           tag da raiz — `li` (padrão, dentro de lista) ou `div`.
+ *   …            qualquer outro atributo válido é repassado à raiz.
+ *
+ * A ORDEM DOS QUATRO É OBRIGATÓRIA e o componente a impõe: frase em português comum → nome
+ * técnico → descrição → ação. A frase popular vem primeiro porque é ela que a pessoa reconhece —
+ * quem chega com dor no ombro não procura "traumato-ortopedia". Como prop e não como slot
+ * justamente para que a ordem não seja negociável no ponto de uso.
+ *
+ * LINK ESTENDIDO, e é por isso que a raiz é sempre `relative`: a área clicável do card inteiro vem
+ * de um `::after` posicionado sobre ele, a partir da própria âncora da ação. Envolver o card num
+ * `<a>` daria ao link um nome acessível formado por frase + nome técnico + descrição, lidos de uma
+ * vez só — é o mesmo motivo de não existir um primitivo `CardLink` solto: a correção dele depende
+ * de um ancestral `relative` que ele não enxerga. No Tailwind v4 não é preciso (nem permitido)
+ * escrever a utility de `content`: ela já vem com valor inicial vazio, e a versão arbitrária seria
+ * reprovada pelo gate de estilos.
+ *
+ * AGUENTA TÍTULO DE TRÊS LINHAS sem mudar de forma — é um dos casos-limite declarados, e por isso
+ * nada no card depende da altura do título.
+ *
+ * RECONCILIAÇÃO: as onze ocorrências que originaram este componente tinham CINCO grafias de
+ * contêiner. A canônica é a daqui, e o espaçamento interno passou a sair de `gap-6` no card em vez
+ * de `mt-4` em cada filho — a única diferença visível é um degrau a mais entre a imagem e a frase
+ * nos três cards da home.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'li'>`, não genérica em `as` — ver o comentário
+ * equivalente em `Container.astro`. Nem `li` nem `div` têm atributo exclusivo de tag.
+ *
+ *   <ServiceCard eyebrow="Estou com dor…" title="Fisioterapia" description="…" href="/servicos" />
+ *   <ServiceCard … layout="row" />            no índice, imagem à esquerda em caixa larga
+ *   <ServiceCard … media={false} />           sem imagem cadastrada
+ *
+ * Quando NÃO usar: para um card que não leva ação própria. Sem o link, o `::after` não tem dono e
+ * o card vira uma caixa com borda — que é `class` num `<div>`, não um componente.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
+
+interface Props extends HTMLAttributes<'li'> {
+  /** Frase em português comum — vem antes do nome técnico. */
+  eyebrow: string;
+  /** Nome técnico do atendimento. */
+  title: string;
+  /** Tag do título — padrão `'h3'`. */
+  titleAs?: HTMLTag;
+  /** Texto de apoio. Ausente ⇒ nenhum parágrafo é renderizado. */
+  description?: string;
+  /** Destino do card. */
+  href: string;
+  /** Texto da ação — padrão `'Ver detalhes'`. */
+  actionLabel?: string;
+  /** Reserva o espaço de imagem — padrão `true`. */
+  media?: boolean;
+  /** `stack` (padrão) ou `row`. */
+  layout?: 'stack' | 'row';
+  /** Tag da raiz — `'li'` (padrão) ou `'div'`. */
+  as?: HTMLTag;
+}
+
+const {
+  eyebrow,
+  title,
+  titleAs: Title = 'h3',
+  description,
+  href,
+  actionLabel = 'Ver detalhes',
+  media = true,
+  layout = 'stack',
+  as: Tag = 'li',
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* Sufixo `Class` nos nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const rootClass =
+  'relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6';
+const layoutClass = layout === 'row' ? '@container @row:flex-row' : undefined;
+const mediaClass = layout === 'row' ? 'w-full shrink-0 @row:w-64' : undefined;
+const actionClass =
+  'mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0';
+---
+
+<Tag class:list={[rootClass, layoutClass, className]} {...rest}>
+  {media && <BrandPlaceholder ratio="16/9" radius="control" class={mediaClass} />}
+  <div>
+    <p class="text-small text-ink-muted">{eyebrow}</p>
+    <Title class="mt-4 text-h3 text-ink">{title}</Title>
+    {description && <p class="mt-4 text-body text-ink-body">{description}</p>}
+    <a href={href} class={actionClass}>{actionLabel}</a>
+  </div>
+</Tag>

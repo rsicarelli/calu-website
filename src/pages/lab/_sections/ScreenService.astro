@@ -22,6 +22,7 @@
  * de teclado fica escondido atrás dele.
  */
 
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import Credential from '@/components/ui/Credential.astro';
@@ -217,24 +218,20 @@ import RuledList from '@/components/ui/RuledList.astro';
   <div>
     <p class="label text-ink-muted">Relacionados</p>
     <ul class="mt-4 grid gap-6 md:grid-cols-2">
-      <li class="relative rounded-card border border-line-soft bg-surface p-6">
-        <p class="text-small text-ink-muted">Quero me mexer com orientação</p>
-        <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
-      <li class="relative rounded-card border border-line-soft bg-surface p-6">
-        <p class="text-small text-ink-muted">Vou operar, ou acabei de operar</p>
-        <h4 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h4>
-        <a
-          href="/servicos"
-          class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
-          >Ver detalhes</a
-        >
-      </li>
+      <ServiceCard
+        eyebrow="Quero me mexer com orientação"
+        title="Pilates clínico"
+        titleAs="h4"
+        href="/servicos"
+        media={false}
+      />
+      <ServiceCard
+        eyebrow="Vou operar, ou acabei de operar"
+        title="Acompanhamento no pós-operatório"
+        titleAs="h4"
+        href="/servicos"
+        media={false}
+      />
     </ul>
   </div>
 </div>
