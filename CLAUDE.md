@@ -213,10 +213,11 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   `fmt:check` e `check:styles`. O pre-commit chama `task check` por um único alvo — de propósito,
   para nunca divergir do gate quando um novo check entrar.
 - Alias `@/*` → `src/*` (via `paths` no `tsconfig.json`; Astro/Vite resolvem sozinhos).
-- Estrutura de pastas: `src/components/ui/` (primitivos; `src/components/blocks/` chega na
-  Fase 1), `src/lib/` (helpers puros — `site.ts`, `seo.ts`, `jsonld.ts`), `src/styles/global.css`
-  (tokens e base), `tests/tokens/` (contraste e invariantes dos tokens), `tests/components/`
-  (Container API + axe-core), `tests/system/` (linkedom sobre `dist/**`), `scripts/`
+- Estrutura de pastas: `src/components/ui/` (primitivos), `src/components/blocks/` (chrome
+  estrutural), `src/components/content/` (`JsonLd`), `src/lib/` (helpers puros — `site.ts`,
+  `seo.ts`, `jsonld.ts`), `src/styles/global.css` (tokens e base), `tests/tokens/` (contraste e
+  invariantes dos tokens), `tests/components/` (Container API + axe-core), `tests/lib/`,
+  `tests/pages/`, `tests/system/` (linkedom sobre `dist/**`), `scripts/`
   (`check-utilities.mjs`, o gate de arbitrary value/utility morta).
 - `task --list` mostra todos os comandos disponíveis.
 

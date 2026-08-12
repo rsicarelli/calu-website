@@ -23,7 +23,7 @@ export const SITE = {
 /* Itens do nav principal (Header + MobileNav + Footer), na ordem em que aparecem — fonte
    única para os três, que repetem o mesmo menu (design_handoff_calu/PAGES.md "Rotas Astro
    sugeridas"). Nenhuma dessas rotas existe em `src/pages/` ainda; são as páginas previstas
-   para as fases seguintes (Fase 3), não um erro de link. */
+   para as fases seguintes (Fase 4), não um erro de link. */
 export const SITE_NAV: NavLink[] = [
   { href: '/servicos', label: 'Serviços' },
   { href: '/equipe', label: 'Equipe' },

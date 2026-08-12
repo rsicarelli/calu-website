@@ -7,7 +7,7 @@
    algoritmo de "aspect ratio intrínseco" do CSSWG usa para calcular a proporção antes do
    download) OU uma declaração de `aspect-ratio` reconhecível (classe utilitária ou `style`
    inline). Medição real de CLS exigiria um motor de browser (Lighthouse/Playwright), fora de
-   escopo enquanto não houver CI (CLAUDE.md, Fase 4).
+   escopo enquanto não houver CI (CLAUDE.md, Fase 5 — endurecimento).
 
    `width`/`height` são checados como ATRIBUTOS HTML (`getAttribute`/`hasAttribute`), não como a
    propriedade JS `.width`/`.height` do elemento — em um `<img>` sem esses atributos, um DOM real
