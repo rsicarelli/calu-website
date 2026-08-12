@@ -1,0 +1,156 @@
+---
+/**
+ * /lab — kitchen sink do design system.
+ *
+ * Rota `noindex` e FORA do sitemap (ver `src/pages/sitemap.xml.ts`, que lista as duas exceções
+ * permanentes). Existe para três coisas, nesta ordem de importância
+ * (`design_handoff_calu/PROMPT.md`, "página de laboratório"):
+ *
+ *   1. enxergar repetição REAL antes de abstrair — a Fase 3 só extrai o que se repetiu de fato
+ *      (3 ocorrências, ou 2 + variação de estado), e é aqui que a repetição fica visível;
+ *   2. validar token e contraste no navegador, nos dois temas, em tela de verdade;
+ *   3. sobreviver como página viva de regressão visual. **Não apagar depois** — quando a Fase 3
+ *      substituir o markup cru por componente, esta página é o teste: nada pode mudar de aparência.
+ *
+ * O conteúdo é DELIBERADAMENTE cru e repetido. Não componentizar nada aqui antes da Fase 3, e não
+ * criar um `_data.ts` compartilhado: extrair cedo esconde justamente a repetição que a fase
+ * seguinte precisa enxergar.
+ *
+ * ---
+ *
+ * SOBRE O TEXTO DESTA PÁGINA — leia antes de editar qualquer partial.
+ *
+ * Duas regras do projeto se cruzam aqui e a interseção é estreita:
+ *
+ *   · o handoff exige "copy em PT-BR real, frase curta, sem jargão. Nada de lorem ipsum"
+ *     (`design_handoff_calu/CLAUDE.md`, "Invioláveis" §10);
+ *   · o guardrail do projeto proíbe "conteúdo real da clínica … antes de ser levantado com a
+ *     cliente e aprovado. Não inventar placeholder que pareça real" (`CLAUDE.md`, "Guardrails").
+ *
+ * A saída é prosa portuguesa de verdade que NÃO AFIRMA NADA verificável sobre a clínica: nenhum
+ * nome de profissional, nenhum número de CREFITO, nenhum endereço, telefone, horário ou preço
+ * inventado. Onde a tela pede um dado da clínica, o dado vem de `SITE` (`src/lib/site.ts`), que
+ * já é placeholder declarado ("a confirmar", DDD 000). Onde a tela pede um nome próprio, o texto
+ * usa a forma entre colchetes do próprio mockup (`[Nome da profissional]`).
+ *
+ * Nomes de modalidade ("Pilates clínico", "Fisioterapia ortopédica") aparecem porque são termos
+ * genéricos da área, não afirmação sobre o que ESTA clínica oferece — e a página inteira se
+ * declara exemplo, no parágrafo de abertura e no rótulo de cada tela.
+ *
+ * ---
+ *
+ * DUAS REGRAS ESTRUTURAIS que todo partial de `_sections/` segue:
+ *
+ *   1. Cabeçalho desce um nível. A página tem UM `<h1>` (regra do projeto e de `PAGES.md`), então
+ *      o que numa tela real seria `<h1>` vira `<h3>` debaixo do `<h2>` da seção, com o TAMANHO
+ *      pedido pelo design (`text-display`/`text-h1`). Nível e tamanho são independentes neste
+ *      sistema: peso e cor vêm do `@layer base` para h1..h6, o tamanho é utility. É isso que
+ *      mantém `heading-order` do axe limpo numa página que empilha oito telas.
+ *   2. Andaime de demonstração NUNCA é cabeçalho. Rótulo de estado ("hover", "erro", "8 itens")
+ *      sai em `<p class="label">`. Só conteúdo de verdade usa `h3..h5`.
+ *
+ * E uma regra de `id`: TODO `id` desta página começa com `lab-`. A página renderiza o mesmo campo
+ * de formulário várias vezes, e `conteudo`, `mobile-nav-toggle` e `mobile-nav-panel` já são da
+ * casca (`BaseLayout`/`MobileNav`).
+ *
+ * REGRA DE LINK, que decorre da anterior: dentro de uma seção de TELA, todo link aponta para a
+ * ROTA REAL que ele teria em produção (`/servicos`, `/duvidas`, o WhatsApp de `SITE`) — nunca para
+ * uma âncora de outra seção do laboratório. Duas razões: a tela reproduzida fica igual à de
+ * verdade, que é o ponto de um kitchen sink; e âncora entre seções seria um link interno cujo alvo
+ * depende de qual seção já foi implementada, o que quebra a cada commit até a última.
+ * Essas rotas ainda não existem (chegam na Fase 4) — é a mesma situação, já documentada, do
+ * `SITE_NAV` em `src/lib/site.ts`. Navegação DENTRO do laboratório existe num lugar só: o sumário.
+ */
+import Container from '@/components/ui/Container.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/lib/site';
+
+import Resilience from './_sections/Resilience.astro';
+import ScreenContact from './_sections/ScreenContact.astro';
+import ScreenContactPlace from './_sections/ScreenContactPlace.astro';
+import ScreenFaq from './_sections/ScreenFaq.astro';
+import ScreenHomeBottom from './_sections/ScreenHomeBottom.astro';
+import ScreenIndex from './_sections/ScreenIndex.astro';
+import ScreenService from './_sections/ScreenService.astro';
+import ScreenTeam from './_sections/ScreenTeam.astro';
+import ScreenHomeTop from './_sections/ScreenHomeTop.astro';
+import StatesAction from './_sections/StatesAction.astro';
+import StatesForm from './_sections/StatesForm.astro';
+import StatesMedia from './_sections/StatesMedia.astro';
+import TokensColor from './_sections/TokensColor.astro';
+import TokensShape from './_sections/TokensShape.astro';
+import TokensType from './_sections/TokensType.astro';
+
+/* Fonte única do índice E da ordem das seções: o mesmo array alimenta os dois, então âncora do
+   sumário não tem como divergir do `id` da seção. `tests/pages/lab.test.ts` trava isso mesmo
+   assim — o array protege contra descuido, o teste protege contra alguém abandonar o array. */
+const SECTIONS = [
+  { id: 'lab-cor', title: 'Cor', Section: TokensColor },
+  { id: 'lab-tipografia', title: 'Tipografia', Section: TokensType },
+  { id: 'lab-espaco-e-forma', title: 'Espaço e forma', Section: TokensShape },
+  { id: 'lab-acao', title: 'Ação e link', Section: StatesAction },
+  { id: 'lab-campos', title: 'Campos de formulário', Section: StatesForm },
+  { id: 'lab-imagem', title: 'Imagem e credencial', Section: StatesMedia },
+  {
+    id: 'lab-home-topo',
+    title: 'Home — hero, manifesto, serviços e equipe',
+    Section: ScreenHomeTop,
+  },
+  { id: 'lab-home-base', title: 'Home — família, acesso, CTA e mapa', Section: ScreenHomeBottom },
+  { id: 'lab-servico', title: 'Serviço — o template', Section: ScreenService },
+  { id: 'lab-contato', title: 'Contato — o formulário e seus estados', Section: ScreenContact },
+  { id: 'lab-lugar', title: 'Contato — onde estamos e acesso', Section: ScreenContactPlace },
+  { id: 'lab-equipe', title: 'Equipe', Section: ScreenTeam },
+  { id: 'lab-indice', title: 'Índice de serviços', Section: ScreenIndex },
+  { id: 'lab-faq', title: 'Dúvidas frequentes', Section: ScreenFaq },
+  { id: 'lab-resiliencia', title: 'Resiliência de conteúdo', Section: Resilience },
+];
+---
+
+<BaseLayout title={`Laboratório do design system · ${SITE.name}`} noindex>
+  <Container as="section" class="py-12" aria-labelledby="lab-intro-titulo" data-prose>
+    <p class="label text-ink-muted">Página interna</p>
+    <h1 id="lab-intro-titulo" class="mt-4 text-h1">Laboratório do design system</h1>
+    <p class="mt-4 text-lead text-ink-body">
+      Esta página reúne, num lugar só, cada token, cada estado de cada elemento e cada tela do site.
+      Ela não é parte do site público: sai do índice dos buscadores e não entra no sitemap.
+    </p>
+    <p class="mt-4 text-body text-ink-body">
+      Todo o texto daqui é <strong class="font-semibold">exemplo</strong>, escrito só para exercitar
+      tipografia, quebra de linha e limite de layout. Nada nesta página descreve a clínica: não há
+      nome de profissional, número de registro, endereço, horário nem valor. Onde uma tela precisa
+      de um dado de contato, o dado vem do cadastro central do site, que hoje ainda é placeholder.
+    </p>
+    <nav aria-label="Índice do laboratório" class="mt-8">
+      <p class="label text-ink-muted">Nesta página</p>
+      <ul class="mt-4 flex flex-col">
+        {
+          SECTIONS.map(({ id, title }) => (
+            <li>
+              <a href={`#${id}`} class="inline-flex min-h-target items-center text-body text-brand">
+                {title}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </Container>
+
+  {
+    SECTIONS.map(({ id, title, Section }) => (
+      <section
+        id={id}
+        aria-labelledby={`${id}-titulo`}
+        class="scroll-mt-header border-t border-line-soft py-16"
+      >
+        <Container width="page">
+          <h2 id={`${id}-titulo`} class="text-h2">
+            {title}
+          </h2>
+        </Container>
+        <Section />
+      </section>
+    ))
+  }
+</BaseLayout>

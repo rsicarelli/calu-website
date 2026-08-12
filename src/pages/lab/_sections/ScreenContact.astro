@@ -1,0 +1,280 @@
+---
+/**
+ * Tela "Contato" (mockup §07) — o formulário nos quatro estados, com WhatsApp e telefone ANTES
+ * dele.
+ *
+ * A ORDEM IMPORTA: parte do público liga em vez de escrever, e parte desiste no meio de um
+ * formulário. Por isso os dois canais diretos vêm primeiro, com o mesmo peso visual, e o
+ * formulário depois — para quem prefere escrever.
+ *
+ * O CAMPO DE E-MAIL EXISTE NOS DOIS BREAKPOINTS e é opcional em ambos. O mockup mostra o campo no
+ * celular e o omite na tela larga; `PAGES.md` registra a divergência e decide pela versão do
+ * celular. Não "corrigir" para o desktop do mockup.
+ *
+ * QUATRO DETALHES QUE NÃO SÃO NEGOCIÁVEIS, cada um por um motivo concreto:
+ *
+ *   · "enviando" usa `aria-disabled` + `aria-busy`, NUNCA o atributo `disabled` — ele tira o botão
+ *     da ordem de foco no meio do envio e a pessoa perde o lugar. O bloqueio real do submit é
+ *     trabalho do handler, não da marcação;
+ *   · o resumo de erro é um contêiner com `tabindex="-1"` que recebe foco no submit inválido, e
+ *     precisa de estilo em `:focus`, não só `:focus-visible` — no Chrome um contêiner focado por
+ *     script não casa `:focus-visible`, e o resumo ficaria sem anel nenhum;
+ *   · cada mensagem de erro NOMEIA o campo ("Informe um telefone com DDD"), nunca "Campo
+ *     obrigatório": quem usa leitor de tela ouve a mensagem fora do contexto visual do campo;
+ *   · o honeypot é escondido com `display: none`, jamais `sr-only` ou `clip-path` — os dois
+ *     deixam o campo alcançável por leitor de tela, a pessoa preenche e é barrada como spam.
+ *
+ * `autocomplete` correto não é polimento: é WCAG 1.3.5, e para o público de 60–75 anos é a
+ * diferença entre enviar e desistir no meio do preenchimento.
+ *
+ * Os quatro estados são renderizados lado a lado, então cada `id` é namespaced pelo estado —
+ * `lab-contato-<estado>-<campo>`. `tests/pages/lab.test.ts` reprova repetição.
+ */
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+---
+
+<div class="container-page mt-8 flex flex-col gap-12">
+  <div>
+    <h3 class="text-h1 text-ink">Fale com a gente</h3>
+    <p class="mt-4 text-lead text-ink-body">
+      O jeito mais rápido é o WhatsApp ou o telefone. Se preferir escrever com calma, o formulário
+      está logo abaixo.
+    </p>
+    <ContactPair
+      class="mt-8"
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+    <p class="mt-4 text-small text-ink-muted">
+      A resposta costuma sair dentro do horário de atendimento. Ninguém precisa esperar retorno de
+      madrugada.
+    </p>
+  </div>
+
+  <!-- Estado parado -->
+  <div>
+    <p class="label text-ink-muted">Formulário — parado</p>
+    <h4 class="mt-4 text-h3 text-ink">Ou escreva por aqui</h4>
+    <form class="mt-4 flex max-w-answer flex-col gap-6">
+      <div class="flex flex-col">
+        <label for="lab-contato-parado-nome" class="text-small font-semibold text-ink">Nome</label>
+        <input
+          type="text"
+          id="lab-contato-parado-nome"
+          name="nome"
+          autocomplete="name"
+          required
+          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+        />
+      </div>
+      <div class="flex flex-col">
+        <label for="lab-contato-parado-telefone" class="text-small font-semibold text-ink"
+          >Telefone ou WhatsApp</label
+        >
+        <input
+          type="tel"
+          id="lab-contato-parado-telefone"
+          name="telefone"
+          autocomplete="tel"
+          required
+          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+        />
+      </div>
+      <div class="flex flex-col">
+        <label for="lab-contato-parado-email" class="text-small font-semibold text-ink"
+          >E-mail (opcional)</label
+        >
+        <input
+          type="email"
+          id="lab-contato-parado-email"
+          name="email"
+          autocomplete="email"
+          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+        />
+      </div>
+
+      <fieldset class="rounded-card border border-line-soft p-6">
+        <legend class="text-small font-semibold text-ink">Para quem é o atendimento</legend>
+        <div class="mt-4 flex flex-col">
+          <label
+            for="lab-contato-parado-para-mim"
+            class="flex min-h-target items-center gap-4 text-body text-ink"
+          >
+            <input
+              type="radio"
+              id="lab-contato-parado-para-mim"
+              name="para-quem"
+              value="mim"
+              checked
+            />
+            Para mim
+          </label>
+          <label
+            for="lab-contato-parado-para-pai"
+            class="flex min-h-target items-center gap-4 text-body text-ink"
+          >
+            <input
+              type="radio"
+              id="lab-contato-parado-para-pai"
+              name="para-quem"
+              value="pai-ou-mae"
+            />
+            Para meu pai ou minha mãe
+          </label>
+          <label
+            for="lab-contato-parado-para-outra"
+            class="flex min-h-target items-center gap-4 text-body text-ink"
+          >
+            <input type="radio" id="lab-contato-parado-para-outra" name="para-quem" value="outra" />
+            Para outra pessoa da família
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="flex flex-col">
+        <label for="lab-contato-parado-interesse" class="text-small font-semibold text-ink"
+          >Interesse</label
+        >
+        <select
+          id="lab-contato-parado-interesse"
+          name="interesse"
+          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+        >
+          <option>Ainda não sei</option>
+          <option>Fisioterapia</option>
+          <option>Pilates clínico</option>
+          <option>Acompanhamento no pós-operatório</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="lab-contato-parado-mensagem" class="text-small font-semibold text-ink"
+          >Mensagem</label
+        >
+        <textarea
+          id="lab-contato-parado-mensagem"
+          name="mensagem"
+          rows="4"
+          class="mt-4 rounded-control border border-field-border bg-field-bg px-5 py-4 text-body text-ink"
+        ></textarea>
+      </div>
+
+      {
+        /* Honeypot: escondido com `display: none` via `hidden`, mais `tabindex="-1"`,
+        `aria-hidden` e `autocomplete="off"`. Nunca `sr-only` nem `clip-path` — os dois deixam o
+        campo alcançável por leitor de tela, e a pessoa que o preenchesse seria barrada como spam.
+        Sem captcha visual em lugar nenhum do site. */
+      }
+      <input
+        type="text"
+        name="lab-contato-parado-confirmacao"
+        hidden
+        tabindex="-1"
+        aria-hidden="true"
+        autocomplete="off"
+      />
+
+      <button
+        type="submit"
+        data-surface="accent"
+        class="inline-flex min-h-target-primary cursor-pointer items-center justify-center rounded-control bg-accent px-6 font-semibold text-on-accent hover:bg-accent-hover"
+        >Enviar mensagem</button
+      >
+    </form>
+  </div>
+
+  <!-- Estado com erro -->
+  <div>
+    <p class="label text-ink-muted">Formulário — com erro</p>
+    <p class="mt-4 text-small text-ink-muted">
+      O resumo no topo recebe o foco no envio inválido e lista cada campo com problema. Cada erro é
+      a soma de três sinais: mensagem nomeando o campo, borda mais grossa e
+      <span class="font-semibold">aria-invalid</span>.
+    </p>
+    <div class="mt-4 flex max-w-answer flex-col gap-6">
+      <div
+        tabindex="-1"
+        class="rounded-card border-2 border-error bg-error-bg p-6 focus:outline-3 focus:outline-offset-2 focus:outline-focus-ring"
+      >
+        <h4 class="text-h3 text-error">Não foi possível enviar</h4>
+        <ul class="mt-4 flex flex-col" data-prose>
+          <li>
+            <a
+              href="#lab-contato-erro-telefone"
+              class="inline-flex min-h-target items-center font-semibold text-error"
+              >Faltou o telefone — é por ele que a gente retorna.</a
+            >
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="lab-contato-erro-nome" class="text-small font-semibold text-ink">Nome</label>
+        <input
+          type="text"
+          id="lab-contato-erro-nome"
+          name="nome"
+          autocomplete="name"
+          required
+          class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+        />
+      </div>
+      <div class="flex flex-col">
+        <label for="lab-contato-erro-telefone" class="text-small font-semibold text-ink"
+          >Telefone ou WhatsApp</label
+        >
+        <input
+          type="tel"
+          id="lab-contato-erro-telefone"
+          name="telefone"
+          autocomplete="tel"
+          required
+          aria-invalid="true"
+          aria-describedby="lab-contato-erro-telefone-mensagem"
+          class="mt-4 min-h-target rounded-control border-2 border-error bg-field-bg px-5 text-body text-ink"
+        />
+        <span
+          id="lab-contato-erro-telefone-mensagem"
+          class="mt-4 text-small font-semibold text-error">Informe um telefone com DDD.</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado enviando -->
+  <div>
+    <p class="label text-ink-muted">Formulário — enviando</p>
+    <p class="mt-4 text-small text-ink-muted">
+      O botão anuncia o andamento e continua alcançável por teclado. Repare que ele NÃO usa o
+      atributo <span class="font-semibold">disabled</span>: isso o tiraria da ordem de foco no meio
+      do envio.
+    </p>
+    <button
+      type="button"
+      aria-disabled="true"
+      aria-busy="true"
+      class="mt-4 inline-flex min-h-target-primary items-center justify-center rounded-control bg-disabled-bg px-6 font-semibold text-disabled-ink"
+      >Enviando…</button
+    >
+  </div>
+
+  <!-- Estado enviado -->
+  <div>
+    <p class="label text-ink-muted">Formulário — enviado</p>
+    <div role="status" class="mt-4 rounded-card border border-line-soft bg-surface p-6">
+      <h4 class="text-h3 text-ink">Mensagem enviada</h4>
+      <p class="mt-4 text-body text-ink-body">
+        A gente responde dentro do horário de atendimento. Se preferir adiantar, o WhatsApp costuma
+        ser mais rápido.
+      </p>
+      <ContactPair
+        class="mt-8"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,271 @@
+---
+/**
+ * Grade de amostras de cor — os 31 tokens `--color-*` do `@theme`, um a um.
+ *
+ * Renderizado DUAS vezes por `TokensColor.astro`: uma herdando o tema da página, outra dentro de
+ * um `data-theme="dark"`. Por isso este arquivo não tem NENHUM `id` e nenhum `<h*>`: os dois usos
+ * conviveriam no mesmo documento e duplicariam ambos. Rótulo de grupo sai em `<p class="label">`,
+ * que é andaime de demonstração, não estrutura de cabeçalho.
+ *
+ * POR QUE CADA CLASSE ESTÁ ESCRITA POR EXTENSO, e não gerada a partir de uma lista de nomes:
+ * `scripts/check-utilities.mjs` só enxerga o que está DENTRO de um atributo `class=`. Uma classe
+ * montada (`class={`bg-${token}`}`) escapa das duas travas — e como o Tailwind v4 varre o arquivo
+ * cru, ele ainda geraria o CSS a partir do literal solto, então um typo não quebraria o build:
+ * viraria no-op silencioso, exatamente o buraco que a trava B existe pra fechar. Verbosidade aqui
+ * é o preço de a grade inteira ser verificada.
+ *
+ * A amostra é um quadrado de `size-target` (52px, o mesmo alvo de toque do sistema) com borda
+ * `line-soft` — sem a borda, `bg`, `surface` e `field-bg` desapareceriam contra o fundo da página
+ * no tema claro, que é justamente quando a diferença entre eles importa.
+ */
+---
+
+<div class="flex flex-col gap-8">
+  <div>
+    <p class="label text-ink-muted">Superfícies</p>
+    <ul class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-bg"></span>
+        <span class="text-small text-ink"
+          >bg<br /><span class="text-ink-muted">fundo da página</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-surface"
+        ></span>
+        <span class="text-small text-ink"
+          >surface<br /><span class="text-ink-muted">card e painel</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-surface-alt"
+        ></span>
+        <span class="text-small text-ink"
+          >surface-alt<br /><span class="text-ink-muted">faixa creme</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-surface-brand"
+        ></span>
+        <span class="text-small text-ink"
+          >surface-brand<br /><span class="text-ink-muted">manifesto e CTA</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-surface-deep"
+        ></span>
+        <span class="text-small text-ink"
+          >surface-deep<br /><span class="text-ink-muted">rodapé e CTA escuro</span></span
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Linhas</p>
+    <ul class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-line"></span>
+        <span class="text-small text-ink"
+          >line<br /><span class="text-ink-muted">borda padrão de controle</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-line-strong"
+        ></span>
+        <span class="text-small text-ink"
+          >line-strong<br /><span class="text-ink-muted">régua de abertura de seção</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-line-soft"
+        ></span>
+        <span class="text-small text-ink"
+          >line-soft<br /><span class="text-ink-muted">divisória discreta</span></span
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Texto</p>
+    <ul class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink"></span>
+        <span class="text-small text-ink">ink<br /><span class="text-ink-muted">título</span></span>
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink-body"
+        ></span>
+        <span class="text-small text-ink"
+          >ink-body<br /><span class="text-ink-muted">texto corrido</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink-muted"
+        ></span>
+        <span class="text-small text-ink"
+          >ink-muted<br /><span class="text-ink-muted">meta e rótulo</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink-on-brand"
+        ></span>
+        <span class="text-small text-ink"
+          >ink-on-brand<br /><span class="text-ink-muted">único texto sobre surface-brand</span
+          ></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink-on-deep"
+        ></span>
+        <span class="text-small text-ink"
+          >ink-on-deep<br /><span class="text-ink-muted">texto sobre surface-deep</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink-on-deep-2"
+        ></span>
+        <span class="text-small text-ink"
+          >ink-on-deep-2<br /><span class="text-ink-muted">secundário sobre deep</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-ink-on-deep-3"
+        ></span>
+        <span class="text-small text-ink"
+          >ink-on-deep-3<br /><span class="text-ink-muted">meta sobre deep</span></span
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Marca</p>
+    <ul class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-brand"></span>
+        <span class="text-small text-ink"
+          >brand<br /><span class="text-ink-muted">link e texto de marca</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-brand-tint"
+        ></span>
+        <span class="text-small text-ink"
+          >brand-tint<br /><span class="text-ink-muted">fundo de hover e foco</span></span
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Ação</p>
+    <ul class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-accent"></span>
+        <span class="text-small text-ink"
+          >accent<br /><span class="text-ink-muted">fundo da ação principal</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-accent-hover"
+        ></span>
+        <span class="text-small text-ink"
+          >accent-hover<br /><span class="text-ink-muted">mesma ação, sob o cursor</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-on-accent"
+        ></span>
+        <span class="text-small text-ink"
+          >on-accent<br /><span class="text-ink-muted">texto sobre accent</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-accent-deep"
+        ></span>
+        <span class="text-small text-ink"
+          >accent-deep<br /><span class="text-ink-muted">ação sobre fundo escuro</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-on-accent-deep"
+        ></span>
+        <span class="text-small text-ink"
+          >on-accent-deep<br /><span class="text-ink-muted">texto sobre accent-deep</span></span
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Estado</p>
+    <ul class="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-focus-ring"
+        ></span>
+        <span class="text-small text-ink"
+          >focus-ring<br /><span class="text-ink-muted">anel de foco</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span
+          class="size-target shrink-0 rounded-control border border-line-soft bg-focus-ring-on-dark"
+        ></span>
+        <span class="text-small text-ink"
+          >focus-ring-on-dark<br /><span class="text-ink-muted">o mesmo anel, em bloco escuro</span
+          ></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-focus-halo"
+        ></span>
+        <span class="text-small text-ink"
+          >focus-halo<br /><span class="text-ink-muted">reforço supletivo do anel</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-error"></span>
+        <span class="text-small text-ink"
+          >error<br /><span class="text-ink-muted">mensagem e borda de erro</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-error-bg"
+        ></span>
+        <span class="text-small text-ink"
+          >error-bg<br /><span class="text-ink-muted">fundo do resumo de erro</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-disabled-bg"
+        ></span>
+        <span class="text-small text-ink"
+          >disabled-bg<br /><span class="text-ink-muted">fundo de controle inativo</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-disabled-ink"
+        ></span>
+        <span class="text-small text-ink"
+          >disabled-ink<br /><span class="text-ink-muted">texto de controle inativo</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-field-bg"
+        ></span>
+        <span class="text-small text-ink"
+          >field-bg<br /><span class="text-ink-muted">fundo de campo</span></span
+        >
+      </li>
+      <li class="flex items-center gap-4">
+        <span class="size-target shrink-0 rounded-control border border-line-soft bg-field-border"
+        ></span>
+        <span class="text-small text-ink"
+          >field-border<br /><span class="text-ink-muted">borda de campo</span></span
+        >
+      </li>
+    </ul>
+  </div>
+</div>

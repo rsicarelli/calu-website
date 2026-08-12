@@ -42,7 +42,7 @@ export const EXEMPT_COLOR_TOKENS: ColorExemption[] = [
   {
     token: '--color-focus-halo',
     reason:
-      'halo decorativo supletivo ao redor do anel de foco sólido (--color-focus-ring), que já é o indicador funcional e já tem contraste próprio medido; zero consumidor em src/ hoje. Se algum componente vier a usar este halo como ÚNICO indicador de foco (sem o anel sólido), esta isenção precisa ser revisitada e o par precisa voltar a NONTEXT_PAIRS.',
+      'halo decorativo supletivo ao redor do anel de foco sólido (--color-focus-ring), que já é o indicador funcional e já tem contraste próprio medido. GANHOU SEU PRIMEIRO CONSUMIDOR na Fase 2: os campos com foco de `/lab` (src/pages/lab/_sections/StatesForm.astro) emitem `ring-3 ring-focus-halo` — mas SEMPRE junto do anel sólido (`outline-3 outline-focus-ring`), que continua sendo o indicador que carrega a conformidade sozinho. A condição da isenção, portanto, segue valendo: o halo acompanha, nunca substitui. Se algum componente vier a usar este halo como ÚNICO indicador de foco (sem o anel sólido), a isenção precisa ser revisitada e o par precisa voltar a NONTEXT_PAIRS.',
   },
 ];
 

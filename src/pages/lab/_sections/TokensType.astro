@@ -1,0 +1,131 @@
+---
+/**
+ * Seção "Tipografia" da `/lab` — os dez tamanhos da escala, os dois pesos, e a regra do rótulo.
+ *
+ * A escala tem DEZ tamanhos, não oito: além de display/h1/h2/h3/lead/body/small/label existem
+ * `lockup` (o "CaLu" do Header) e `question` (o `<summary>` do FaqItem). Os dois caíam entre
+ * `lead` e `h3` e virariam arbitrary value se não tivessem nome próprio (DESIGN-SYSTEM §2).
+ *
+ * Cada espécime usa prosa portuguesa de verdade, não "Aa" nem pangrama: o que precisa ser julgado
+ * aqui é quebra de linha, altura de linha e comportamento com diacrítico (ã õ á é ç), e isso só
+ * aparece em frase. Nenhuma frase afirma nada sobre a clínica — ver o cabeçalho de `index.astro`.
+ *
+ * O que este arquivo NÃO faz: repetir os valores em px. Quem trava tamanho é
+ * `tests/tokens/invariants.test.ts` (piso de 17px, `body` de 19→20px, `label` fixo em 15px),
+ * lendo o CSS direto. Número copiado à mão numa página vira mentira no dia em que o token muda —
+ * o rótulo ao lado de cada espécime diz o NOME do token, que é o que não sai de sincronia.
+ */
+---
+
+<div class="container-page mt-8 flex flex-col gap-8">
+  <div>
+    <p class="label text-ink-muted">Escala</p>
+    <ul class="mt-4 flex flex-col gap-6">
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">display</p>
+        <p class="mt-4 text-display text-ink">Um plano para cada corpo</p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">h1</p>
+        <p class="mt-4 text-h1 text-ink">Atenção que começa pela avaliação</p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">h2</p>
+        <p class="mt-4 text-h2 text-ink">O que costuma acontecer na prática</p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">h3</p>
+        <p class="mt-4 text-h3 text-ink">Como funciona a primeira conversa</p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">lockup — o nome da marca no cabeçalho</p>
+        <p class="mt-4 text-lockup text-ink">CaLu</p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">question — a pergunta do accordion</p>
+        <p class="mt-4 text-question text-ink">Preciso de pedido médico para começar?</p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">lead — abertura de página</p>
+        <p class="mt-4 text-lead text-ink-body">
+          Um parágrafo de abertura carrega mais peso que o resto do texto e precisa continuar
+          legível quando a frase cresce.
+        </p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">body — texto corrido, o padrão da página</p>
+        <p class="mt-4 text-body text-ink-body">
+          O corpo do texto começa em dezenove pixels e sobe até vinte na tela larga. É a decisão que
+          mais muda a leitura para quem tem mais de sessenta anos, e ela vem antes de qualquer
+          escolha estética. A altura de linha acompanha: quanto mais longa a linha, mais espaço
+          entre elas.
+        </p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">small — piso absoluto do sistema</p>
+        <p class="mt-4 text-small text-ink-body">
+          Nenhum texto do site desce daqui, nem a linha de registro profissional no rodapé.
+        </p>
+      </li>
+      <li class="border-t border-line-soft pt-4">
+        <p class="text-small text-ink-muted">label — a única exceção, e ela nunca vem sozinha</p>
+        <p class="mt-4 label text-ink-muted">Sobre a clínica</p>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Pesos</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Uma família, dois pesos. Não existe 500 nem 700 no sistema, e
+      <span class="font-semibold">tests/tokens/invariants.test.ts</span> reprova qualquer terceiro.
+    </p>
+    <ul class="mt-4 flex flex-col gap-4">
+      <li>
+        <p class="text-small text-ink-muted">font-normal — 400</p>
+        <p class="text-body font-normal text-ink-body">
+          O texto corrido do site inteiro sai neste peso, em português com acentuação completa.
+        </p>
+      </li>
+      <li>
+        <p class="text-small text-ink-muted">font-semibold — 600</p>
+        <p class="text-body font-semibold text-ink-body">
+          Título, rótulo, credencial e ação usam o peso mais forte, e nada além deles.
+        </p>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Rótulo: a regra e a degradação</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Quinze pixels só é legítimo junto de caixa-alta, a sans do sistema, tracking e peso 600 — o
+      pacote inteiro, nunca só o tamanho. Por isso a utility emite tudo de uma vez. Quando o texto
+      cresce além de três palavras, o rótulo deve degradar para caixa normal em
+      <span class="font-semibold">small</span>, em vez de virar um bloco de caixa-alta.
+    </p>
+    <div class="mt-4 grid gap-6 md:grid-cols-2">
+      <div class="rounded-card border border-line-soft p-6">
+        <p class="text-small text-ink-muted">Até três palavras — usa o rótulo</p>
+        <p class="mt-4 label text-ink-muted">Estrutura e acesso</p>
+      </div>
+      <div class="rounded-card border border-line-soft p-6">
+        <p class="text-small text-ink-muted">Texto longo — degrada para caixa normal</p>
+        <p class="mt-4 text-small font-semibold text-ink-muted">
+          O que muda no dia a dia de quem começa agora
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Quebra de palavra longa</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Título recebe quebra e hifenização por padrão. A 320px, uma palavra composta longa mede mais
+      que a caixa disponível — sem isso, ela vaza a tela em vez de quebrar.
+    </p>
+    <div class="mt-4 w-80 rounded-card border border-line-soft p-4">
+      <p class="text-h2 text-ink">Acompanhamento individualizado</p>
+    </div>
+  </div>
+</div>

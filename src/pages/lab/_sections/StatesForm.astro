@@ -1,0 +1,193 @@
+---
+/**
+ * Seção "Campos de formulário" da `/lab` — texto, seleção e área de texto, nos estados parado,
+ * com foco, com erro e opcional.
+ *
+ * REGRAS QUE ESTA SEÇÃO DEMONSTRA, e que valem para todo campo do site:
+ *
+ *   · `<label>` SEMPRE visível, nunca placeholder no lugar de rótulo. Placeholder some quando a
+ *     pessoa começa a digitar, e some justamente para quem mais precisa dele;
+ *   · o opcional é marcado NO rótulo ("E-mail (opcional)"), nunca por asterisco solto. O
+ *     obrigatório leva o atributo `required`, que é o sinal programático — a marcação visual
+ *     cobre o caso oposto, não substitui o atributo;
+ *   · erro é a soma de TRÊS sinais, nunca cor sozinha: mensagem nomeando o campo ("Informe seu
+ *     telefone", jamais "Campo obrigatório"), borda mais grossa, e `aria-invalid`. A mensagem se
+ *     liga ao campo por `aria-describedby`;
+ *   · não existe token de borda de erro. A borda de erro é o próprio `--color-error`, porque
+ *     `--calu-error-border` foi removido do handoff por reprovar contraste em quase toda
+ *     superfície.
+ *
+ * O `id` de cada campo começa com `lab-` e é namespaced pelo estado que ele demonstra: a página
+ * inteira renderiza o mesmo campo várias vezes, e `id` repetido quebraria `<label for>` e
+ * `aria-describedby` em silêncio. `tests/pages/lab.test.ts` reprova repetição.
+ */
+---
+
+<div class="container-page mt-8 flex flex-col gap-8">
+  <div>
+    <p class="label text-ink-muted">Campo de texto</p>
+    <div class="mt-4 grid gap-6 md:grid-cols-2">
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">parado</span>
+        <div class="flex flex-col">
+          <label for="lab-campo-parado" class="text-small font-semibold text-ink">Nome</label>
+          <input
+            type="text"
+            id="lab-campo-parado"
+            name="lab-campo-parado"
+            autocomplete="name"
+            required
+            class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">com foco de teclado</span>
+        <div class="flex flex-col">
+          <label for="lab-campo-foco" class="text-small font-semibold text-ink">Nome</label>
+          <input
+            type="text"
+            id="lab-campo-foco"
+            name="lab-campo-foco"
+            autocomplete="name"
+            required
+            class="mt-4 min-h-target rounded-control border border-brand bg-field-bg px-5 text-body text-ink ring-3 ring-focus-halo outline-3 outline-offset-2 outline-focus-ring"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">com erro</span>
+        <div class="flex flex-col">
+          <label for="lab-campo-erro" class="text-small font-semibold text-ink"
+            >Telefone ou WhatsApp</label
+          >
+          <input
+            type="tel"
+            id="lab-campo-erro"
+            name="lab-campo-erro"
+            autocomplete="tel"
+            required
+            aria-invalid="true"
+            aria-describedby="lab-campo-erro-mensagem"
+            class="mt-4 min-h-target rounded-control border-2 border-error bg-field-bg px-5 text-body text-ink"
+          />
+          <span id="lab-campo-erro-mensagem" class="mt-4 text-small font-semibold text-error"
+            >Informe um telefone com DDD.</span
+          >
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">opcional</span>
+        <div class="flex flex-col">
+          <label for="lab-campo-opcional" class="text-small font-semibold text-ink"
+            >E-mail (opcional)</label
+          >
+          <input
+            type="email"
+            id="lab-campo-opcional"
+            name="lab-campo-opcional"
+            autocomplete="email"
+            class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Seleção</p>
+    <div class="mt-4 grid gap-6 md:grid-cols-2">
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">parado</span>
+        <div class="flex flex-col">
+          <label for="lab-selecao-parado" class="text-small font-semibold text-ink">Interesse</label
+          >
+          <select
+            id="lab-selecao-parado"
+            name="lab-selecao-parado"
+            class="mt-4 min-h-target rounded-control border border-field-border bg-field-bg px-5 text-body text-ink"
+          >
+            <option>Ainda não sei</option>
+            <option>Pilates clínico</option>
+            <option>Fisioterapia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">com foco de teclado</span>
+        <div class="flex flex-col">
+          <label for="lab-selecao-foco" class="text-small font-semibold text-ink">Interesse</label>
+          <select
+            id="lab-selecao-foco"
+            name="lab-selecao-foco"
+            class="mt-4 min-h-target rounded-control border border-brand bg-field-bg px-5 text-body text-ink ring-3 ring-focus-halo outline-3 outline-offset-2 outline-focus-ring"
+          >
+            <option>Ainda não sei</option>
+            <option>Pilates clínico</option>
+            <option>Fisioterapia</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Área de texto</p>
+    <div class="mt-4 grid gap-6 md:grid-cols-2">
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">parado</span>
+        <div class="flex flex-col">
+          <label for="lab-area-parado" class="text-small font-semibold text-ink">Mensagem</label>
+          <textarea
+            id="lab-area-parado"
+            name="lab-area-parado"
+            rows="4"
+            class="mt-4 rounded-control border border-field-border bg-field-bg px-5 py-4 text-body text-ink"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">com foco de teclado</span>
+        <div class="flex flex-col">
+          <label for="lab-area-foco" class="text-small font-semibold text-ink">Mensagem</label>
+          <textarea
+            id="lab-area-foco"
+            name="lab-area-foco"
+            rows="4"
+            class="mt-4 rounded-control border border-brand bg-field-bg px-5 py-4 text-body text-ink ring-3 ring-focus-halo outline-3 outline-offset-2 outline-focus-ring"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Grupo de escolha</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Quando a pergunta tem alternativas, ela vive num <span class="font-semibold">fieldset</span> com
+      legenda visível. Sem isso as opções ficam órfãs da pergunta para quem navega por leitor de tela.
+    </p>
+    <fieldset class="mt-4 rounded-card border border-line-soft p-6">
+      <legend class="text-small font-semibold text-ink">Para quem é o atendimento</legend>
+      <div class="mt-4 flex flex-col">
+        <label for="lab-para-mim" class="flex min-h-target items-center gap-4 text-body text-ink">
+          <input type="radio" id="lab-para-mim" name="lab-para-quem" value="mim" checked />
+          Para mim
+        </label>
+        <label for="lab-para-pai" class="flex min-h-target items-center gap-4 text-body text-ink">
+          <input type="radio" id="lab-para-pai" name="lab-para-quem" value="pai-ou-mae" />
+          Para meu pai ou minha mãe
+        </label>
+        <label for="lab-para-outra" class="flex min-h-target items-center gap-4 text-body text-ink">
+          <input type="radio" id="lab-para-outra" name="lab-para-quem" value="outra" />
+          Para outra pessoa da família
+        </label>
+      </div>
+    </fieldset>
+  </div>
+</div>

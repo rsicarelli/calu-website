@@ -3,7 +3,7 @@
    `tests/components/BaseLayout.test.ts` já prova, no componente isolado, que os 3 `<nav>` do
    site (Header desktop "Principal", MobileNav "Menu", Footer "Rodapé") convivem sem violar
    `landmark-unique` do axe. Este arquivo reprova o mesmo tipo de regressão, mas sobre CADA
-   página real que o build produzir daqui pra frente — inclusive as que a Fase 3 ainda vai
+   página real que o build produzir daqui pra frente — inclusive as que a Fase 4 ainda vai
    adicionar (`/servicos`, `/equipe`, `/duvidas`, `/contato`), sem precisar de edição: a
    varredura é por todo `.html` de `dist/`, em qualquer profundidade (mesmo glob de
    `tests/system/_dom.ts`), não por um componente nomeado.

@@ -251,9 +251,10 @@
   --spacing-target: 3.25rem; /* 52px — mínimo de qualquer controle */
   --spacing-target-primary: 3.5rem; /* 56px — ação principal */
 
-  /* 20px (gutter) + 56px (target-primary) = 76px: padding-bottom que o <main> vai reservar pro
-     WhatsAppFab numa fase futura. pb-target-primary sozinho sub-reservaria por exatamente os 20px
-     do gutter, já que o FAB fica posicionado a `gutter` de distância da borda. */
+  /* 20px (gutter) + 56px (target-primary) = 76px: padding-bottom que o <main> reserva pro
+     WhatsAppFab (`pb-fab-offset` em BaseLayout). pb-target-primary sozinho sub-reservaria por
+     exatamente os 20px do gutter, já que o FAB fica posicionado a `gutter` de distância da
+     borda. */
   --spacing-fab-offset: calc(var(--spacing-gutter) + var(--spacing-target-primary));
 
   /* ---- orçamento de rolagem do Header sticky ----
