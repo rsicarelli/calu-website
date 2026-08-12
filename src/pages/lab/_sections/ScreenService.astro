@@ -24,6 +24,7 @@
 import { Image } from 'astro:assets';
 
 import ContactPair from '@/components/ui/ContactPair.astro';
+import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
 import logoMark from '@/assets/brand/logo-mark.png';
 ---
@@ -114,9 +115,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
           </div>
           <div>
             <h5 class="text-h3 text-ink">[Nome da profissional]</h5>
-            <p class="mt-4 text-small font-semibold text-ink-muted">
-              Fisioterapeuta · CREFITO-3/000000-F
-            </p>
+            <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
           </div>
         </div>
       </div>
@@ -160,9 +159,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
         <div class="mt-8 border-t border-line-soft pt-4">
           <p class="label text-ink-muted">Quem conduz</p>
           <p class="mt-4 text-body text-ink">[Nome da profissional]</p>
-          <p class="mt-4 text-small font-semibold text-ink-muted">
-            Fisioterapeuta · CREFITO-3/000000-F
-          </p>
+          <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
         </div>
 
         <ContactPair

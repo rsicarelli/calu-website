@@ -26,6 +26,7 @@
 import { Image } from 'astro:assets';
 
 import logoMark from '@/assets/brand/logo-mark.png';
+import Credential from '@/components/ui/Credential.astro';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-8">
@@ -124,6 +125,6 @@ import logoMark from '@/assets/brand/logo-mark.png';
       é informação, não decoração. O formato abaixo é o do próprio mockup, com o número deixado como
       espaço reservado.
     </p>
-    <p class="mt-4 text-small font-semibold text-ink-muted">Fisioterapeuta · CREFITO-3/000000-F</p>
+    <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
   </div>
 </div>

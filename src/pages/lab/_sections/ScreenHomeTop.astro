@@ -18,6 +18,7 @@
 import { Image } from 'astro:assets';
 
 import ContactPair from '@/components/ui/ContactPair.astro';
+import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
 import logoMark from '@/assets/brand/logo-mark.png';
 ---
@@ -156,9 +157,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
           </div>
           <div>
             <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
-            <p class="mt-4 text-small font-semibold text-ink-muted">
-              Fisioterapeuta · CREFITO-3/000000-F
-            </p>
+            <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
             <p class="mt-4 text-body text-ink-body">
               Atende queixa de dor e limitação de movimento, com foco em retomar atividade do dia a
               dia.
@@ -176,9 +175,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
           </div>
           <div>
             <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
-            <p class="mt-4 text-small font-semibold text-ink-muted">
-              Fisioterapeuta · CREFITO-3/000000-F
-            </p>
+            <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
             <p class="mt-4 text-body text-ink-body">
               Conduz as turmas de exercício e acompanha a progressão de carga ao longo do plano.
             </p>
