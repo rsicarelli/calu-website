@@ -1,0 +1,132 @@
+---
+/**
+ * Tela "Índice de serviços" (mockup §09) — o bloco de escolha, a lista de cards, e o estado vazio.
+ *
+ * O BLOCO "Não sabe qual escolher?" vem ANTES da lista, e não é enfeite: o público chega com uma
+ * queixa em português comum ("estou com dor no ombro"), não com o nome técnico do atendimento.
+ * Forçar a escolha antes de conversar é o jeito mais fácil de perder o contato.
+ *
+ * ORDEM OBRIGATÓRIA DENTRO DO CARD: frase em português comum → nome técnico → descrição →
+ * "Ver detalhes". A frase popular vem primeiro porque é ela que a pessoa reconhece.
+ *
+ * LINK ESTENDIDO, e por que não é um `<a>` em volta do card: envolver o card inteiro daria ao link
+ * um nome acessível formado por frase + nome técnico + descrição, lidos de uma vez só. O padrão
+ * certo é `relative` no card + `after:absolute after:inset-0` no "Ver detalhes" — a área clicável
+ * cobre o card, e o nome acessível continua sendo só o texto da ação. No Tailwind v4 não é preciso
+ * (nem permitido) escrever a utility de `content`: ela já vem com valor inicial vazio, e a versão
+ * arbitrária seria reprovada pelo gate de estilos.
+ *
+ * O ESTADO VAZIO usa o `EmptyState` de verdade, o mesmo componente da `/404`. É o que a página
+ * mostra quando o CMS não tem nenhum serviço cadastrado — situação garantida no dia em que a
+ * cliente começar a editar.
+ */
+import { Image } from 'astro:assets';
+
+import EmptyState from '@/components/blocks/EmptyState.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+import logoMark from '@/assets/brand/logo-mark.png';
+---
+
+<div class="container-page mt-8 flex flex-col gap-12">
+  <div>
+    <h3 class="text-h1 text-ink">O que a gente atende</h3>
+
+    <div class="mt-8 rounded-card bg-surface-alt p-6">
+      <h4 class="text-h3 text-ink">Não sabe qual escolher?</h4>
+      <p class="mt-4 text-body text-ink-body">
+        Não precisa saber o nome do atendimento. Conte o que está sentindo e a gente ajuda a
+        entender por onde começar.
+      </p>
+      <ContactPair
+        class="mt-8"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Lista — linha na tela larga, coluna no celular</p>
+    <ul class="mt-4 flex flex-col gap-6">
+      <li
+        class="@container relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6 @row:flex-row"
+      >
+        <div
+          data-surface="brand"
+          class="flex aspect-16/9 w-full shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand @row:w-64"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
+        </div>
+        <div>
+          <p class="text-small text-ink-muted">Estou com dor em algum lugar</p>
+          <h4 class="mt-4 text-h3 text-ink">Fisioterapia</h4>
+          <p class="mt-4 text-body text-ink-body">
+            Avaliação, plano e acompanhamento para queixa de dor ou limitação de movimento.
+          </p>
+          <a
+            href="/servicos"
+            class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
+            >Ver detalhes</a
+          >
+        </div>
+      </li>
+
+      <li
+        class="@container relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6 @row:flex-row"
+      >
+        <div
+          data-surface="brand"
+          class="flex aspect-16/9 w-full shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand @row:w-64"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
+        </div>
+        <div>
+          <p class="text-small text-ink-muted">Quero me mexer com orientação</p>
+          <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
+          <p class="mt-4 text-body text-ink-body">
+            Exercício conduzido em turma pequena, com o plano ajustado ao que a avaliação mostrou.
+          </p>
+          <a
+            href="/servicos"
+            class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
+            >Ver detalhes</a
+          >
+        </div>
+      </li>
+
+      <li class="relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6">
+        <p class="label text-ink-muted">Sem imagem cadastrada · título de três linhas</p>
+        <div>
+          <p class="text-small text-ink-muted">Vou operar, ou acabei de operar</p>
+          <h4 class="mt-4 text-h3 text-ink">
+            Acompanhamento no pós-operatório de ombro, joelho e coluna
+          </h4>
+          <p class="mt-4 text-body text-ink-body">
+            Retomada gradual de movimento, no ritmo combinado com quem indicou a cirurgia.
+          </p>
+          <a
+            href="/servicos"
+            class="mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0"
+            >Ver detalhes</a
+          >
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Estado vazio — o CMS sem nenhum serviço cadastrado</p>
+    <div class="mt-4 rounded-card border border-line-soft p-6">
+      <EmptyState
+        headingAs="h4"
+        heading="Estamos organizando esta página"
+        message="Enquanto isso, fale com a gente: dá para explicar o que está sentindo e a gente ajuda a entender o caminho."
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
+  </div>
+</div>

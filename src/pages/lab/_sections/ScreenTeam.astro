@@ -1,0 +1,105 @@
+---
+/**
+ * Tela "Equipe" (mockup §08) — as bios, com retrato, credencial e lista de formação.
+ *
+ * O layout aguenta de 1 a 4 profissionais sem alteração nenhuma, porque a grade é `auto-fit` em
+ * espírito: duas colunas na tela larga, uma no celular, e o número de itens não muda a marcação.
+ * Hoje o desenho prevê duas sócias.
+ *
+ * O SEGUNDO CARD ESTÁ SEM FOTO DE PROPÓSITO — é assim que o mockup desenha esta tela, e é o estado
+ * mais provável de acontecer na vida real do CMS. Sem foto, o espaço não colapsa: entra o fallback
+ * de marca na mesma proporção 4/5.
+ *
+ * A lista de formação aceita de 1 a 6 linhas. Os dois extremos aparecem aqui, um card com uma
+ * linha e outro com seis, porque é o intervalo que o layout precisa aguentar sem mudar de forma.
+ *
+ * A credencial nunca sai de caixa normal nem desce do piso de 17px: é a informação que sustenta a
+ * confiança clínica, não um detalhe de rodapé de card.
+ */
+import { Image } from 'astro:assets';
+
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+import logoMark from '@/assets/brand/logo-mark.png';
+---
+
+<div class="container-page mt-8 flex flex-col gap-8">
+  <div>
+    <h3 class="text-h1 text-ink">Quem vai te atender</h3>
+    <p class="mt-4 text-lead text-ink-body">
+      Duas profissionais conduzem os atendimentos, e é uma delas que responde quando você escreve.
+    </p>
+  </div>
+
+  <ul class="grid gap-6 md:grid-cols-2">
+    <li class="@container rounded-card border border-line-soft p-6">
+      <p class="label text-ink-muted">Com retrato · formação com uma linha</p>
+      <div class="mt-4 flex flex-col gap-6 @thumb:flex-row">
+        <div
+          data-surface="brand"
+          class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
+        </div>
+        <div>
+          <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
+          <p class="mt-4 text-small font-semibold text-ink-muted">
+            Fisioterapeuta · CREFITO-3/000000-F
+          </p>
+          <p class="mt-4 text-body text-ink-body">
+            Atende queixa de dor e limitação de movimento, com foco em devolver as atividades do dia
+            a dia.
+          </p>
+          <p class="mt-4 label text-ink-muted">Formação</p>
+          <ul class="mt-4 flex flex-col gap-4">
+            <li class="text-small text-ink-body">Graduação em Fisioterapia</li>
+          </ul>
+        </div>
+      </div>
+    </li>
+
+    <li class="@container rounded-card border border-line-soft p-6">
+      <p class="label text-ink-muted">Sem foto cadastrada · formação com seis linhas</p>
+      <div class="mt-4 flex flex-col gap-6 @thumb:flex-row">
+        <div
+          data-surface="brand"
+          class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
+        </div>
+        <div>
+          <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
+          <p class="mt-4 text-small font-semibold text-ink-muted">
+            Fisioterapeuta · CREFITO-3/000000-F
+          </p>
+          <p class="mt-4 text-body text-ink-body">
+            Conduz as turmas de exercício e acompanha a progressão de carga ao longo do plano.
+          </p>
+          <p class="mt-4 label text-ink-muted">Formação</p>
+          <ul class="mt-4 flex flex-col gap-4">
+            <li class="text-small text-ink-body">Graduação em Fisioterapia</li>
+            <li class="text-small text-ink-body">Formação em Pilates clínico</li>
+            <li class="text-small text-ink-body">Curso de reabilitação de coluna</li>
+            <li class="text-small text-ink-body">Curso de reabilitação de ombro e joelho</li>
+            <li class="text-small text-ink-body">Formação em exercício para idosos</li>
+            <li class="text-small text-ink-body">Atualização em avaliação funcional</li>
+          </ul>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="rounded-card bg-surface-alt p-6">
+    <h4 class="text-h3 text-ink">O que isso muda pra você</h4>
+    <p class="mt-4 text-body text-ink-body">
+      Quem avalia é quem acompanha. Não há troca de profissional a cada sessão, e o histórico não
+      precisa ser recontado do começo toda vez.
+    </p>
+    <ContactPair
+      class="mt-8"
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </div>
+</div>
