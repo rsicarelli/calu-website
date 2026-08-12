@@ -1,0 +1,236 @@
+---
+/**
+ * Seção "Ação e link" da `/lab` — as três variantes de botão, nos dois tamanhos, nos cinco
+ * estados; o link dentro e fora de texto corrido; o alternador de tema; e o skip link.
+ *
+ * COMO ESTADO VISUAL É CONGELADO NUMA PÁGINA ESTÁTICA, e por que não há `<style>` aqui:
+ *
+ *   · estado que É atributo continua atributo de verdade — `disabled` no botão de demonstração,
+ *     `aria-busy` no que está enviando. Nada é simulado onde o HTML já sabe dizer;
+ *   · `hover` é congelado TROCANDO a classe: o espécime "sob o cursor" já nasce com
+ *     `bg-accent-hover` em vez de `bg-accent`. É o mesmo valor que o `hover:` aplicaria;
+ *   · `focus-visible` é congelado escrevendo as utilities equivalentes (`outline-3`,
+ *     `outline-focus-ring`, `outline-offset-2`), que vencem a regra do `@layer base` por estarem
+ *     numa camada posterior.
+ *
+ * E cada linha traz também UM controle vivo, com as classes `hover:`/`focus-visible:` de verdade,
+ * para o espécime congelado nunca ser a única prova de que o estado existe. Um `<style>` aqui
+ * custaria caro: `tests/system/typography.test.ts` lê o bundle inteiro, e uma família ou um peso
+ * fora de {400, 600} dentro de qualquer `<style>` reprova o BUILD todo, não só esta página.
+ *
+ * O `disabled` aparece SÓ no botão de demonstração. No formulário (`ScreenContact.astro`) o estado
+ * "enviando" usa `aria-disabled` + bloqueio no handler, nunca `disabled`, porque `disabled` tira o
+ * botão da ordem de foco e o foco da pessoa se perde no meio do envio. Não reintroduzir lá.
+ */
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+---
+
+<div class="container-page mt-8 flex flex-col gap-8">
+  <div>
+    <p class="label text-ink-muted">Ação principal — 56px</p>
+    <p class="mt-4 text-small text-ink-muted">
+      A ação mais importante da tela. Sempre com palavra visível: nada no site depende de ícone
+      sozinho nem de passar o cursor por cima.
+    </p>
+    <ul class="mt-4 flex flex-wrap gap-6">
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">padrão</span>
+        <span
+          data-surface="accent"
+          class="inline-flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent"
+          >Falar no WhatsApp</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">sob o cursor</span>
+        <span
+          data-surface="accent"
+          class="inline-flex min-h-target-primary items-center rounded-control bg-accent-hover px-6 font-semibold text-on-accent"
+          >Falar no WhatsApp</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">com foco de teclado</span>
+        <span
+          data-surface="accent"
+          class="inline-flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent outline-3 outline-offset-2 outline-focus-ring"
+          >Falar no WhatsApp</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">vivo — passe o cursor ou dê Tab</span>
+        <button
+          type="button"
+          data-surface="accent"
+          class="inline-flex min-h-target-primary cursor-pointer items-center rounded-control bg-accent px-6 font-semibold text-on-accent hover:bg-accent-hover"
+          >Falar no WhatsApp</button
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Ação secundária — 52px</p>
+    <ul class="mt-4 flex flex-wrap gap-6">
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">padrão</span>
+        <span
+          class="inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand"
+          >Conhecer os serviços</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">sob o cursor</span>
+        <span
+          class="inline-flex min-h-target items-center rounded-control border border-line bg-brand-tint px-6 font-semibold text-brand"
+          >Conhecer os serviços</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">com foco de teclado</span>
+        <span
+          class="inline-flex min-h-target items-center rounded-control border border-line px-6 font-semibold text-brand outline-3 outline-offset-2 outline-focus-ring"
+          >Conhecer os serviços</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">vivo</span>
+        <button
+          type="button"
+          class="inline-flex min-h-target cursor-pointer items-center rounded-control border border-line px-6 font-semibold text-brand hover:bg-brand-tint"
+          >Conhecer os serviços</button
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Ação discreta — 52px</p>
+    <ul class="mt-4 flex flex-wrap gap-6">
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">padrão</span>
+        <span class="inline-flex min-h-target items-center px-6 font-semibold text-brand"
+          >Ver detalhes</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">sob o cursor</span>
+        <span
+          class="inline-flex min-h-target items-center rounded-control bg-brand-tint px-6 font-semibold text-brand"
+          >Ver detalhes</span
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">vivo</span>
+        <button
+          type="button"
+          class="inline-flex min-h-target cursor-pointer items-center rounded-control px-6 font-semibold text-brand hover:bg-brand-tint"
+          >Ver detalhes</button
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Inativo e em andamento</p>
+    <p class="mt-4 text-small text-ink-muted">
+      São dois estados diferentes e não se confundem. O inativo usa o atributo
+      <span class="font-semibold">disabled</span> e sai da ordem de foco — cabe quando o controle ainda
+      não faz sentido. O "enviando" NÃO pode usar o atributo: ele tira o botão da ordem de foco no meio
+      da ação, e a pessoa perde o lugar. Lá, o sinal é
+      <span class="font-semibold">aria-disabled</span> mais
+      <span class="font-semibold">aria-busy</span>, com o envio barrado no próprio handler.
+    </p>
+    <ul class="mt-4 flex flex-wrap gap-6">
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">inativo</span>
+        <button
+          type="button"
+          disabled
+          class="inline-flex min-h-target cursor-not-allowed items-center rounded-control bg-disabled-bg px-6 font-semibold text-disabled-ink"
+          >Enviar mensagem</button
+        >
+      </li>
+      <li class="flex flex-col gap-4">
+        <span class="text-small text-ink-muted">enviando</span>
+        <button
+          type="button"
+          aria-disabled="true"
+          aria-busy="true"
+          class="inline-flex min-h-target items-center rounded-control bg-disabled-bg px-6 font-semibold text-disabled-ink"
+          >Enviando…</button
+        >
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Ação sobre fundo escuro</p>
+    <p class="mt-4 text-small text-ink-muted">
+      No escuro o bronze some e o dourado vira a ação. O anel de foco também troca de valor, e quem
+      troca é a superfície — o botão não sabe onde está e não ganha variante para isso.
+    </p>
+    <div data-surface="deep" class="mt-4 rounded-card bg-surface-deep p-6">
+      <div class="flex flex-wrap gap-6">
+        <span
+          class="inline-flex min-h-target-primary items-center rounded-control bg-accent-deep px-6 font-semibold text-on-accent-deep"
+          >Falar no WhatsApp</span
+        >
+        <span
+          class="inline-flex min-h-target-primary items-center rounded-control bg-accent-deep px-6 font-semibold text-on-accent-deep outline-3 outline-offset-2 outline-focus-ring"
+          >Com foco de teclado</span
+        >
+        <button
+          type="button"
+          class="inline-flex min-h-target cursor-pointer items-center rounded-control border border-line px-6 font-semibold text-ink-on-deep"
+          >Vivo, dê Tab aqui</button
+        >
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Link</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Dentro de texto corrido o link é sublinhado, não só colorido — cor sozinha não é sinal
+      suficiente. Fora de texto, em navegação ou card, ele perde o sublinhado mas mantém o alvo de
+      52px.
+    </p>
+    <div class="mt-4 grid gap-6 md:grid-cols-2">
+      <div class="rounded-card border border-line-soft p-6" data-prose>
+        <p class="text-small text-ink-muted">Em texto corrido</p>
+        <p class="mt-4 text-body text-ink-body">
+          Quando a dúvida é sobre qual atendimento procurar, vale
+          <a href="#lab-acao">começar pela conversa</a> antes de escolher sozinho.
+        </p>
+      </div>
+      <div class="rounded-card border border-line-soft p-6">
+        <p class="text-small text-ink-muted">Fora de texto</p>
+        <a href="#lab-acao" class="mt-4 inline-flex min-h-target items-center text-body text-brand"
+          >Ver todos os serviços</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Alternador de tema</p>
+    <p class="mt-4 text-small text-ink-muted">
+      O mesmo controle que vive no cabeçalho. Ele só aparece quando há JavaScript: sem isso seria um
+      botão inoperante anunciando um estado falso. Este é um segundo exemplar na página — os dois
+      ficam em sincronia, mas o do cabeçalho é o de uso real.
+    </p>
+    <div class="mt-4">
+      <ThemeToggle />
+    </div>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Atalho para o conteúdo</p>
+    <p class="mt-4 text-small text-ink-muted">
+      O primeiro elemento focável da página é o atalho que pula o cabeçalho. Ele vive na casca, não
+      aqui: dê Shift+Tab a partir do topo, ou recarregue a página e aperte Tab uma vez — ele aparece
+      no canto superior esquerdo, com 52px de altura.
+    </p>
+  </div>
+</div>

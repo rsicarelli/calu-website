@@ -1,0 +1,129 @@
+---
+/**
+ * Seção "Imagem e credencial" da `/lab` — as cinco proporções canônicas, com e sem imagem, e a
+ * linha de credencial profissional.
+ *
+ * POR QUE NÃO HÁ FOTO NENHUMA AQUI: o guardrail do projeto proíbe conteúdo real da clínica antes
+ * de aprovado, e foto de gente é conteúdo real. O laboratório então mostra os dois lados sem
+ * inventar nada:
+ *
+ *   · "com imagem" usa um bloco NEUTRO construído com token — proporção certa, dimensão explícita,
+ *     visivelmente um espaço reservado. Ele prova o layout e o reflow sem afirmar nada;
+ *   · "sem imagem" usa o fallback DESENHADO do sistema: o símbolo da marca sobre `surface-brand`,
+ *     na mesma proporção, sempre decorativo (`alt=""` + `aria-hidden`), porque é ausência de foto,
+ *     não informação.
+ *
+ * Os dois são deliberadamente diferentes entre si. Se o espaço reservado fosse igual ao fallback,
+ * a seção deixaria de mostrar o estado que mais importa: a página não colapsa quando o CMS vem sem
+ * imagem.
+ *
+ * CLS: a proporção vem de classe fracionária (`aspect-3/4`, `aspect-16/9`…) no elemento externo, e
+ * toda `<img>` real nasce de `<Image>` do `astro:assets`, que emite `width`/`height` sozinho.
+ * `tests/pages/lab.test.ts` exige os dois atributos em toda imagem; `tests/system/cls.test.ts`
+ * aceita qualquer um dos dois sinais — e só entende a sintaxe de fração desde a correção que
+ * abriu esta fase.
+ */
+import { Image } from 'astro:assets';
+
+import logoMark from '@/assets/brand/logo-mark.png';
+---
+
+<div class="container-page mt-8 flex flex-col gap-8">
+  <div>
+    <p class="label text-ink-muted">Proporções, com espaço reservado</p>
+    <p class="mt-4 text-small text-ink-muted">
+      As cinco proporções que o sistema usa. Cada bloco reserva a altura antes de qualquer imagem
+      carregar, então a página não pula quando ela chega.
+    </p>
+    <ul class="mt-4 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex flex-col gap-4">
+        <div
+          class="flex aspect-3/4 items-center justify-center rounded-card border border-line-soft bg-surface-alt"
+        >
+          <span class="text-small text-ink-muted">3/4</span>
+        </div>
+        <span class="text-small text-ink-muted">hero no celular</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <div
+          class="flex aspect-4/5 items-center justify-center rounded-card border border-line-soft bg-surface-alt"
+        >
+          <span class="text-small text-ink-muted">4/5</span>
+        </div>
+        <span class="text-small text-ink-muted">hero na tela larga, e retrato</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <div
+          class="flex aspect-16/9 items-center justify-center rounded-card border border-line-soft bg-surface-alt"
+        >
+          <span class="text-small text-ink-muted">16/9</span>
+        </div>
+        <span class="text-small text-ink-muted">card de serviço</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <div
+          class="flex aspect-3/2 items-center justify-center rounded-card border border-line-soft bg-surface-alt"
+        >
+          <span class="text-small text-ink-muted">3/2</span>
+        </div>
+        <span class="text-small text-ink-muted">mapa estático</span>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Sem imagem — o fallback de marca</p>
+    <p class="mt-4 text-small text-ink-muted">
+      Quando o cadastro vem sem foto, o espaço não colapsa: entra o símbolo da marca na mesma
+      proporção. Ele é sempre decorativo, porque representa ausência de foto, não informação.
+    </p>
+    <ul class="mt-4 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+      <li class="flex flex-col gap-4">
+        <div
+          data-surface="brand"
+          class="flex aspect-3/4 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+        </div>
+        <span class="text-small text-ink-muted">3/4 — hero sem foto</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <div
+          data-surface="brand"
+          class="flex aspect-4/5 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+        </div>
+        <span class="text-small text-ink-muted">4/5 — retrato sem foto</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <div
+          data-surface="brand"
+          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+        </div>
+        <span class="text-small text-ink-muted">16/9 — card sem foto</span>
+      </li>
+      <li class="flex flex-col gap-4">
+        <div
+          data-surface="brand"
+          class="flex aspect-3/2 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
+        >
+          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+        </div>
+        <span class="text-small text-ink-muted">3/2 — mapa sem imagem</span>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <p class="label text-ink-muted">Credencial</p>
+    <p class="mt-4 text-small text-ink-muted">
+      A linha que sustenta a confiança clínica. Nunca em caixa-alta e nunca abaixo do piso de 17px —
+      é informação, não decoração. O formato abaixo é o do próprio mockup, com o número deixado como
+      espaço reservado.
+    </p>
+    <p class="mt-4 text-small font-semibold text-ink-muted">Fisioterapeuta · CREFITO-3/000000-F</p>
+  </div>
+</div>

@@ -57,6 +57,9 @@ import Container from '@/components/ui/Container.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { SITE } from '@/lib/site';
 
+import StatesAction from './_sections/StatesAction.astro';
+import StatesForm from './_sections/StatesForm.astro';
+import StatesMedia from './_sections/StatesMedia.astro';
 import TokensColor from './_sections/TokensColor.astro';
 import TokensShape from './_sections/TokensShape.astro';
 import TokensType from './_sections/TokensType.astro';
@@ -68,6 +71,9 @@ const SECTIONS = [
   { id: 'lab-cor', title: 'Cor', Section: TokensColor },
   { id: 'lab-tipografia', title: 'Tipografia', Section: TokensType },
   { id: 'lab-espaco-e-forma', title: 'Espaço e forma', Section: TokensShape },
+  { id: 'lab-acao', title: 'Ação e link', Section: StatesAction },
+  { id: 'lab-campos', title: 'Campos de formulário', Section: StatesForm },
+  { id: 'lab-imagem', title: 'Imagem e credencial', Section: StatesMedia },
 ];
 ---
 
