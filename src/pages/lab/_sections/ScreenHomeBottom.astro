@@ -17,11 +17,10 @@
  * O CTA escuro e a faixa de contato declaram `data-surface`, sem o qual o anel de foco dos links
  * internos cai para menos de 2:1 no tema claro.
  */
-import { Image } from 'astro:assets';
 
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
-import logoMark from '@/assets/brand/logo-mark.png';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-12">
@@ -155,12 +154,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
     <div>
       <p class="label text-ink-muted">Onde estamos</p>
       <h3 class="mt-4 text-h3 text-ink">Onde estamos</h3>
-      <div
-        data-surface="brand"
-        class="mt-4 flex aspect-3/2 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-      >
-        <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
-      </div>
+      <BrandPlaceholder ratio="3/2" class="mt-4" />
       <p class="mt-4 text-body text-ink-body">{SITE.address}</p>
       <p class="mt-4 text-body text-ink-body">{SITE.hours}</p>
       <ContactPair

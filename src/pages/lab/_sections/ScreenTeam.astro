@@ -16,12 +16,11 @@
  * A credencial nunca sai de caixa normal nem desce do piso de 17px: é a informação que sustenta a
  * confiança clínica, não um detalhe de rodapé de card.
  */
-import { Image } from 'astro:assets';
 
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
-import logoMark from '@/assets/brand/logo-mark.png';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-8">
@@ -36,12 +35,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
     <li class="@container rounded-card border border-line-soft p-6">
       <p class="label text-ink-muted">Com retrato · formação com uma linha</p>
       <div class="mt-4 flex flex-col gap-6 @thumb:flex-row">
-        <div
-          data-surface="brand"
-          class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
-        </div>
+        <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
         <div>
           <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
           <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
@@ -60,12 +54,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
     <li class="@container rounded-card border border-line-soft p-6">
       <p class="label text-ink-muted">Sem foto cadastrada · formação com seis linhas</p>
       <div class="mt-4 flex flex-col gap-6 @thumb:flex-row">
-        <div
-          data-surface="brand"
-          class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
-        </div>
+        <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
         <div>
           <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
           <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>

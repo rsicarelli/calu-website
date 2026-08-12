@@ -15,12 +15,11 @@
  * Cabeçalho: o `<h1>` da home vira `<h3>` aqui, com o tamanho `display` que o design pede — a
  * página já tem um `<h1>` próprio. Ver a regra 1 no cabeçalho de `index.astro`.
  */
-import { Image } from 'astro:assets';
 
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
-import logoMark from '@/assets/brand/logo-mark.png';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-12">
@@ -28,12 +27,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
   <div>
     <p class="label text-ink-muted">Hero</p>
     <div class="mt-4 grid gap-8 md:grid-cols-2 md:items-center">
-      <div
-        data-surface="brand"
-        class="flex aspect-3/4 items-center justify-center overflow-hidden rounded-card bg-surface-brand md:aspect-4/5"
-      >
-        <Image src={logoMark} alt="" aria-hidden="true" width={96} height={96} />
-      </div>
+      <BrandPlaceholder ratio="3/4" class="md:aspect-4/5" />
       <div>
         <p class="label text-ink-muted">Vila Clementino · SP</p>
         <h3 class="mt-4 text-display text-ink">Um plano para o seu corpo, não para a média</h3>
@@ -81,12 +75,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
     <h3 class="mt-4 text-h2 text-ink">O que atendemos</h3>
     <ul class="mt-8 grid gap-6 md:grid-cols-3">
       <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <div
-          data-surface="brand"
-          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
-        </div>
+        <BrandPlaceholder ratio="16/9" radius="control" />
         <p class="mt-4 text-small text-ink-muted">Estou com dor em algum lugar</p>
         <h4 class="mt-4 text-h3 text-ink">Fisioterapia</h4>
         <p class="mt-4 text-body text-ink-body">
@@ -99,12 +88,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
         >
       </li>
       <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <div
-          data-surface="brand"
-          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
-        </div>
+        <BrandPlaceholder ratio="16/9" radius="control" />
         <p class="mt-4 text-small text-ink-muted">Quero me mexer com orientação</p>
         <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
         <p class="mt-4 text-body text-ink-body">
@@ -117,12 +101,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
         >
       </li>
       <li class="relative flex flex-col rounded-card border border-line-soft bg-surface p-6">
-        <div
-          data-surface="brand"
-          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
-        </div>
+        <BrandPlaceholder ratio="16/9" radius="control" />
         <p class="mt-4 text-small text-ink-muted">Vou operar, ou acabei de operar</p>
         <h4 class="mt-4 text-h3 text-ink">Acompanhamento no pós-operatório</h4>
         <p class="mt-4 text-body text-ink-body">
@@ -149,12 +128,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
     <ul class="mt-8 grid gap-6 md:grid-cols-2">
       <li class="@container flex flex-col gap-4 rounded-card border border-line-soft p-6">
         <div class="flex flex-col gap-4 @thumb:flex-row">
-          <div
-            data-surface="brand"
-            class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-          >
-            <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
-          </div>
+          <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
           <div>
             <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
             <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>
@@ -167,12 +141,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
       </li>
       <li class="@container flex flex-col gap-4 rounded-card border border-line-soft p-6">
         <div class="flex flex-col gap-4 @thumb:flex-row">
-          <div
-            data-surface="brand"
-            class="flex aspect-4/5 w-40 shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand"
-          >
-            <Image src={logoMark} alt="" aria-hidden="true" width={48} height={48} />
-          </div>
+          <BrandPlaceholder ratio="4/5" radius="control" class="w-40 shrink-0" />
           <div>
             <h4 class="text-h3 text-ink">[Nome da profissional]</h4>
             <Credential class="mt-4">Fisioterapeuta · CREFITO-3/000000-F</Credential>

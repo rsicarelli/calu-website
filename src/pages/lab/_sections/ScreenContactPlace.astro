@@ -11,23 +11,17 @@
  * vir — é o que transforma uma lista de características em uma oferta de ajuda. Aqui aparece com a
  * quantidade típica; os extremos de 2 e 8 ficam em `Resilience.astro`.
  */
-import { Image } from 'astro:assets';
 
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
-import logoMark from '@/assets/brand/logo-mark.png';
 ---
 
 <div class="container-page mt-8 grid gap-8 md:grid-cols-2">
   <div>
     <p class="label text-ink-muted">Onde estamos — mapa estático 3/2</p>
     <h3 class="mt-4 text-h3 text-ink">Onde estamos</h3>
-    <div
-      data-surface="brand"
-      class="mt-4 flex aspect-3/2 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-    >
-      <Image src={logoMark} alt="" aria-hidden="true" width={72} height={72} />
-    </div>
+    <BrandPlaceholder ratio="3/2" class="mt-4" />
     <p class="mt-4 text-body text-ink-body">{SITE.address}</p>
     <p class="mt-4 text-body text-ink-body">{SITE.hours}</p>
     <ContactPair

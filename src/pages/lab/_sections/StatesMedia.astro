@@ -23,9 +23,8 @@
  * aceita qualquer um dos dois sinais — e só entende a sintaxe de fração desde a correção que
  * abriu esta fase.
  */
-import { Image } from 'astro:assets';
 
-import logoMark from '@/assets/brand/logo-mark.png';
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import Credential from '@/components/ui/Credential.astro';
 ---
 
@@ -80,39 +79,19 @@ import Credential from '@/components/ui/Credential.astro';
     </p>
     <ul class="mt-4 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
       <li class="flex flex-col gap-4">
-        <div
-          data-surface="brand"
-          class="flex aspect-3/4 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
-        </div>
+        <BrandPlaceholder ratio="3/4" />
         <span class="text-small text-ink-muted">3/4 — hero sem foto</span>
       </li>
       <li class="flex flex-col gap-4">
-        <div
-          data-surface="brand"
-          class="flex aspect-4/5 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
-        </div>
+        <BrandPlaceholder ratio="4/5" />
         <span class="text-small text-ink-muted">4/5 — retrato sem foto</span>
       </li>
       <li class="flex flex-col gap-4">
-        <div
-          data-surface="brand"
-          class="flex aspect-16/9 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
-        </div>
+        <BrandPlaceholder ratio="16/9" />
         <span class="text-small text-ink-muted">16/9 — card sem foto</span>
       </li>
       <li class="flex flex-col gap-4">
-        <div
-          data-surface="brand"
-          class="flex aspect-3/2 items-center justify-center overflow-hidden rounded-card bg-surface-brand"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
-        </div>
+        <BrandPlaceholder ratio="3/2" />
         <span class="text-small text-ink-muted">3/2 — mapa sem imagem</span>
       </li>
     </ul>

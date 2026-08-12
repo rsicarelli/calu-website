@@ -20,12 +20,11 @@
  * mostra quando o CMS não tem nenhum serviço cadastrado — situação garantida no dia em que a
  * cliente começar a editar.
  */
-import { Image } from 'astro:assets';
 
 import EmptyState from '@/components/blocks/EmptyState.astro';
+import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
-import logoMark from '@/assets/brand/logo-mark.png';
 ---
 
 <div class="container-page mt-8 flex flex-col gap-12">
@@ -53,12 +52,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
       <li
         class="@container relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6 @row:flex-row"
       >
-        <div
-          data-surface="brand"
-          class="flex aspect-16/9 w-full shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand @row:w-64"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
-        </div>
+        <BrandPlaceholder ratio="16/9" radius="control" class="w-full shrink-0 @row:w-64" />
         <div>
           <p class="text-small text-ink-muted">Estou com dor em algum lugar</p>
           <h4 class="mt-4 text-h3 text-ink">Fisioterapia</h4>
@@ -76,12 +70,7 @@ import logoMark from '@/assets/brand/logo-mark.png';
       <li
         class="@container relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6 @row:flex-row"
       >
-        <div
-          data-surface="brand"
-          class="flex aspect-16/9 w-full shrink-0 items-center justify-center overflow-hidden rounded-control bg-surface-brand @row:w-64"
-        >
-          <Image src={logoMark} alt="" aria-hidden="true" width={56} height={56} />
-        </div>
+        <BrandPlaceholder ratio="16/9" radius="control" class="w-full shrink-0 @row:w-64" />
         <div>
           <p class="text-small text-ink-muted">Quero me mexer com orientação</p>
           <h4 class="mt-4 text-h3 text-ink">Pilates clínico</h4>
