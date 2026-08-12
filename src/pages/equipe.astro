@@ -1,0 +1,72 @@
+---
+/* Equipe.
+   ============================================================================
+   `PAGES.md` § Equipe: cada bio traz retrato 4/5, nome, `Credential`, o que atende
+   e a formação (1–6 linhas). O layout aguenta de 1 a 4 profissionais sem alteração
+   — o grid é `auto-fit`, não duas colunas fixas —, mas hoje são duas.
+
+   Nome e registro são MARCADORES de `src/lib/placeholders.ts`, não texto inventado.
+   `tests/system/placeholders.test.ts` imprime o inventário do que ainda falta. */
+import { getCollection } from 'astro:content';
+
+import CtaBlock from '@/components/blocks/CtaBlock.astro';
+import EmptyState from '@/components/blocks/EmptyState.astro';
+import PageHeader from '@/components/blocks/PageHeader.astro';
+import PageSection from '@/components/blocks/PageSection.astro';
+import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
+import Container from '@/components/ui/Container.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/lib/site';
+
+const equipe = (await getCollection('equipe')).sort((a, b) => a.data.ordem - b.data.ordem);
+---
+
+<BaseLayout
+  title={`Quem vai te atender · ${SITE.name}`}
+  description="Conheça as fisioterapeutas que conduzem os atendimentos na Calu, na Vila Clementino, em São Paulo."
+>
+  <PageHeader
+    class="py-12"
+    width="page"
+    titulo="Quem vai te atender"
+    lead="Quem responde quando você escreve é uma das profissionais que atende aqui."
+  />
+
+  <PageSection id="profissionais" titulo="As profissionais" class="pb-12">
+    {
+      equipe.length > 0 ? (
+        <ul class="mt-8 grid gap-10 md:grid-cols-2">
+          {equipe.map((pessoa) => (
+            <li>
+              <ProfessionalBio
+                name={pessoa.data.nome}
+                credential={pessoa.data.credencial}
+                description={pessoa.data.atende}
+                education={pessoa.data.formacao}
+              />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState
+          class="mt-8"
+          heading="Estamos organizando esta página"
+          message="Enquanto isso, fale com a gente — quem responde é uma das profissionais."
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      )
+    }
+  </PageSection>
+
+  <Container width="page" class="pb-12">
+    <CtaBlock
+      heading="Quer falar com uma delas antes de marcar?"
+      message="Dá para conversar antes de qualquer compromisso. Conte o que está acontecendo."
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </Container>
+</BaseLayout>

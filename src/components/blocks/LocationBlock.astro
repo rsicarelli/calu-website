@@ -1,0 +1,63 @@
+---
+/**
+ * LocationBlock — "Onde estamos": o mapa estático, o endereço, o horário e o par de contato.
+ * Dois usos reais (Home e `/contato`) mais as duas telas equivalentes da `/lab`.
+ *
+ * Props
+ *   mapa   imagem 3/2 do mapa. AUSENTE ⇒ `AspectImage` cai no placeholder de marca na mesma
+ *          proporção, e é assim que o bloco se comporta hoje: não há mapa aprovado ainda.
+ *   …      qualquer atributo de `div` vai para a raiz.
+ *
+ * Endereço, horário e contato NÃO são props: vêm de `SITE`. O bloco existe para mostrar um
+ * fato só do site, e passar esse fato por prop abriria a porta para duas páginas exibirem
+ * endereços diferentes — que é exatamente o que a fonte única existe para impedir.
+ *
+ * FOI REJEITADO NA FASE 3, E A REJEIÇÃO ESTAVA CERTA
+ * ---------------------------------------------------------------------------------------
+ * O `CLAUDE.md` registra: "LocationBlock (2 ocorrências byte a byte idênticas, mas sem
+ * variação de estado — é o caso que mais tenta)". A régua é "3 ocorrências, ou 2 + variação",
+ * e naquele momento ele tinha 2 e nenhuma variação.
+ *
+ * O que mudou não foi a régua, foi o fato: com `AspectImage`, o bloco passa a ter dois estados
+ * reais (mapa presente e mapa ausente), e as telas da `/lab` re-apontadas somam ocorrências.
+ * Vale registrar a diferença — um componente rejeitado que volta porque "agora deu vontade" é
+ * outra coisa.
+ *
+ * O MAPA É IMAGEM ESTÁTICA, NUNCA EMBED INTERATIVO. Um iframe de mapa custa centenas de KB de
+ * JS de terceiro, rouba o scroll no celular e reprova os Core Web Vitals que o projeto trata
+ * como requisito. O caminho para quem quer navegar é o link "Abrir no mapa", que entrega a
+ * tarefa ao app nativo — melhor no celular do que qualquer embed.
+ *
+ * O mapa é DECORATIVO de propósito: o endereço está escrito em texto logo abaixo, e descrever
+ * a imagem repetiria a mesma informação para quem usa leitor de tela.
+ *
+ *   <LocationBlock />                      sem mapa aprovado — placeholder de marca
+ *   <LocationBlock mapa={mapaEstatico} />  com mapa
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica — ver `Container.astro`.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+import AspectImage from '@/components/ui/AspectImage.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import { SITE } from '@/lib/site';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Mapa estático 3/2. Ausente ⇒ placeholder de marca na mesma proporção. */
+  mapa?: import('astro').ImageMetadata;
+}
+
+const { mapa, class: className, ...rest } = Astro.props;
+---
+
+<div class:list={[className]} {...rest}>
+  <AspectImage src={mapa} decorative ratio="3/2" />
+  <p class="mt-6 text-body text-ink-body">{SITE.addressLine}</p>
+  <p class="mt-2 text-body text-ink-body">{SITE.hoursLine}</p>
+  <ContactPair
+    class="mt-6"
+    whatsappHref={SITE.whatsapp.href}
+    phoneHref={SITE.phone.href}
+    phoneLabel={SITE.phone.label}
+  />
+</div>

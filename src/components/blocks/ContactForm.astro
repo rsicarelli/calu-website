@@ -1,0 +1,227 @@
+---
+/**
+ * ContactForm — o formulário de contato, com validação no cliente.
+ * Dois usos (a página `/contato` e a tela da `/lab`) e quatro estados desenhados, que é a
+ * variação que justifica extraí-lo — foi rejeitado na Fase 3 quando tinha 1 ocorrência.
+ *
+ * Props
+ *   nota          linha acima dos campos ("Respondemos no próximo horário…").
+ *   privacidade   linha de privacidade. TEXTO, não link — ver abaixo.
+ *   enviar        rótulo do botão.
+ *   paraQuem      opções do radio "Para quem é o atendimento".
+ *   interesses    opções do select "Interesse".
+ *   idPrefix      prefixo dos `id` dos campos. A `/lab` renderiza o formulário mais de uma vez
+ *                 na mesma página, e `id` duplicado quebra o par `<label for>` — o rótulo passa
+ *                 a apontar para o primeiro campo com aquele id, em silêncio.
+ *   …             qualquer atributo de `form` vai para a raiz.
+ *
+ * NÃO ENVIA NADA — e isso é a decisão, não uma pendência
+ * ---------------------------------------------------------------------------------------
+ * Para onde as mensagens vão ainda é decisão em aberto (`CLAUDE.md` § Decisões em aberto), e
+ * ela depende da hospedagem, que também está em aberto. O formulário valida no cliente e, ao
+ * passar, mostra o caminho que JÁ funciona: WhatsApp e telefone.
+ *
+ * O que ele NUNCA faz é fingir que enviou. Um estado de sucesso falso é pior que formulário
+ * nenhum: a pessoa vai embora achando que foi atendida. Por isso o `submit` é interceptado e o
+ * cartão final diz o que de fato aconteceu.
+ *
+ * A LINHA DE PRIVACIDADE NÃO É LINK nesta fase, porque `/politica-de-privacidade` está fora do
+ * escopo da Fase 4 e link para página inexistente é defeito — travado por
+ * `tests/system/links.test.ts`. Quando a página existir, vira link e o teste avisa.
+ *
+ * ACESSIBILIDADE, os pontos que COMPONENTS.md cobra por nome:
+ *   · o botão "enviando" usa `aria-disabled`, NUNCA `disabled` — `disabled` tira o elemento da
+ *     ordem de foco e o foco cai no `<body>` no meio do envio;
+ *   · o resumo de erro é `<div tabindex="-1">` e recebe foco, com estilo em `:focus` e não só
+ *     `:focus-visible` (foco movido por script não é "visible" para o navegador);
+ *   · toda mensagem de erro NOMEIA o campo — "Informe seu telefone", nunca "Campo
+ *     obrigatório" (WCAG 3.3.1);
+ *   · o honeypot é `display: none`, jamais `sr-only`: `sr-only` é visível para leitor de tela, e
+ *     a pessoa cega preencheria o campo-armadilha e teria a mensagem recusada.
+ *
+ * Tipagem: `Props extends HTMLAttributes<'form'>`, não genérica — ver `Container.astro`.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+import Action from '@/components/ui/Action.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import Field from '@/components/ui/Field.astro';
+import { SITE } from '@/lib/site';
+
+interface Props extends HTMLAttributes<'form'> {
+  /** Linha acima dos campos. */
+  nota: string;
+  /** Linha de privacidade. Texto, não link — a página legal ainda não existe. */
+  privacidade: string;
+  /** Rótulo do botão de envio. */
+  enviar: string;
+  /** Opções de "Para quem é o atendimento". */
+  paraQuem: string[];
+  /** Opções de "Interesse". */
+  interesses: string[];
+  /** Prefixo dos ids, para o formulário poder aparecer duas vezes na mesma página. */
+  idPrefix?: string;
+}
+
+const {
+  nota,
+  privacidade,
+  enviar,
+  paraQuem,
+  interesses,
+  idPrefix = 'contato',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const id = (nome: string): string => `${idPrefix}-${nome}`;
+---
+
+<form data-contact-form novalidate class:list={[className]} {...rest}>
+  {/* Resumo de erro: só aparece depois de uma tentativa inválida, e recebe foco. */}
+  <div
+    data-error-summary
+    tabindex="-1"
+    hidden
+    class="mb-8 rounded-card border-2 border-error bg-error-bg p-6 focus:outline-3 focus:outline-offset-2 focus:outline-focus-ring"
+  >
+    <h3 class="text-h3">Não foi possível enviar</h3>
+    <ul data-error-list class="mt-4 flex flex-col gap-2"></ul>
+  </div>
+
+  <p class="text-body text-ink-body">{nota}</p>
+
+  <div class="mt-8 flex flex-col gap-6">
+    <Field id={id('nome')} label="Nome" name="nome" autocomplete="name" required />
+    <Field
+      id={id('telefone')}
+      label="Telefone ou WhatsApp"
+      name="telefone"
+      type="tel"
+      autocomplete="tel"
+      required
+    />
+    <Field
+      id={id('email')}
+      label="E-mail (opcional)"
+      name="email"
+      type="email"
+      autocomplete="email"
+    />
+
+    <fieldset>
+      <legend class="label text-ink-muted">Para quem é o atendimento</legend>
+      <div class="mt-4 flex flex-col gap-3">
+        {
+          paraQuem.map((opcao, indice) => (
+            <label class="flex min-h-target items-center gap-3 text-body text-ink-body">
+              <input type="radio" name="paraQuem" value={opcao} checked={indice === 0} />
+              {opcao}
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <Field id={id('interesse')} label="Interesse" name="interesse" control="select">
+      {interesses.map((opcao) => <option value={opcao}>{opcao}</option>)}
+    </Field>
+
+    <Field
+      id={id('mensagem')}
+      label="Mensagem"
+      name="mensagem"
+      control="textarea"
+      rows={5}
+      required
+    />
+
+    {/* Armadilha de robô. `display:none` e NUNCA `sr-only` — ver o cabeçalho. */}
+    <div style="display: none" aria-hidden="true">
+      <label for={id('site')}>Não preencha este campo</label>
+      <input id={id('site')} name="site" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+  </div>
+
+  <p class="mt-6 text-small text-ink-muted">{privacidade}</p>
+
+  <Action data-submit type="submit" variant="primary" size="lg" class="mt-8">{enviar}</Action>
+
+  {/* Estado final. Diz o que de fato aconteceu: a mensagem NÃO foi enviada. */}
+  <div data-sent role="status" hidden class="mt-8 rounded-card border border-line p-6">
+    <h3 class="text-h3">Falta um passo</h3>
+    <p class="mt-2 text-body text-ink-body">
+      O envio pelo site ainda não está ligado. Copie o que você escreveu e mande pelo WhatsApp ou
+      ligue — quem responde é uma das profissionais.
+    </p>
+    <ContactPair
+      class="mt-6"
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </div>
+</form>
+
+<script>
+  /* Validação no cliente. Sem framework, e o formulário continua legível sem JS: os campos
+     carregam `required`, então o navegador valida sozinho se este script não rodar. O
+     `novalidate` no `<form>` existe para que, COM script, as mensagens sejam as nossas — que
+     nomeiam o campo — em vez das genéricas do navegador. */
+  const MENSAGENS: Record<string, string> = {
+    nome: 'Informe seu nome',
+    telefone: 'Informe seu telefone — é por ele que a gente retorna',
+    mensagem: 'Escreva sua mensagem',
+  };
+
+  document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+    const resumo = form.querySelector<HTMLElement>('[data-error-summary]')!;
+    const lista = form.querySelector<HTMLUListElement>('[data-error-list]')!;
+    const enviado = form.querySelector<HTMLElement>('[data-sent]')!;
+
+    form.addEventListener('submit', (evento) => {
+      evento.preventDefault();
+
+      /* Honeypot preenchido: robô. Não diz nada — responder ensinaria o robô. */
+      const armadilha = form.querySelector<HTMLInputElement>('input[name="site"]');
+      if (armadilha?.value) return;
+
+      const falhas: { campo: HTMLElement; mensagem: string }[] = [];
+
+      for (const [nome, mensagem] of Object.entries(MENSAGENS)) {
+        const campo = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          `[name="${nome}"]`,
+        );
+        if (!campo) continue;
+
+        const vazio = campo.value.trim() === '';
+        campo.setAttribute('aria-invalid', vazio ? 'true' : 'false');
+
+        /* A mensagem por campo vive no `<p>` que o `Field` já liga por
+           `aria-describedby`; aqui só o conteúdo dele muda. */
+        const alvo = document.getElementById(`${campo.id}-mensagem`);
+        if (alvo) alvo.textContent = vazio ? mensagem : '';
+        if (vazio) falhas.push({ campo, mensagem });
+      }
+
+      lista.textContent = '';
+      if (falhas.length > 0) {
+        for (const falha of falhas) {
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = `#${falha.campo.id}`;
+          link.textContent = falha.mensagem;
+          item.append(link);
+          lista.append(item);
+        }
+        resumo.hidden = false;
+        resumo.focus();
+        return;
+      }
+
+      resumo.hidden = true;
+      enviado.hidden = false;
+      enviado.scrollIntoView({ block: 'nearest' });
+    });
+  });
+</script>

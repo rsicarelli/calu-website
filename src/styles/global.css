@@ -785,3 +785,39 @@
     box-shadow: var(--elevation-float);
   }
 }
+
+/* Lista de passos numerados — `StepList`.
+   O número é gerado por contador CSS, e não escrito no conteúdo, por duas razões
+   que não são de estilo: quem edita não renumera a lista à mão quando um passo
+   entra no meio, e o leitor de tela não anuncia o número duas vezes (uma do `<ol>`
+   e outra do texto, que é o que acontece quando a numeração é digitada).
+
+   Vive num `@utility` porque `counter-reset` no `<ol>` e `counter-increment` no
+   `<li>` são duas declarações que precisam existir JUNTAS e na ordem certa —
+   exatamente o critério desta seção. Em classes soltas, uma delas some numa
+   refatoração e a lista passa a numerar tudo como "1" em silêncio.
+
+   O marcador nativo sai (`list-style: none`) e volta como `::before` para poder
+   receber a cor e a fonte da marca; `aria-hidden` não é necessário porque
+   conteúdo gerado por CSS não entra na árvore de acessibilidade em nenhum dos
+   navegadores-alvo — a semântica de ordem já vem do `<ol>`. */
+@utility step-list {
+  counter-reset: step;
+  list-style: none;
+  padding-left: 0;
+}
+
+@utility step-item {
+  counter-increment: step;
+
+  &::before {
+    content: counter(step);
+    display: block;
+    margin-bottom: --spacing(2);
+    color: var(--color-brand);
+    font-family: var(--font-label);
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--font-weight-semibold);
+  }
+}

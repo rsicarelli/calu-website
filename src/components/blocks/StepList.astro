@@ -1,0 +1,63 @@
+---
+/**
+ * StepList — passos numerados, cada um com título e explicação.
+ * Três usos reais: "Como funciona" na Home (3 fixos), "Como acontece na prática" no template
+ * de serviço (1–5) e "Como começa" no índice de serviços (3), mais as telas da `/lab`.
+ *
+ * Props
+ *   passos    a lista, na ordem. Vazia ⇒ nada é renderizado (mesma disciplina do `RuledList`).
+ *   tituloAs  nível do título de cada passo — `h3` (padrão). O template de serviço usa `h3`
+ *             sob um `h2`; a `/lab`, que desce tudo um nível, passa `h4`.
+ *   …         qualquer atributo de `ol` vai para a raiz.
+ *
+ * `<ol>`, NÃO `<ul>`, e a numeração é conteúdo
+ * ---------------------------------------------------------------------------------------
+ * A ordem aqui é informação: "Contato → Avaliação → Plano" lido fora de ordem é outra coisa.
+ * `<ol>` é o que comunica isso a quem usa leitor de tela, que anuncia "item 2 de 3".
+ *
+ * O número visível sai de um contador CSS (`counter-increment` na utility `step-list` de
+ * `global.css`) em vez de vir escrito no texto, por dois motivos: quem edita o conteúdo não
+ * precisa renumerar a lista à mão quando um passo entra no meio, e o leitor de tela não lê o
+ * número duas vezes — uma do `<ol>` e outra do texto.
+ *
+ * CARDINALIDADE VARIÁVEL É A VARIAÇÃO QUE JUSTIFICA O COMPONENTE
+ * ---------------------------------------------------------------------------------------
+ * A Home trava 3 passos no schema; o serviço aceita 1 a 5. Um layout de três colunas fixas
+ * atenderia a Home e quebraria no serviço com 4. Por isso `flex flex-col`: a lista muda de
+ * tamanho sem mudar de forma, que é a regra 9 dos invioláveis.
+ *
+ *   <StepList passos={home.data.comoFunciona.passos} />
+ *   <StepList passos={servico.data.passos} tituloAs="h3" class="mt-8" />
+ *
+ * Tipagem: `Props extends HTMLAttributes<'ol'>`, não genérica — ver `Container.astro`.
+ */
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+interface Props extends HTMLAttributes<'ol'> {
+  /** Os passos, na ordem. Vazio ⇒ nada é renderizado. */
+  passos: { titulo: string; texto: string }[];
+  /** Nível do título de cada passo — padrão `'h3'`. */
+  tituloAs?: HTMLTag;
+}
+
+const { passos, tituloAs: Titulo = 'h3', class: className, ...rest } = Astro.props;
+
+/* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+const itemClass = 'step-item border-t border-line-soft pt-4';
+const tituloClass = 'text-h3';
+const textoClass = 'mt-2 text-body text-ink-body';
+---
+
+{
+  passos.length > 0 && (
+    <ol class:list={['flex flex-col gap-6 step-list', className]} {...rest}>
+      {passos.map((passo) => (
+        <li class={itemClass}>
+          <Titulo class={tituloClass}>{passo.titulo}</Titulo>
+          <p class={textoClass}>{passo.texto}</p>
+        </li>
+      ))}
+    </ol>
+  )
+}

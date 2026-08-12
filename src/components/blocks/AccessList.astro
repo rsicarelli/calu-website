@@ -1,0 +1,53 @@
+---
+/**
+ * AccessList — a lista "Estrutura e acesso" / "Como é chegar aqui", com a frase de
+ * fechamento que sempre a acompanha.
+ * Dois usos reais (Home e `/contato`) mais as duas telas equivalentes da `/lab`.
+ *
+ * Props
+ *   itens  2 a 8 linhas curtas. Vazio ⇒ nada é renderizado.
+ *   fecho  a frase de fechamento ("Precisa de alguma adaptação? Avise antes."). Ausente ⇒
+ *          nenhum parágrafo — mas ver abaixo por que ela quase nunca deve faltar.
+ *   …      qualquer atributo de `div` vai para a raiz.
+ *
+ * POR QUE ISTO EXISTE E O `RuledList` NÃO BASTA
+ * ---------------------------------------------------------------------------------------
+ * `RuledList` renderiza as linhas e diz, no próprio cabeçalho, que a frase de fechamento
+ * "fica com quem chama: é copy, e copy não entra em componente antes da Fase 4". Esta é a
+ * Fase 4, e o que se aprendeu nas quatro ocorrências é que a lista e o fecho não são duas
+ * decisões — são uma. A lista de acesso sem o convite a avisar sobre adaptação é uma lista de
+ * requisitos; com ele, é um convite. Separá-los deixou o fecho ser esquecido em uma das telas.
+ *
+ * Então o componente compõe `RuledList` em vez de reimplementá-lo: a régua, o intervalo de
+ * 2 a 8 itens e a disciplina de lista vazia continuam vindo de um lugar só.
+ *
+ * O FECHO É `<p>`, DEPOIS DA LISTA, e não um nono `<li>`: ele não é um item de acesso, é uma
+ * instrução sobre o que fazer com a lista. Como `<li>` ele seria anunciado como "item 9 de 9"
+ * e entraria na contagem que o schema limita a 8.
+ *
+ *   <AccessList itens={home.data.acesso.itens} fecho={home.data.acesso.fecho} />
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica — ver `Container.astro`.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+import RuledList from '@/components/ui/RuledList.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** As linhas de acesso, 2 a 8. Vazio ⇒ nada é renderizado. */
+  itens: string[];
+  /** Frase de fechamento. Ausente ⇒ nenhum parágrafo. */
+  fecho?: string;
+}
+
+const { itens, fecho, class: className, ...rest } = Astro.props;
+---
+
+{
+  itens.length > 0 && (
+    <div class:list={[className]} {...rest}>
+      <RuledList items={itens} />
+      {fecho && <p class="mt-6 text-body text-ink-body">{fecho}</p>}
+    </div>
+  )
+}

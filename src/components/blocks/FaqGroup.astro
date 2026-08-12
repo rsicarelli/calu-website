@@ -1,0 +1,85 @@
+---
+/**
+ * FaqGroup — um grupo de perguntas, com o primeiro item já aberto.
+ * Quatro usos reais: os três grupos de `/duvidas` e o resumo da Home, mais as telas da `/lab`.
+ *
+ * Props
+ *   perguntas  as entradas da collection `duvidas`, na ordem de exibição. Vazio ⇒ nada é
+ *              renderizado — nunca uma moldura de grupo sem pergunta dentro.
+ *   titulo     cabeçalho do grupo. Ausente ⇒ nenhum cabeçalho (é o caso do resumo da Home,
+ *              que já tem o título vindo do `PageSection` que o embrulha).
+ *   tituloAs   nível do cabeçalho do grupo — `h2` (padrão).
+ *   perguntaAs nível do cabeçalho de cada pergunta — `h3` (padrão). Desce junto com `tituloAs`.
+ *   …          qualquer atributo de `div` vai para a raiz.
+ *
+ * O PRIMEIRO ITEM ABRE, E É REGRA DE GRUPO — não de página
+ * ---------------------------------------------------------------------------------------
+ * `PAGES.md` § FAQ: "primeiro item de cada grupo aberto". Com três grupos na mesma página, isso
+ * significa três `<details open>`, não um. Escrito à mão, a regra vira "quem lembrar de passar
+ * `open` no primeiro de cada lista", e `tests/pages/lab.test.ts` já travava exatamente esse
+ * contrato (`exatamente um <details open> por [data-faq-group]`) porque ele é fácil de errar.
+ * Aqui o índice decide, e o erro deixa de ser possível.
+ *
+ * O `data-faq-group` continua na raiz: é o gancho de que aquele teste depende, e mantê-lo
+ * significa que a página real herda a mesma cobertura que a `/lab` tinha.
+ *
+ * A RESPOSTA VEM DO CORPO MARKDOWN, não de um campo. `render()` do `astro:content` devolve um
+ * componente `Content` por entrada, e ele entra no slot do `FaqItem`. Isso é o que dá parágrafo,
+ * lista e link de verdade na resposta — e é por isso que o `render` acontece AQUI, num `await`
+ * por pergunta, e não na página: quem sabe que a resposta é rich text é este componente.
+ *
+ *   <FaqGroup titulo="Antes de começar" perguntas={doGrupo} />
+ *   <FaqGroup perguntas={destaque} perguntaAs="h3" />        resumo da Home, sem título
+ *
+ * Tipagem: `Props extends HTMLAttributes<'div'>`, não genérica — ver `Container.astro`.
+ */
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+import FaqItem from '@/components/blocks/FaqItem.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** As perguntas do grupo, na ordem. Vazio ⇒ nada é renderizado. */
+  perguntas: CollectionEntry<'duvidas'>[];
+  /** Cabeçalho do grupo. Ausente ⇒ nenhum cabeçalho. */
+  titulo?: string;
+  /** Nível do cabeçalho do grupo — padrão `'h2'`. */
+  tituloAs?: HTMLTag;
+  /** Nível do cabeçalho de cada pergunta — padrão `'h3'`. */
+  perguntaAs?: HTMLTag;
+}
+
+const {
+  perguntas,
+  titulo,
+  tituloAs: Titulo = 'h2',
+  perguntaAs = 'h3',
+  class: className,
+  ...rest
+} = Astro.props;
+
+/* O `render` de cada entrada é resolvido aqui, de uma vez: dentro do `.map()` do template não
+   dá para usar `await` sem transformar cada item numa Promise não resolvida. */
+const itens = await Promise.all(
+  perguntas.map(async (entrada) => ({
+    entrada,
+    Content: (await render(entrada)).Content,
+  })),
+);
+---
+
+{
+  itens.length > 0 && (
+    <div data-faq-group class:list={[className]} {...rest}>
+      {titulo && <Titulo class="text-h2">{titulo}</Titulo>}
+      <div class:list={[titulo && 'mt-6']}>
+        {itens.map(({ entrada, Content }, index) => (
+          <FaqItem question={entrada.data.pergunta} questionAs={perguntaAs} open={index === 0}>
+            <Content />
+          </FaqItem>
+        ))}
+      </div>
+    </div>
+  )
+}

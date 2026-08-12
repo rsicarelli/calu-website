@@ -6,7 +6,13 @@ import { SITE } from '@/lib/site';
 ---
 
 <BaseLayout title={`Página não encontrada · ${SITE.name}`} noindex>
-  <Container as="section" class="py-16 text-center">
+  {
+    /* `div`, não `section`: esta é a única coisa na página, e o `<main>` que a envolve
+      já é o marco. Um `<section>` aqui seria um marco anônimo duplicando o `<main>` —
+      quem navega por marcos ouviria "região" sem nome logo depois de "principal".
+      Travado por `tests/system/landmarks.test.ts`. */
+  }
+  <Container class="py-16 text-center">
     <EmptyState
       headingAs="h1"
       heading="Não encontramos esta página"

@@ -1,10 +1,235 @@
 ---
+/* Home.
+   ============================================================================
+   A ordem das seções é a de `design_handoff_calu/PAGES.md`:
+   Hero → Manifesto → Serviços → Equipe → Para a família → Estrutura e acesso →
+   Como funciona → CTA escuro → FAQ resumido → Onde estamos.
+
+   DIVERGÊNCIA REGISTRADA: o mockup (`Calu - Direcao de Marca.dc.html`, seção 03)
+   põe "Estrutura e acesso" DEPOIS do FAQ, e `PAGES.md` põe antes de "Como
+   funciona". Seguimos `PAGES.md`, que é a spec; o handoff é documento vivo e a
+   divergência foi corrigida lá.
+
+   O herói fica INLINE, sem virar componente: a régua da Fase 3 é "3 ocorrências,
+   ou 2 + variação de estado", e o herói tem 2 (aqui e a tela da `/lab`) com a
+   única variação — imagem presente ou ausente — já absorvida por `AspectImage`.
+   Componente que só embrulha outro não paga o próprio custo.
+
+   Este é o primeiro chamador de `localBusinessLd`, escrito na Fase 1 e até agora
+   sem consumidor. Ele fica SÓ aqui, e não em toda página: `Physiotherapy` é um nó
+   sobre a organização, não sobre o documento — repeti-lo em seis páginas não
+   melhora nada e multiplica a chance de as cópias divergirem. */
+import { getEntries, getEntry } from 'astro:content';
+
+import AccessList from '@/components/blocks/AccessList.astro';
+import FaqGroup from '@/components/blocks/FaqGroup.astro';
+import LocationBlock from '@/components/blocks/LocationBlock.astro';
+import PageSection from '@/components/blocks/PageSection.astro';
+import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
+import StepList from '@/components/blocks/StepList.astro';
+import JsonLd from '@/components/content/JsonLd.astro';
+import Action from '@/components/ui/Action.astro';
+import AspectImage from '@/components/ui/AspectImage.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
 import Container from '@/components/ui/Container.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { localBusinessLd } from '@/lib/jsonld';
+import { canonicalUrl } from '@/lib/seo';
+import { SITE } from '@/lib/site';
+
+const home = await getEntry('home', 'home');
+if (!home) throw new Error('src/content/home/home.md não encontrado — a Home depende dele.');
+const { data } = home;
+
+/* `getEntries` resolve as referências na ORDEM em que foram declaradas no conteúdo.
+   Isso importa: a ordem dos destaques é decisão editorial, não alfabética. */
+const servicosDestaque = await getEntries(data.servicos.destaque);
+const equipeDestaque = await getEntries(data.equipe.destaque);
+const faqDestaque = await getEntries(data.faq.destaque);
+
+const site = Astro.site ?? Astro.url;
+const negocio = localBusinessLd({
+  name: SITE.name,
+  url: canonicalUrl('/', site),
+  telephone: SITE.phone.href.replace('tel:', ''),
+  address: SITE.address,
+  openingHours: SITE.openingHours,
+  areaServed: SITE.areaServed,
+});
 ---
 
-<BaseLayout title="Calu Pilates e Fisioterapia">
-  <Container>
-    <h1 class="text-display">Calu Pilates e Fisioterapia</h1>
-  </Container>
+<BaseLayout title={data.seo.title} description={data.seo.description}>
+  <JsonLd slot="head" schema={negocio} />
+
+  {/* ── Hero ────────────────────────────────────────────────────────────── */}
+  <header class="py-12">
+    <Container width="page">
+      <div class="grid gap-8 md:grid-cols-2 md:items-center">
+        <div>
+          {data.hero.eyebrow && <p class="label text-ink-muted">{data.hero.eyebrow}</p>}
+          <h1 class="mt-2 text-display">{data.hero.titulo}</h1>
+          <p class="mt-6 text-lead text-ink-body">{data.hero.lead}</p>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <Action as="a" href={SITE.whatsapp.href} variant="primary" size="lg" id="cta-principal">
+              Falar no WhatsApp
+            </Action>
+            <Action as="a" href="/servicos" size="lg">{data.hero.acaoSecundaria}</Action>
+          </div>
+          <ContactPair
+            class="mt-6"
+            size="small"
+            whatsappHref={SITE.whatsapp.href}
+            phoneHref={SITE.phone.href}
+            phoneLabel={SITE.phone.label}
+          />
+        </div>
+        <AspectImage
+          src={data.hero.imagem}
+          alt=""
+          decorative
+          priority
+          ratio="3/4"
+          class="md:aspect-4/5"
+        />
+      </div>
+    </Container>
+  </header>
+
+  {/* ── Manifesto ───────────────────────────────────────────────────────── */}
+  <PageSection id="manifesto" data-surface="brand" class="bg-surface-brand py-12" width="measure">
+    <p class="text-lead text-ink-on-brand">{data.manifesto.texto}</p>
+  </PageSection>
+
+  {/* ── Serviços ────────────────────────────────────────────────────────── */}
+  {
+    servicosDestaque.length > 0 && (
+      <PageSection
+        id="servicos"
+        label={data.servicos.label}
+        titulo={data.servicos.titulo}
+        class="py-12"
+      >
+        <ul class="mt-8 grid gap-6 md:grid-cols-3">
+          {servicosDestaque.map((servico) => (
+            <ServiceCard
+              eyebrow={servico.data.frasePopular}
+              title={servico.data.titulo}
+              description={servico.data.resumo}
+              href={`/servicos/${servico.id}/`}
+            />
+          ))}
+        </ul>
+        <Action as="a" href="/servicos" class="mt-8">
+          {data.servicos.linkLabel}
+        </Action>
+      </PageSection>
+    )
+  }
+
+  {/* ── Equipe ──────────────────────────────────────────────────────────── */}
+  {
+    equipeDestaque.length > 0 && (
+      <PageSection id="equipe" label={data.equipe.label} titulo={data.equipe.titulo} class="py-12">
+        <p class="mt-4 text-body text-ink-body">{data.equipe.intro}</p>
+        <ul class="mt-8 grid gap-8 md:grid-cols-2">
+          {equipeDestaque.map((pessoa) => (
+            <li class="rounded-card border border-line-soft p-6">
+              <ProfessionalBio
+                name={pessoa.data.nome}
+                credential={pessoa.data.credencial}
+                description={pessoa.data.atende}
+              />
+            </li>
+          ))}
+        </ul>
+        <Action as="a" href="/equipe" class="mt-8">
+          {data.equipe.linkLabel}
+        </Action>
+      </PageSection>
+    )
+  }
+
+  {/* ── Para a família ──────────────────────────────────────────────────── */}
+  <PageSection
+    id="familia"
+    label={data.familia.label}
+    titulo={data.familia.titulo}
+    class="py-12"
+    width="measure"
+  >
+    <p class="mt-4 text-body text-ink-body">{data.familia.texto}</p>
+    <AccessList class="mt-6" itens={data.familia.itens} />
+    <ContactPair
+      class="mt-8"
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </PageSection>
+
+  {/* ── Estrutura e acesso ──────────────────────────────────────────────── */}
+  <PageSection
+    id="acesso"
+    label={data.acesso.label}
+    titulo={data.acesso.titulo}
+    class="py-12"
+    width="measure"
+  >
+    <AccessList class="mt-6" itens={data.acesso.itens} fecho={data.acesso.fecho} />
+  </PageSection>
+
+  {/* ── Como funciona ───────────────────────────────────────────────────── */}
+  <PageSection
+    id="como-funciona"
+    label={data.comoFunciona.label}
+    titulo={data.comoFunciona.titulo}
+    class="py-12"
+    width="measure"
+  >
+    <StepList class="mt-8" passos={data.comoFunciona.passos} />
+  </PageSection>
+
+  {/* ── CTA escuro ──────────────────────────────────────────────────────── */}
+  {
+    /* O rótulo e o cabeçalho são escritos à mão, e não via as props do `PageSection`, porque
+      em superfície escura eles precisam de `text-ink-on-deep*` — as cores padrão do
+      componente (`text-ink`, `text-ink-muted`) são as do tema claro e sairiam ilegíveis
+      aqui. Como consequência o `aria-labelledby` também vai à mão: sem `titulo`, o
+      componente não o emite, e o `{...rest}` prevalece sobre o atributo do template
+      (comportamento verificado e documentado em `BrandPlaceholder.astro`). */
+  }
+  <PageSection
+    id="contato-rapido"
+    class="bg-surface-deep py-12"
+    data-surface="deep"
+    aria-labelledby="contato-rapido-titulo"
+  >
+    <p class="label text-ink-on-deep-2">{data.cta.label}</p>
+    <h2 id="contato-rapido-titulo" class="mt-2 text-h2 text-ink-on-deep">{data.cta.titulo}</h2>
+    <p class="mt-4 text-body text-ink-on-deep-2">{data.cta.texto}</p>
+    <ContactPair
+      class="mt-8"
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </PageSection>
+
+  {/* ── FAQ resumido ────────────────────────────────────────────────────── */}
+  {
+    faqDestaque.length > 0 && (
+      <PageSection id="duvidas" titulo={data.faq.titulo} class="py-12" width="measure">
+        <FaqGroup class="mt-8" perguntas={faqDestaque} />
+        <Action as="a" href="/duvidas" class="mt-8">
+          {data.faq.linkLabel}
+        </Action>
+      </PageSection>
+    )
+  }
+
+  {/* ── Onde estamos ────────────────────────────────────────────────────── */}
+  <PageSection id="onde-estamos" titulo={data.local.titulo} class="py-12" width="measure">
+    <LocationBlock class="mt-8" />
+  </PageSection>
 </BaseLayout>

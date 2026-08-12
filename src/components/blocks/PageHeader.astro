@@ -1,0 +1,59 @@
+---
+/**
+ * PageHeader — o cabeçalho de uma página interna: `<h1>` e a linha de apoio.
+ * Usado por `/servicos`, `/equipe`, `/duvidas` e `/contato`, mais as telas equivalentes da
+ * `/lab`.
+ *
+ * Props
+ *   titulo    o `<h1>`. Descreve ESTA página, nunca o nome da marca — ver abaixo.
+ *   lead      linha de apoio. Ausente ⇒ nenhum parágrafo é renderizado.
+ *   eyebrow   linha curta acima do título (o breadcrumb do template de serviço passa por fora,
+ *             não por aqui — este eyebrow é texto, não navegação).
+ *   width     largura do trilho, repassada ao `Container` — `measure` (padrão) ou `page`.
+ *   …         qualquer atributo de `header` vai para a raiz.
+ *
+ * UM `<h1>` POR PÁGINA, DESCREVENDO A PÁGINA
+ * ---------------------------------------------------------------------------------------
+ * Regra transversal de `PAGES.md`: "Fisioterapia para dor e lesão", não "Calu Pilates e
+ * Fisioterapia" repetido em todo lugar. O componente não consegue julgar o TEXTO que recebe,
+ * mas garante a estrutura: um `<h1>` só, sempre o primeiro cabeçalho da página, com o lead
+ * como `<p>` e não como um `<h2>` que inventaria um nível.
+ *
+ * A contagem de `<h1>` por página é travada em `tests/system/headings.test.ts`, sobre o HTML
+ * construído — é lá que um segundo `<h1>` vindo de um bloco qualquer apareceria.
+ *
+ * NÃO É `PageSection`. A diferença não é cosmética: `PageSection` é um marco NOMEADO
+ * (`aria-labelledby`), e nomear o cabeçalho da página como marco criaria um marco que duplica
+ * o `<main>` que já o contém. Aqui a raiz é `<header>`, que dentro de `<main>` não vira marco
+ * de banner.
+ *
+ *   <PageHeader titulo="Quem vai te atender" lead="Duas fisioterapeutas…" />
+ *   <PageHeader titulo="Pilates clínico" eyebrow="Estou com dor nas costas" width="page" />
+ *
+ * Tipagem: `Props extends HTMLAttributes<'header'>`, não genérica — ver `Container.astro`.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+import Container from '@/components/ui/Container.astro';
+
+interface Props extends HTMLAttributes<'header'> {
+  /** O `<h1>` da página. */
+  titulo: string;
+  /** Linha de apoio. Ausente ⇒ nenhum `<p>`. */
+  lead?: string;
+  /** Linha curta acima do título. */
+  eyebrow?: string;
+  /** Largura do trilho — `measure` (padrão) ou `page`. */
+  width?: 'page' | 'measure';
+}
+
+const { titulo, lead, eyebrow, width = 'measure', class: className, ...rest } = Astro.props;
+---
+
+<header class:list={[className]} {...rest}>
+  <Container width={width}>
+    {eyebrow && <p class="label text-ink-muted">{eyebrow}</p>}
+    <h1 class:list={['text-h1', eyebrow && 'mt-2']}>{titulo}</h1>
+    {lead && <p class="mt-4 text-lead text-ink-body">{lead}</p>}
+  </Container>
+</header>

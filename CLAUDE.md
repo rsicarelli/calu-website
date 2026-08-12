@@ -73,13 +73,39 @@ Duas decisões que valem para quem continuar:
   vezes, mas ~63 são andaime de demonstração da própria `/lab` e ~13 são conteúdo real — extrair
   agora carimbaria o andaime dentro de um componente de site.
 
+✅ **Fase 4 — páginas reais implementada e commitada.** O site existe. `src/content.config.ts`
+define cinco coleções com schema Zod espelhando `PAGES.md` campo a campo, e as seis rotas
+(`/`, `/servicos`, `/servicos/[slug]`, `/equipe`, `/duvidas`, `/contato`) são montadas a partir
+dos componentes, não de markup novo. `localBusinessLd` ganhou seu primeiro chamador — só na Home,
+porque `Physiotherapy` descreve a organização e não o documento. A suíte foi de 363 para 708
+testes. Detalhes que valem para quem continuar:
+
+- **`.strict()` em todo objeto de schema é a trava CFF/CREFITO, não estilo.** Verificado
+  empiricamente contra o `astro/zod` instalado: sem ele, chave desconhecida é SILENCIOSAMENTE
+  REMOVIDA — um `preco:` numa entrada sumiria sem erro nenhum. Com ele, o build para e diz o nome
+  da chave. A `ficha` do serviço é enum fechado de seis chaves pelo mesmo motivo.
+- **Fonte única virou derivação.** `src/lib/site.ts` guarda cada fato UMA vez, estruturado, e
+  deriva toda apresentação por função pura. Os dígitos do telefone são digitados uma vez e
+  `tel:`, `wa.me/` e o rótulo saem deles — um site que mostrasse um número e discasse outro era
+  estado possível antes, e não é mais.
+- **`src/lib/placeholders.ts`** separa prosa de identidade: a copy é real (não afirma nada
+  verificável, então não depende de aprovação), o nome e o CREFITO são marcadores entre
+  colchetes. `tests/system/placeholders.test.ts` imprime o inventário do que falta — é a
+  checklist da troca.
+- **Três agentes de escrita em `.claude/agents/`** (`copywriter`, `grammar-reviewer`,
+  `cohesion-reviewer`). A trava CFF fica em três camadas: o schema não tem o campo, o teste varre
+  o texto construído, os agentes auditam a intenção.
+- **`SectionLabel` fechou sem virar componente:** é a prop `label` do `PageSection`.
+- **`LocationBlock` foi extraído depois de ter sido rejeitado na Fase 3** — o que mudou foi o
+  fato (com `AspectImage` ele passou a ter variação de estado), não a régua.
+- **O formulário não envia**, e isso é a decisão: o destino depende da hospedagem, ainda em
+  aberto. Ele valida no cliente e nunca finge sucesso.
+
 **Ainda não existe** — e a ausência é temporária, não uma decisão contra:
-CMS, hospedagem/deploy, CI, analytics, formulários que de fato enviem, favicon, e qualquer
-conteúdo real da clínica — inclusive os dados que preenchem o JSON-LD e o cadastro no Google
-Business Profile (SEO local, ver "Decisões em aberto"). O `index.astro` continua um placeholder
-com o nome e nada mais: a `/lab` é laboratório, não página pública, e o conteúdo das páginas de
-verdade só entra na Fase 4. O próximo passo é a **Fase 4 — páginas reais**: content collections
-com schema Zod espelhando `PAGES.md`, montadas a partir dos componentes que a Fase 3 extraiu.
+CMS, hospedagem/deploy, CI, analytics, formulários que de fato enviem, favicon, imagem OG, as
+rotas `/sobre`, `/blog` e `/politica-de-privacidade` (não desenhadas), e o dado real da clínica —
+endereço, telefone, horário, nome e CREFITO das profissionais, mais o cadastro no Google Business
+Profile (SEO local, ver "Decisões em aberto"). O próximo passo é a **Fase 5 — endurecimento**.
 
 ## Restrições firmes
 
@@ -261,11 +287,12 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
 - ~~**Fase 3 — extração de componentes.**~~ ✅ Feita. Só extraiu o que se repetiu de fato: 3
   ocorrências, ou 2 + variação de estado. Ver "Status" para a lista do que saiu, do que foi
   rejeitado e por quê — e para a regra de que ocorrência em galeria não conta.
-- **Fase 4 — páginas reais.** Content collections com schema Zod espelhando `PAGES.md` do handoff,
-  substituindo o conteúdo bruto do `/lab` pelas páginas de verdade — e é quando dado real da
-  clínica (endereço, telefone, horário, equipe) entra pela primeira vez, aprovado pela cliente.
-  `localBusinessLd` (Fase 1) ganha seu primeiro chamador aqui; `src/lib/site.ts` troca os
-  placeholders pelos dados reais.
+- ~~**Fase 4 — páginas reais.**~~ ✅ Feita. Content collections com schema Zod espelhando
+  `PAGES.md`, e as seis rotas desenhadas montadas sobre os componentes. Ver "Status" para o que
+  ficou decidido. Duas coisas NÃO aconteceram aqui, e é bom não procurá-las: o dado real da
+  clínica (segue placeholder tipado, à espera da cliente) e as três rotas não desenhadas
+  (`/sobre`, `/blog`, `/politica-de-privacidade`). Enquanto elas não existem, o texto que
+  apontaria para elas é renderizado SEM link — `tests/system/links.test.ts` trava os dois lados.
 - **Fase 5 — endurecimento.** A11y, performance, SEO local (cadastro no Google Business Profile),
   e só então CI/GitHub Actions.
 
