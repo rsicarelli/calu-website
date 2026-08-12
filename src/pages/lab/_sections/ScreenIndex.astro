@@ -16,9 +16,9 @@
  * cliente começar a editar.
  */
 
+import CtaBlock from '@/components/blocks/CtaBlock.astro';
 import ServiceCard from '@/components/blocks/ServiceCard.astro';
 import EmptyState from '@/components/blocks/EmptyState.astro';
-import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
 ---
 
@@ -26,19 +26,15 @@ import { SITE } from '@/lib/site';
   <div>
     <h3 class="text-h1 text-ink">O que a gente atende</h3>
 
-    <div class="mt-8 rounded-card bg-surface-alt p-6">
-      <h4 class="text-h3 text-ink">Não sabe qual escolher?</h4>
-      <p class="mt-4 text-body text-ink-body">
-        Não precisa saber o nome do atendimento. Conte o que está sentindo e a gente ajuda a
-        entender por onde começar.
-      </p>
-      <ContactPair
-        class="mt-8"
-        whatsappHref={SITE.whatsapp.href}
-        phoneHref={SITE.phone.href}
-        phoneLabel={SITE.phone.label}
-      />
-    </div>
+    <CtaBlock
+      class="mt-8"
+      headingAs="h4"
+      heading="Não sabe qual escolher?"
+      message="Não precisa saber o nome do atendimento. Conte o que está sentindo e a gente ajuda a entender por onde começar."
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
   </div>
 
   <div>

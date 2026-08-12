@@ -14,8 +14,8 @@
  * da casca mais o sumário do laboratório, e dois landmarks de navegação com o mesmo nome reprovam
  * `landmark-unique` do axe e a varredura de sistema.
  */
+import CtaBlock from '@/components/blocks/CtaBlock.astro';
 import FaqItem from '@/components/blocks/FaqItem.astro';
-import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
 ---
 
@@ -119,18 +119,14 @@ import { SITE } from '@/lib/site';
         </div>
       </div>
 
-      <div class="rounded-card bg-surface-alt p-6">
-        <h4 class="text-h3 text-ink">Sua dúvida não estava aqui?</h4>
-        <p class="mt-4 text-body text-ink-body">
-          Escreva ou ligue. Quem responde é uma das profissionais da clínica.
-        </p>
-        <ContactPair
-          class="mt-8"
-          whatsappHref={SITE.whatsapp.href}
-          phoneHref={SITE.phone.href}
-          phoneLabel={SITE.phone.label}
-        />
-      </div>
+      <CtaBlock
+        headingAs="h4"
+        heading="Sua dúvida não estava aqui?"
+        message="Escreva ou ligue. Quem responde é uma das profissionais da clínica."
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
     </div>
   </div>
 </div>

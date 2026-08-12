@@ -17,8 +17,8 @@
  * confiança clínica, não um detalhe de rodapé de card.
  */
 
+import CtaBlock from '@/components/blocks/CtaBlock.astro';
 import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
-import ContactPair from '@/components/ui/ContactPair.astro';
 import Credential from '@/components/ui/Credential.astro';
 import { SITE } from '@/lib/site';
 ---
@@ -75,17 +75,12 @@ import { SITE } from '@/lib/site';
     </li>
   </ul>
 
-  <div class="rounded-card bg-surface-alt p-6">
-    <h4 class="text-h3 text-ink">O que isso muda pra você</h4>
-    <p class="mt-4 text-body text-ink-body">
-      Quem avalia é quem acompanha. Não há troca de profissional a cada sessão, e o histórico não
-      precisa ser recontado do começo toda vez.
-    </p>
-    <ContactPair
-      class="mt-8"
-      whatsappHref={SITE.whatsapp.href}
-      phoneHref={SITE.phone.href}
-      phoneLabel={SITE.phone.label}
-    />
-  </div>
+  <CtaBlock
+    headingAs="h4"
+    heading="O que isso muda pra você"
+    message="Quem avalia é quem acompanha. Não há troca de profissional a cada sessão, e o histórico não precisa ser recontado do começo toda vez."
+    whatsappHref={SITE.whatsapp.href}
+    phoneHref={SITE.phone.href}
+    phoneLabel={SITE.phone.label}
+  />
 </div>
