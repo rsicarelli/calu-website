@@ -3,12 +3,19 @@
 Site institucional da **Calu Pilates e Fisioterapia** — estúdio de Pilates e clínica de
 fisioterapia na Vila Clementino, São Paulo.
 
-> **Status:** 🚧 Em construção — o design system e a casca estrutural existem; o conteúdo, não.
-> Já implementados: os tokens do handoff de design (cor, tipografia, espaço, forma, tema claro e
-> escuro) em `src/styles/global.css`, o chrome que toda página usa (`Header` + `MobileNav`,
-> `Footer`, `WhatsAppFab`, `EmptyState`), a página `/404` e o SEO técnico (sitemap, `robots.txt`,
-> meta tags, JSON-LD). **Ainda não existem:** CMS, hospedagem/deploy, CI, analytics, formulários,
-> favicon e qualquer conteúdo real da clínica.
+> **Status:** 🚧 Em construção — o site existe, o dado real da clínica ainda não.
+> Já implementados: os tokens do handoff de design em `src/styles/global.css`, o chrome que toda
+> página usa (`Header` + `MobileNav`, `Footer`, `WhatsAppFab`, `EmptyState`), o SEO técnico
+> (sitemap, `robots.txt`, meta tags, JSON-LD) e as **seis páginas reais** — `/`, `/servicos`,
+> `/servicos/[slug]`, `/equipe`, `/duvidas` e `/contato` — montadas a partir de content
+> collections com schema Zod.
+>
+> **Ainda não existem:** CMS, hospedagem/deploy, CI, analytics, favicon, imagem OG, as rotas
+> `/sobre`, `/blog` e `/politica-de-privacidade` (não desenhadas), e um formulário que de fato
+> envie. **O dado real da clínica também não:** endereço, telefone e horário são placeholder
+> tipado em `src/lib/site.ts`; nome e CREFITO das profissionais são marcadores em
+> `src/lib/placeholders.ts`. A prosa do site é real e não afirma nada verificável — a troca pelo
+> dado aprovado é edição de valor nesses dois arquivos, não de código.
 
 ## O que é isto
 
@@ -17,17 +24,18 @@ verdade do código e do conteúdo.
 
 ## Stack
 
-| Camada     | Escolha                                            |
-| ---------- | -------------------------------------------------- |
-| Framework  | **Astro 7** (SSG, zero-JS por padrão)              |
-| Toolchain  | **mise** (Node + pnpm + go-task)                   |
-| Qualidade  | ESLint 10 + Prettier 3 + `astro check`, via `task` |
-| Idioma     | **pt-BR** apenas                                   |
-| CSS        | **Tailwind v4 CSS-first** — tokens em `@theme`     |
-| Design     | handoff em `design_handoff_calu/`, implementado    |
-| Testes     | **Vitest** — tokens, componentes, páginas, sistema |
-| CMS        | _a decidir_ — Git-based, com interface visual      |
-| Hospedagem | _a decidir_ — provavelmente Cloudflare Pages       |
+| Camada     | Escolha                                                 |
+| ---------- | ------------------------------------------------------- |
+| Framework  | **Astro 7** (SSG, zero-JS por padrão)                   |
+| Toolchain  | **mise** (Node + pnpm + go-task)                        |
+| Qualidade  | ESLint 10 + Prettier 3 + `astro check`, via `task`      |
+| Idioma     | **pt-BR** apenas                                        |
+| CSS        | **Tailwind v4 CSS-first** — tokens em `@theme`          |
+| Design     | handoff em `design_handoff_calu/`, implementado         |
+| Conteúdo   | **content collections** + Zod (`src/content.config.ts`) |
+| Testes     | **Vitest** — tokens, componentes, páginas, sistema      |
+| CMS        | _a decidir_ — Git-based, com interface visual           |
+| Hospedagem | _a decidir_ — provavelmente Cloudflare Pages            |
 
 ## Estrutura
 

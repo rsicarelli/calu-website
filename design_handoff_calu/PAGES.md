@@ -33,6 +33,12 @@ Vale para todas as páginas abaixo, não é regra de uma seção só:
 
 Ordem: Header → Hero → Manifesto (faixa verde) → Serviços → Equipe → **Para a família** → **Estrutura e acesso** → Como funciona → CTA escuro → FAQ resumido → Onde estamos → Footer → FAB WhatsApp.
 
+> **Divergência resolvida (Fase 4).** O mockup (`Calu - Direcao de Marca.dc.html`, seção 03)
+> renderiza "Estrutura e acesso" DEPOIS do FAQ resumido, não entre "Para a família" e "Como
+> funciona". A implementação segue a ordem escrita ACIMA, que é a spec — o mockup é a referência
+> visual, não a normativa. Registrado aqui para a próxima pessoa não "corrigir" o código pelo
+> mockup: se a ordem do mockup for a desejada, muda-se esta linha primeiro.
+
 Desktop muda: hero vira 2 colunas (texto / imagem 4/5), serviços viram 3 colunas, "Para a família" e "Estrutura e acesso" ficam lado a lado, FAQ e mapa dividem a linha.
 
 **Conteúdo (CMS)**
