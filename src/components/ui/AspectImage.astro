@@ -56,7 +56,7 @@ import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
 
 interface Props extends HTMLAttributes<'div'> {
   /** A imagem. Ausente ⇒ `BrandPlaceholder` na mesma proporção. */
-  src?: ImageMetadata;
+  src?: import('astro').ImageMetadata;
   /** Alternativa textual. Obrigatória junto de `src`, salvo `decorative`. */
   alt?: string;
   /** Marca a imagem como decorativa: `alt=""` + `aria-hidden`. */

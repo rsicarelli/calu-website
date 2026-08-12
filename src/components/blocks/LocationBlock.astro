@@ -44,7 +44,7 @@ import { SITE } from '@/lib/site';
 
 interface Props extends HTMLAttributes<'div'> {
   /** Mapa estático 3/2. Ausente ⇒ placeholder de marca na mesma proporção. */
-  mapa?: ImageMetadata;
+  mapa?: import('astro').ImageMetadata;
 }
 
 const { mapa, class: className, ...rest } = Astro.props;

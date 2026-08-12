@@ -1,0 +1,74 @@
+---
+/* Índice de serviços.
+   ============================================================================
+   `PAGES.md` § Índice: o bloco "Não sabe qual escolher?" vem ANTES da lista, e a
+   lista é coluna única no mobile / linha com imagem à esquerda no desktop.
+
+   O "ChooserBlock" do handoff NÃO virou componente: `CtaBlock` já renderiza
+   exatamente título + mensagem + `ContactPair`, que é tudo o que ele é. Reusar em
+   vez de duplicar — a régua da Fase 3 vale para os dois lados.
+
+   O estado vazio é real, não hipotético: é o estado do primeiro dia de qualquer
+   CMS. Por isso `EmptyState` e não uma lista vazia silenciosa. */
+import { getCollection } from 'astro:content';
+
+import EmptyState from '@/components/blocks/EmptyState.astro';
+import CtaBlock from '@/components/blocks/CtaBlock.astro';
+import PageHeader from '@/components/blocks/PageHeader.astro';
+import PageSection from '@/components/blocks/PageSection.astro';
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
+import Container from '@/components/ui/Container.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/lib/site';
+
+const servicos = (await getCollection('servicos')).sort((a, b) => a.data.ordem - b.data.ordem);
+---
+
+<BaseLayout
+  title={`O que a gente atende · ${SITE.name}`}
+  description="Fisioterapia e Pilates na Vila Clementino, em São Paulo. Veja os atendimentos e fale com a gente para entender qual faz sentido pra você."
+>
+  <PageHeader
+    class="py-12"
+    width="page"
+    titulo="O que a gente atende"
+    lead="Se você não souber por onde começar, a gente ajuda a entender. A indicação sai da avaliação, não do site."
+  />
+
+  <Container width="page">
+    <CtaBlock
+      heading="Não sabe qual escolher?"
+      message="Conte o que está sentindo e a gente indica o caminho. Não precisa saber o nome técnico de nada."
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </Container>
+
+  <PageSection id="lista" titulo="Todos os atendimentos" class="py-12">
+    {
+      servicos.length > 0 ? (
+        <ul class="mt-8 flex flex-col gap-6">
+          {servicos.map((servico) => (
+            <ServiceCard
+              layout="row"
+              eyebrow={servico.data.frasePopular}
+              title={servico.data.titulo}
+              description={servico.data.resumo}
+              href={`/servicos/${servico.id}/`}
+            />
+          ))}
+        </ul>
+      ) : (
+        <EmptyState
+          class="mt-8"
+          heading="Estamos organizando esta página"
+          message="Enquanto isso, fale com a gente — a indicação vem da conversa, não da lista."
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      )
+    }
+  </PageSection>
+</BaseLayout>

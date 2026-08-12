@@ -1,0 +1,179 @@
+---
+/* Template de serviço.
+   ============================================================================
+   A ORDEM DAS SEÇÕES É DECISÃO REGULATÓRIA, não editorial (`PAGES.md` § Serviço):
+   o que é → para quem costuma ser indicado → como acontece na prática → quem
+   conduz. Nenhum campo aceita resultado prometido, e a lista de indicações é
+   SEMPRE seguida da ressalva de que a indicação se define na avaliação — sem ela,
+   uma lista de sintomas lida como diagnóstico.
+
+   O aside fica INLINE aqui, e não virou `ServiceAside`: ele tem 2 ocorrências
+   (esta e a tela da `/lab`) e é composto inteiramente de `<dl>` + `ProfessionalBio`
+   + `ContactPair`, que já são componentes. A variação de estado que ele exibe
+   (seis chaves / subconjunto / sem profissional) é do CONTEÚDO, e o schema já a
+   garante: chave ausente não renderiza linha.
+
+   O breadcrumb também fica inline — 2 ocorrências, nenhuma variação. */
+import { getCollection, getEntries, getEntry, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+import PageHeader from '@/components/blocks/PageHeader.astro';
+import PageSection from '@/components/blocks/PageSection.astro';
+import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
+import ServiceCard from '@/components/blocks/ServiceCard.astro';
+import StepList from '@/components/blocks/StepList.astro';
+import AspectImage from '@/components/ui/AspectImage.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import Container from '@/components/ui/Container.astro';
+import RuledList from '@/components/ui/RuledList.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/lib/site';
+
+export const getStaticPaths = (async () => {
+  const servicos = await getCollection('servicos');
+  return servicos.map((servico) => ({ params: { slug: servico.id } }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+const servico = await getEntry('servicos', slug!);
+if (!servico) throw new Error(`Serviço "${slug}" não encontrado.`);
+
+const { data } = servico;
+const { Content } = await render(servico);
+
+const profissional = data.profissional ? await getEntry(data.profissional) : undefined;
+const relacionados = data.relacionados ? await getEntries(data.relacionados) : [];
+
+/* Os seis rótulos da ficha, na ordem de exibição. As CHAVES são fechadas pelo
+   schema; esta lista é só a tradução de cada uma para o que se lê na tela. Chave
+   ausente no conteúdo não vira linha vazia — o `filter` abaixo a remove. */
+const FICHA_ROTULOS = [
+  ['duracao', 'Duração da sessão'],
+  ['turma', 'Turma'],
+  ['roupa', 'Roupa'],
+  ['pedidoMedico', 'Pedido médico'],
+  ['local', 'Local'],
+  ['frequencia', 'Frequência'],
+] as const;
+
+const fichaLinhas = FICHA_ROTULOS.map(([chave, rotulo]) => ({
+  rotulo: rotulo as string,
+  valor: data.ficha?.[chave],
+})).filter((linha): linha is { rotulo: string; valor: string } => Boolean(linha.valor));
+---
+
+<BaseLayout title={`${data.titulo} · ${SITE.name}`} description={data.seoDescription}>
+  <Container width="page" class="pt-8">
+    <nav aria-label="Trilha de navegação">
+      <ol class="flex flex-wrap gap-2 text-small text-ink-muted">
+        <li><a href="/servicos">Serviços</a></li>
+        <li aria-current="page">{data.titulo}</li>
+      </ol>
+    </nav>
+  </Container>
+
+  <PageHeader
+    class="py-8"
+    width="page"
+    eyebrow={data.frasePopular}
+    titulo={data.titulo}
+    lead={data.resumo}
+  />
+
+  <Container width="page">
+    <div class="grid gap-12 md:grid-cols-3">
+      <div class="md:col-span-2">
+        <AspectImage src={data.imagem} alt="" decorative ratio="16/9" />
+
+        <PageSection id="o-que-e" titulo="O que é" width="measure" class="mt-12">
+          <div data-prose class="mt-4 text-body text-ink-body">
+            <Content />
+          </div>
+        </PageSection>
+
+        <PageSection
+          id="indicacoes"
+          titulo="Para quem costuma ser indicado"
+          width="measure"
+          class="mt-12"
+        >
+          <RuledList class="mt-6" items={data.indicacoes} />
+          {/* A ressalva é obrigatória: sem ela a lista lê como diagnóstico. */}
+          <p class="mt-6 text-body text-ink-body">
+            A indicação é definida na avaliação — esta lista é orientativa.
+          </p>
+        </PageSection>
+
+        <PageSection
+          id="na-pratica"
+          titulo="Como acontece na prática"
+          width="measure"
+          class="mt-12"
+        >
+          <StepList class="mt-8" passos={data.passos} />
+        </PageSection>
+      </div>
+
+      <aside class="md:sticky md:top-header md:self-start" aria-label="Resumo do atendimento">
+        {
+          fichaLinhas.length > 0 && (
+            <>
+              <h2 class="text-h3">Resumo</h2>
+              <dl class="mt-4 flex flex-col gap-4">
+                {fichaLinhas.map((linha) => (
+                  <div class="border-t border-line-soft pt-4">
+                    <dt class="label text-ink-muted">{linha.rotulo}</dt>
+                    <dd class="mt-1 text-body text-ink">{linha.valor}</dd>
+                  </div>
+                ))}
+              </dl>
+            </>
+          )
+        }
+
+        {
+          profissional && (
+            <>
+              <h2 class="mt-10 text-h3">Quem conduz</h2>
+              <ProfessionalBio
+                class="mt-4"
+                name={profissional.data.nome}
+                credential={profissional.data.credencial}
+                description={profissional.data.atende}
+              />
+            </>
+          )
+        }
+
+        <h2 class="mt-10 text-h3">Faz sentido pra você?</h2>
+        <p class="mt-2 text-body text-ink-body">
+          Conte o que está acontecendo. A gente responde no próximo horário de atendimento.
+        </p>
+        <ContactPair
+          class="mt-6"
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      </aside>
+    </div>
+  </Container>
+
+  {
+    relacionados.length > 0 && (
+      <PageSection id="relacionados" titulo="Outros atendimentos" class="py-12">
+        <ul class="mt-8 grid gap-6 md:grid-cols-3">
+          {relacionados.map((outro) => (
+            <ServiceCard
+              media={false}
+              eyebrow={outro.data.frasePopular}
+              title={outro.data.titulo}
+              description={outro.data.resumo}
+              href={`/servicos/${outro.id}/`}
+            />
+          ))}
+        </ul>
+      </PageSection>
+    )
+  }
+</BaseLayout>

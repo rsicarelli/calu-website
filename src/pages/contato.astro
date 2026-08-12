@@ -1,0 +1,64 @@
+---
+/* Contato.
+   ============================================================================
+   `PAGES.md` § Contato: WhatsApp e telefone vêm ANTES do formulário, e o texto diz
+   o horário de resposta — ninguém deve esperar retorno às 23h. A ordem é
+   deliberada: o caminho que funciona hoje aparece primeiro; o formulário é a
+   alternativa para quem prefere escrever.
+
+   O campo e-mail existe nos dois breakpoints e é OPCIONAL nos dois. O mockup o
+   mostrava só no mobile — divergência do próprio arquivo de referência, resolvida
+   em `PAGES.md` a favor da versão mobile. */
+import { getEntry } from 'astro:content';
+
+import AccessList from '@/components/blocks/AccessList.astro';
+import ContactForm from '@/components/blocks/ContactForm.astro';
+import LocationBlock from '@/components/blocks/LocationBlock.astro';
+import PageHeader from '@/components/blocks/PageHeader.astro';
+import PageSection from '@/components/blocks/PageSection.astro';
+import ContactPair from '@/components/ui/ContactPair.astro';
+import Container from '@/components/ui/Container.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/lib/site';
+
+const contato = await getEntry('contato', 'contato');
+if (!contato) throw new Error('src/content/contato/contato.md não encontrado.');
+const { data } = contato;
+---
+
+<BaseLayout title={data.seo.title} description={data.seo.description}>
+  <PageHeader class="pt-12" width="page" titulo={data.titulo} lead={data.lead} />
+
+  <Container width="page" class="pb-12">
+    {
+      /* Regra 7 dos invioláveis: telefone com o mesmo peso do WhatsApp, e os dois
+        ANTES do formulário. Parte do público liga em vez de escrever. */
+    }
+    <ContactPair
+      class="mt-8"
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+    <p class="mt-4 text-small text-ink-muted">{data.prazoResposta}</p>
+  </Container>
+
+  <PageSection id="formulario" titulo={data.formulario.titulo} width="measure" class="pb-12">
+    <ContactForm
+      class="mt-8"
+      nota={data.formulario.nota}
+      privacidade={data.formulario.privacidade}
+      enviar={data.formulario.enviar}
+      paraQuem={data.formulario.paraQuem}
+      interesses={data.formulario.interesses}
+    />
+  </PageSection>
+
+  <PageSection id="onde-estamos" titulo={data.local.titulo} width="measure" class="pb-12">
+    <LocationBlock class="mt-8" />
+  </PageSection>
+
+  <PageSection id="acesso" titulo={data.acesso.titulo} width="measure" class="pb-12">
+    <AccessList class="mt-8" itens={data.acesso.itens} fecho={data.acesso.fecho} />
+  </PageSection>
+</BaseLayout>

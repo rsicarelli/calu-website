@@ -18,6 +18,14 @@ const RAW_SITEMAP = import.meta.glob('../../dist/sitemap.xml', {
   eager: true,
 });
 
+/* As páginas de serviço que o build gerou. Só as CHAVES interessam (os caminhos);
+   o conteúdo vem junto porque `import.meta.glob` não tem modo "só nomes". */
+const RAW_SERVICE_PAGES = import.meta.glob('../../dist/servicos/*/index.html', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
 function readSitemap(): string {
   const [source] = Object.values(RAW_SITEMAP);
   if (typeof source !== 'string' || source.length === 0) {
@@ -56,12 +64,39 @@ describe('dist/sitemap.xml', () => {
     expect(xml).not.toContain('/lab');
   });
 
-  it('NÃO contém rotas de SITE_NAV que ainda não têm arquivo em src/pages/ (/servicos, /equipe, /duvidas, /contato)', () => {
+  /* Até a Fase 4 este bloco afirmava a AUSÊNCIA destas quatro rotas, porque elas
+     estavam em `SITE_NAV` sem ter arquivo em `src/pages/`. Agora têm, e a afirmação
+     se inverte: toda rota do menu principal precisa estar no índice, ou o menu
+     aponta para páginas que o Google nunca vê. */
+  it.each(['/servicos/', '/equipe/', '/duvidas/', '/contato/'])(
+    'contém a rota %s de SITE_NAV',
+    (rota) => {
+      expect(readSitemap()).toContain(`<loc>https://calupilates.com.br${rota}</loc>`);
+    },
+  );
+
+  /* As páginas de serviço são GERADAS a partir da collection, e o endpoint as deriva
+     da mesma fonte. Este teste é o que prova que a derivação acontece: com os slugs
+     escritos à mão, publicar um serviço novo o deixaria fora do sitemap em silêncio. */
+  it('contém uma entrada por página de serviço construída', () => {
+    /* A lista esperada sai do próprio `dist/`, e não de `getCollection`: o content
+       layer do Astro só existe dentro do build, e chamá-lo aqui devolve coleção
+       vazia — o teste passaria sem verificar nada. Comparar o sitemap com os
+       arquivos que o build de fato gerou é a checagem que interessa de todo jeito. */
+    const paginas = Object.keys(RAW_SERVICE_PAGES).map((caminho) =>
+      caminho.replace(/^.*\/dist/, '').replace(/index\.html$/, ''),
+    );
     const xml = readSitemap();
 
-    expect(xml).not.toContain('/servicos');
-    expect(xml).not.toContain('/equipe');
-    expect(xml).not.toContain('/duvidas');
-    expect(xml).not.toContain('/contato');
+    expect(
+      paginas.length,
+      'nenhuma página de serviço em dist/ — rode `pnpm build`',
+    ).toBeGreaterThan(0);
+
+    const ausentes = paginas.filter(
+      (rota) => !xml.includes(`<loc>https://calupilates.com.br${rota}</loc>`),
+    );
+
+    expect(ausentes, `serviços fora do sitemap: ${ausentes.join(', ')}`).toEqual([]);
   });
 });

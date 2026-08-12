@@ -1,0 +1,102 @@
+---
+/* Dúvidas frequentes.
+   ============================================================================
+   `PAGES.md` § FAQ: três grupos, índice lateral sticky no desktop, primeiro item de
+   cada grupo aberto. O `FaqGroup` cuida do "primeiro aberto" por construção — com
+   três grupos na mesma página isso significa três `<details open>`, não um.
+
+   O índice lateral fica INLINE, sem virar `FaqIndex`: 2 ocorrências (esta e a tela
+   da `/lab`), nenhuma variação de estado. Foi rejeitado na Fase 3 pelo mesmo
+   motivo, e nada mudou.
+
+   ORÇAMENTO DE STICKY: o índice usa `top-header` (88px, a altura do Header fixo).
+   Os dois são os únicos elementos sticky da página, e `scroll-padding-top` já
+   compensa o Header — uma âncora clicada aqui pousa abaixo dos dois. */
+import { getCollection } from 'astro:content';
+
+import CtaBlock from '@/components/blocks/CtaBlock.astro';
+import EmptyState from '@/components/blocks/EmptyState.astro';
+import FaqGroup from '@/components/blocks/FaqGroup.astro';
+import PageHeader from '@/components/blocks/PageHeader.astro';
+import PageSection from '@/components/blocks/PageSection.astro';
+import Container from '@/components/ui/Container.astro';
+import { FAQ_GROUPS } from '@/content.config';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/lib/site';
+
+const todas = await getCollection('duvidas');
+
+/* Os grupos vêm do vocabulário fechado do schema, não do conteúdo: nome e ordem
+   dos grupos não são decisão de quem edita perguntas. Grupo sem pergunta some. */
+const grupos = FAQ_GROUPS.map((grupo) => ({
+  ...grupo,
+  perguntas: todas
+    .filter((duvida) => duvida.data.grupo === grupo.slug)
+    .sort((a, b) => a.data.ordem - b.data.ordem),
+})).filter((grupo) => grupo.perguntas.length > 0);
+---
+
+<BaseLayout
+  title={`Dúvidas frequentes · ${SITE.name}`}
+  description="Respostas sobre avaliação, pedido médico, frequência, roupa, recibo e convênio na Calu, na Vila Clementino."
+>
+  <PageHeader
+    class="py-12"
+    width="page"
+    titulo="Dúvidas frequentes"
+    lead="Se a sua pergunta não estiver aqui, é só escrever. A gente responde no próximo horário de atendimento."
+  />
+
+  <Container width="page" class="pb-12">
+    {
+      grupos.length > 0 ? (
+        <div class="grid gap-12 md:grid-cols-4">
+          <nav
+            aria-label="Índice das dúvidas"
+            class="hidden md:sticky md:top-header md:block md:self-start"
+          >
+            <ul class="flex flex-col gap-4">
+              {grupos.map((grupo) => (
+                <li>
+                  <a href={`#${grupo.slug}`} class="text-body text-ink-body">
+                    {grupo.nome}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Cada grupo é um `PageSection`, e não um `<section>` à mão, porque é ele que
+              deriva o `aria-labelledby` do próprio cabeçalho — o par não tem como
+              divergir. O `FaqGroup` entra SEM `titulo`: o cabeçalho já é o da seção, e
+              dois cabeçalhos empilhados criariam um nível fantasma. */}
+          <div class="md:col-span-3">
+            {grupos.map((grupo) => (
+              <PageSection id={grupo.slug} titulo={grupo.nome} width="measure" class="pb-12">
+                <FaqGroup class="mt-6" perguntas={grupo.perguntas} />
+              </PageSection>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <EmptyState
+          heading="Estamos organizando esta página"
+          message="Enquanto isso, pergunte direto — a gente responde no próximo horário de atendimento."
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      )
+    }
+  </Container>
+
+  <Container width="page" class="pb-12">
+    <CtaBlock
+      heading="Sua dúvida não estava aqui?"
+      message="Escreva contando o que você quer saber. Ninguém precisa decidir sozinho."
+      whatsappHref={SITE.whatsapp.href}
+      phoneHref={SITE.phone.href}
+      phoneLabel={SITE.phone.label}
+    />
+  </Container>
+</BaseLayout>
