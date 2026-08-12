@@ -49,13 +49,37 @@ Contato, Equipe, Índice e FAQ, fechando com os casos-limite de resiliência de 
 `tests/pages/lab.test.ts` trava sete contratos estruturais e mais oito de comportamento
 (formulário e accordion); a suíte foi de 216 para 253 testes.
 
+✅ **Fase 3 — extração de componentes implementada e commitada** (11 commits a partir de
+`f050202`; este parágrafo fecha a fase). Oito componentes saíram da `/lab`, cada um aplicado aos
+seus pontos de uso no MESMO commit que o criou, para a página nunca divergir dos componentes:
+`ui/Action` (28 grafias viraram uma), `ui/BrandPlaceholder` (18 blocos, 6 tamanhos de símbolo
+viraram 1), `ui/Field` (os três controles num arquivo só), `ui/Credential`, `ui/RuledList`,
+`blocks/FaqItem` (11 ocorrências, zero mudança visual), `blocks/ServiceCard` (10),
+`blocks/ProfessionalBio` (5) e `blocks/CtaBlock` (3). A `/lab` encolheu de 2.941 para 2.617
+linhas e a suíte foi de 253 para 363 testes.
+
+Duas decisões que valem para quem continuar:
+
+- **Galeria não conta como ocorrência.** A `/lab` tem dois tipos de seção. Nas GALERIAS
+  (`TokensColor`, `TokensShape`, as amostras congeladas de `StatesAction`/`StatesForm`) a utility
+  crua É o assunto exibido — trocá-la por componente apagaria a evidência que a galeria existe
+  para mostrar. Nas TELAS, markup cru é duplicação. Só a segunda conta para a regra de 3+. Foi por
+  isso que a variante `ghost` e a paleta `accent-deep` NÃO foram construídas: as sete ocorrências
+  delas vivem todas em galeria.
+- **Rejeitados por não baterem a régua**, e vale registrar para não voltarem por hábito:
+  `LocationBlock` (2 ocorrências byte a byte idênticas, mas sem variação de estado — é o caso que
+  mais tenta), `ChooserBlock`, `FamilyBlock`, `FaqIndex`, `ContactForm` inteiro e o resumo de erro
+  (1 cada). `SectionLabel` foi adiado por outro motivo: a string `label text-ink-muted` aparece 76
+  vezes, mas ~63 são andaime de demonstração da própria `/lab` e ~13 são conteúdo real — extrair
+  agora carimbaria o andaime dentro de um componente de site.
+
 **Ainda não existe** — e a ausência é temporária, não uma decisão contra:
 CMS, hospedagem/deploy, CI, analytics, formulários que de fato enviem, favicon, e qualquer
 conteúdo real da clínica — inclusive os dados que preenchem o JSON-LD e o cadastro no Google
 Business Profile (SEO local, ver "Decisões em aberto"). O `index.astro` continua um placeholder
 com o nome e nada mais: a `/lab` é laboratório, não página pública, e o conteúdo das páginas de
-verdade só entra na Fase 4. O próximo passo é a **Fase 3 — extração de componentes**, e a `/lab`
-é o teste dela: substituir markup cru por componente sem que nada mude de aparência.
+verdade só entra na Fase 4. O próximo passo é a **Fase 4 — páginas reais**: content collections
+com schema Zod espelhando `PAGES.md`, montadas a partir dos componentes que a Fase 3 extraiu.
 
 ## Restrições firmes
 
@@ -201,8 +225,10 @@ pelo commit da sub-fase correspondente conforme ela é implementada.
   medido real em `pairs.ts`, mantendo `--color-line` visivelmente mais sutil que
   `--color-line-strong` pra preservar a distinção de estado no `ThemeToggle`. `--color-focus-halo`
   foi isento em vez de corrigido: é reforço decorativo supletivo ao anel de foco sólido
-  (`--color-focus-ring`, que já é conforme sozinho) e não tem consumidor hoje; a isenção precisa
-  ser revisitada se isso mudar.
+  (`--color-focus-ring`, que já é conforme sozinho). **Ganhou seu primeiro consumidor na Fase 2** —
+  os campos com foco da `/lab` —, mas sempre ACOMPANHADO do anel sólido, então a condição da
+  isenção segue valendo; ela precisa ser revisitada se algum dia o halo virar o único indicador.
+  A justificativa em `tests/tokens/pairs.ts` está atualizada.
 
 ## Fases seguintes
 
@@ -232,10 +258,9 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   vem de `SITE`, nome próprio sai como `[Nome da profissional]`); e link dentro de uma seção de
   tela aponta para a ROTA REAL de produção (`/servicos`, `/duvidas`), nunca para âncora de outra
   seção — navegação interna existe só no sumário.
-- **Fase 3 — extração de componentes.** Só extrai o que se repetiu de fato: 3 ocorrências, ou 2 +
-  variação de estado. Nada de componentizar por antecipação. `src/components/blocks/` já existe
-  desde a Fase 1 — esta fase continua populando a mesma pasta com conteúdo extraído (`ServiceCard`,
-  `Hero`, `FaqAccordion`, `CtaBlock`…).
+- ~~**Fase 3 — extração de componentes.**~~ ✅ Feita. Só extraiu o que se repetiu de fato: 3
+  ocorrências, ou 2 + variação de estado. Ver "Status" para a lista do que saiu, do que foi
+  rejeitado e por quê — e para a regra de que ocorrência em galeria não conta.
 - **Fase 4 — páginas reais.** Content collections com schema Zod espelhando `PAGES.md` do handoff,
   substituindo o conteúdo bruto do `/lab` pelas páginas de verdade — e é quando dado real da
   clínica (endereço, telefone, horário, equipe) entra pela primeira vez, aprovado pela cliente.
