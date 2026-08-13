@@ -76,14 +76,17 @@ describe('LocationBlock', () => {
     expect(document.body.textContent).toContain(SITE.hoursLine);
   });
 
-  /* Regra 7 dos invioláveis: telefone sempre ao lado do WhatsApp, mesmo peso. */
-  it('traz o par de contato completo', async () => {
+  /* Este teste já afirmou o CONTRÁRIO — exigia o par de contato aqui — e foi ele que congelou a
+     divergência: o mockup não põe link de contato nenhum em "Onde estamos", e a lista fechada de
+     `COMPONENTS.md § ContactPair` não inclui este bloco. O invariante 7 ("telefone sempre ao lado
+     do WhatsApp") governa PAREAMENTO, não multiplicidade: ele diz que os dois não se separam,
+     nunca que todo bloco ganha um par. Ver o cabeçalho de `LocationBlock.astro`. */
+  it('não repete o par de contato — o bloco é mapa, endereço e horário', async () => {
     const document = await render();
-    const par = document.querySelector('[data-contact-pair]')!;
-    const links = Array.from(par.children).filter((el) => el.tagName === 'A');
 
-    expect(links).toHaveLength(2);
-    expect(links.map((a) => a.getAttribute('href'))).toEqual([SITE.whatsapp.href, SITE.phone.href]);
+    expect(document.querySelector('[data-contact-pair]')).toBeNull();
+    expect(document.querySelector(`a[href="${SITE.whatsapp.href}"]`)).toBeNull();
+    expect(document.querySelector(`a[href="${SITE.phone.href}"]`)).toBeNull();
   });
 
   it('sem mapa, reserva o espaço com o placeholder de marca em 3/2', async () => {

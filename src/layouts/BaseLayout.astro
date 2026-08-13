@@ -155,8 +155,15 @@ const seoMeta = buildSeoMeta({ title, description, canonical, siteName: SITE.nam
       não parte do fluxo principal. Sem classe própria de propósito — `<aside>` sem estilo não
       interfere no `position: fixed` do FAB, que não depende do posicionamento do pai. */
     }
+    {
+      /* `watchTarget` vai SEMPRE, sem prop no layout: seletor que não casa com nada degrada para
+      "o FAB nunca se esconde" (ver o `<script>` do próprio componente), que é o padrão seguro, e
+      qualquer página que venha a marcar seu CTA principal com `id="cta-principal"` herda o
+      comportamento de graça. Sem isto o FAB flutuava colado no botão "Falar no WhatsApp" do herói
+      da Home já na primeira pintura — dois WhatsApp no mesmo enquadramento. */
+    }
     <aside aria-label="Contato rápido pelo WhatsApp">
-      <WhatsAppFab href={SITE.whatsapp.href} />
+      <WhatsAppFab href={SITE.whatsapp.href} watchTarget="#cta-principal" />
     </aside>
   </body>
 </html>

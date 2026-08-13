@@ -1,7 +1,22 @@
 ---
 /**
- * LocationBlock — "Onde estamos": o mapa estático, o endereço, o horário e o par de contato.
+ * LocationBlock — "Onde estamos": o mapa estático, o endereço e o horário.
  * Dois usos reais (Home e `/contato`) mais as duas telas equivalentes da `/lab`.
+ *
+ * NÃO TEM PAR DE CONTATO, E ISSO É A DECISÃO
+ * ---------------------------------------------------------------------------------------
+ * Ele já teve, e era divergência: o mockup não põe link de contato nenhum em "Onde estamos"
+ * (só mapa + endereço), e a lista fechada de `COMPONENTS.md § ContactPair` — header desktop,
+ * `CtaBlock`, topo do `ContactForm`, `FamilyBlock`, `Footer`, `EmptyState` — não inclui este
+ * bloco. Em `/contato` o efeito era pior: a página abre com WhatsApp e telefone antes do
+ * formulário, de propósito, e repetir o mesmo par lá embaixo desmontava o próprio argumento.
+ *
+ * O invariante "telefone sempre ao lado do WhatsApp" governa PAREAMENTO, não multiplicidade —
+ * o próprio mockup mostra WhatsApp sozinho no herói e no CTA escuro.
+ *
+ * PENDENTE: o CTA que `COMPONENTS.md § LocationBlock` de fato pede aqui é um link de rota
+ * ("Abrir no mapa", alvo ≥52px), que depende do endereço real — bloqueado na cliente. Entra
+ * quando `SITE.address` deixar de ser placeholder.
  *
  * Props
  *   mapa   imagem 3/2 do mapa. AUSENTE ⇒ `AspectImage` cai no placeholder de marca na mesma
@@ -39,7 +54,6 @@
 import type { HTMLAttributes } from 'astro/types';
 
 import AspectImage from '@/components/ui/AspectImage.astro';
-import ContactPair from '@/components/ui/ContactPair.astro';
 import { SITE } from '@/lib/site';
 
 interface Props extends HTMLAttributes<'div'> {
@@ -54,10 +68,4 @@ const { mapa, class: className, ...rest } = Astro.props;
   <AspectImage src={mapa} decorative ratio="3/2" />
   <p class="mt-6 text-body text-ink-body">{SITE.addressLine}</p>
   <p class="mt-2 text-body text-ink-body">{SITE.hoursLine}</p>
-  <ContactPair
-    class="mt-6"
-    whatsappHref={SITE.whatsapp.href}
-    phoneHref={SITE.phone.href}
-    phoneLabel={SITE.phone.label}
-  />
 </div>
