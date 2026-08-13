@@ -1,14 +1,31 @@
 ---
 /**
  * BrandPlaceholder — o espaço de imagem quando NÃO há imagem cadastrada: o símbolo da marca
- * centralizado sobre `surface-brand`, na proporção que a foto teria
+ * centralizado, na proporção que a foto teria
  * (COMPONENTS.md § AspectImage, "sem `src` → BrandPlaceholder na mesma proporção").
+ *
+ * DUAS VARIANTES, E O PADRÃO É O DISCRETO
+ * ---------------------------------------------------------------------------------------
+ * O componente pintava TUDO em `surface-brand` (verde escuro) com o símbolo em opacidade cheia.
+ * Numa tela isolada isso é o que o mockup mostra — mas o mockup mostra UM slot vazio entre
+ * vizinhos fotografados, e o site tem ZERO foto aprovada. O resultado real era ~8 caixas verdes
+ * idênticas por página, e elas dominavam a composição: a página lia como quebrada, não como à
+ * espera de conteúdo.
+ *
+ * `quiet` (padrão) resolve isso sem inventar conteúdo nenhum: creme (`surface-alt`) com o
+ * símbolo a 50%, que é tonalmente onde cai a textura hachurada que o próprio mockup usa para
+ * anotar "foto entra aqui". `brand` preserva o tratamento verde para quando ele for escolha
+ * deliberada de acento.
+ *
+ * Isto DIVERGE de `DESIGN-SYSTEM.md` §95 e `COMPONENTS.md` §42 como estavam escritos, e por isso
+ * os dois foram editados junto — o handoff é documento vivo, não se vence por silêncio.
  *
  * Props
  *   ratio    uma das quatro proporções canônicas do sistema. Obrigatória: a proporção é a razão
  *            de o componente existir, e um padrão silencioso esconderia a escolha errada.
  *   radius   `card` (padrão) para bloco autônomo — hero, mapa, topo do template de serviço;
  *            `control` para miniatura DENTRO de um card — retrato de bio, imagem de ServiceCard.
+ *   variant  `quiet` (padrão) para slot à espera de foto; `brand` para o verde deliberado.
  *   …        qualquer outro atributo válido para `div` é repassado à raiz. É por aqui que entram
  *            as restrições de largura do contexto (`w-40 shrink-0` num retrato, `w-full @row:w-64`
  *            numa linha) e a proporção responsiva do hero (`md:aspect-4/5`) — largura e
@@ -56,9 +73,11 @@ interface Props extends HTMLAttributes<'div'> {
   ratio: '3/4' | '4/5' | '16/9' | '3/2';
   /** `card` (padrão) para bloco autônomo; `control` para miniatura dentro de um card. */
   radius?: 'card' | 'control';
+  /** `quiet` (padrão) para slot vazio à espera de foto; `brand` para o acento deliberado. */
+  variant?: 'quiet' | 'brand';
 }
 
-const { ratio, radius = 'card', class: className, ...rest } = Astro.props;
+const { ratio, radius = 'card', variant = 'quiet', class: className, ...rest } = Astro.props;
 
 /* `data-surface` do chamador é DESCARTADO — ver o cabeçalho. Removido aqui, e não por
    destructuring, porque a variável descartada seria uma variável não usada e o ESLint do projeto
@@ -77,17 +96,33 @@ const ratioClass = {
 }[ratio];
 
 const radiusClass = radius === 'control' ? 'rounded-control' : 'rounded-card';
+
+/* Ver "DUAS VARIANTES" no cabeçalho. `quiet` é creme e não é superfície escura, então NÃO leva
+   `data-surface` — o atributo existe para reescopar o anel de foco dentro de fundo escuro, e
+   declará-lo sobre creme deixaria todo controle focado ali com anel claro sobre claro. */
+const surfaceClass = variant === 'brand' ? 'bg-surface-brand' : 'bg-surface-alt';
+const markClass = variant === 'brand' ? 'opacity-85' : 'opacity-50';
 ---
 
+{
+  /* `data-brand-placeholder` é o identificador ESTÁVEL do slot vazio, e existe porque
+     `data-surface="brand"` estava sendo usado como se fosse um — testes e seletores achavam o
+     placeholder procurando pela superfície escura. Os dois conceitos são independentes: um diz
+     "isto é um espaço à espera de foto", o outro diz "o fundo aqui é escuro, reescope o anel de
+     foco". Assim que a variante `quiet` deixou de ser escura, confundi-los quebrou 14 asserções
+     de uma vez. */
+}
 <div
-  data-surface="brand"
+  data-brand-placeholder={variant}
+  data-surface={variant === 'brand' ? 'brand' : undefined}
   {...rest}
   class:list={[
-    'flex items-center justify-center overflow-hidden bg-surface-brand',
+    'flex items-center justify-center overflow-hidden',
+    surfaceClass,
     ratioClass,
     radiusClass,
     className,
   ]}
 >
-  <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} />
+  <Image src={logoMark} alt="" aria-hidden="true" width={64} height={64} class={markClass} />
 </div>

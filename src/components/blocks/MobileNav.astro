@@ -54,7 +54,7 @@ const { navLinks, whatsappHref, phoneHref, phoneLabel, class: className } = Astr
     id="mobile-nav-toggle"
     aria-expanded="false"
     aria-controls="mobile-nav-panel"
-    class="inline-flex min-h-target items-center rounded-control border border-line px-4 font-body text-body font-semibold text-ink"
+    class="inline-flex min-h-target items-center rounded-control px-4 font-body text-body font-semibold text-ink hover:bg-surface-alt"
   >
     Menu
   </button>
@@ -65,7 +65,7 @@ const { navLinks, whatsappHref, phoneHref, phoneLabel, class: className } = Astr
       <button
         type="button"
         data-mobile-nav-close
-        class="inline-flex min-h-target items-center rounded-control border border-line px-4 font-body text-body font-semibold text-ink"
+        class="inline-flex min-h-target items-center rounded-control px-4 font-body text-body font-semibold text-ink hover:bg-surface-alt"
       >
         Fechar
       </button>
@@ -76,7 +76,7 @@ const { navLinks, whatsappHref, phoneHref, phoneLabel, class: className } = Astr
         navLinks.map((link) => (
           <a
             href={link.href}
-            class="inline-flex min-h-target items-center border-b border-line px-gutter font-body text-body text-ink"
+            class="inline-flex min-h-target items-center border-b border-line-soft px-gutter font-body text-body text-ink"
           >
             {link.label}
           </a>

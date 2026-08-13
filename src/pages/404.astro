@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Action from '@/components/ui/Action.astro';
 import Container from '@/components/ui/Container.astro';
 import EmptyState from '@/components/blocks/EmptyState.astro';
 import { SITE } from '@/lib/site';
@@ -21,11 +22,7 @@ import { SITE } from '@/lib/site';
       phoneHref={SITE.phone.href}
       phoneLabel={SITE.phone.label}
     />
-    <a
-      href="/"
-      class="mt-8 inline-flex min-h-target items-center justify-center rounded-control border border-line px-6 font-body text-body font-semibold text-ink"
-    >
-      Voltar para o início
-    </a>
+    {/* `Action`, e não um `<a>` remontado à mão: o componente JÁ é este botão. */}
+    <Action as="a" href="/" class="mt-8">Voltar para o início</Action>
   </Container>
 </BaseLayout>

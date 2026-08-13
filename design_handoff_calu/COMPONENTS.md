@@ -39,7 +39,7 @@ Erro: borda 2px `--calu-error`, mensagem abaixo em `--calu-error`, `aria-describ
 Opcional marcado no label ("E-mail (opcional)") — nunca asterisco solto. Campo obrigatório leva o atributo `required`: é o sinal programático; a marcação visual cobre o caso oposto (opcional), não o substitui.
 
 ### AspectImage
-Recebe `src`, `alt` (`string`, **obrigatório no tipo** — não opcional; imagem decorativa usa a prop `decorative`, que força `alt=""` de forma explícita, nunca um `alt` opcional que vira string vazia por omissão e fica indistinguível de esquecimento), `ratio`, `sizes`. Renderiza `width`/`height` e `aspect-ratio` sempre. **Sem `src` → `BrandPlaceholder`** na mesma proporção (símbolo do logo sobre `--calu-surface-brand`), sempre decorativo — `alt=""` + `aria-hidden="true"`, porque é ausência de foto, não informação. `loading="lazy"` exceto no hero (`fetchpriority="high"`).
+Recebe `src`, `alt` (`string`, **obrigatório no tipo** — não opcional; imagem decorativa usa a prop `decorative`, que força `alt=""` de forma explícita, nunca um `alt` opcional que vira string vazia por omissão e fica indistinguível de esquecimento), `ratio`, `sizes`. Renderiza `width`/`height` e `aspect-ratio` sempre. **Sem `src` → `BrandPlaceholder`** na mesma proporção (símbolo do logo; variante padrão `quiet` a 50% sobre `--calu-surface-alt`, variante `brand` a 85% sobre `--calu-surface-brand` — ver `DESIGN-SYSTEM.md` § estados de imagem para o porquê da mudança), sempre decorativo — `alt=""` + `aria-hidden="true"`, porque é ausência de foto, não informação. `loading="lazy"` exceto no hero (`fetchpriority="high"`).
 **Teste**: sem imagem não colapsa altura; CLS = 0; toda imagem não decorativa chega ao build com `alt` preenchido.
 
 ### ThemeToggle

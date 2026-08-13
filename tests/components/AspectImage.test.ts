@@ -154,7 +154,9 @@ describe('AspectImage — sem imagem', () => {
     const raiz = document.body.firstElementChild;
 
     expect(classesOf(raiz)).toContain(`aspect-${ratio}`);
-    expect(raiz!.getAttribute('data-surface')).toBe('brand');
+    /* Pelo marcador, não por `data-surface`: o slot vazio é creme por padrão, e `data-surface`
+       acompanha a superfície escura, não a identidade do componente. */
+    expect(raiz!.getAttribute('data-brand-placeholder')).toBe('quiet');
   });
 
   it('o placeholder é sempre decorativo', async () => {

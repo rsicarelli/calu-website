@@ -32,7 +32,7 @@ describe('herói da Home — imagem antes do painel de texto no fonte', () => {
 
     /* `compareDocumentPosition` em vez de comparar índices: é a pergunta exata que o teste faz
        ("A vem antes de B no documento?") e não depende de os dois serem irmãos diretos. */
-    const media = header!.querySelector('img, [data-surface="brand"]');
+    const media = header!.querySelector('img, [data-brand-placeholder]');
     const h1 = header!.querySelector('h1');
 
     expect(media, 'herói sem slot de imagem nenhum').not.toBeNull();

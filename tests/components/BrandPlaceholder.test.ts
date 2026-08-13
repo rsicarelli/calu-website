@@ -2,9 +2,16 @@
    ============================================================================
    Confirma: zero violação de axe-core (região desligada — mesma isenção dos outros testes de
    fragmento); a `<img>` sai SEMPRE com `width` e `height`; ela é sempre decorativa; a raiz carrega
-   `data-surface="brand"` nas quatro proporções E vence um `data-surface` passado pelo chamador;
-   cada proporção emite exatamente uma classe `aspect-*`; os dois raios; e `class` do chamador é
+   `data-surface="brand"` nas quatro proporções QUANDO a variante é `brand`, e NÃO o carrega na
+   variante creme; que o chamador não consegue nem sobrescrever nem injetar essa superfície; cada
+   proporção emite exatamente uma classe `aspect-*`; os dois raios; e `class` do chamador é
    repassada sem apagar as próprias.
+
+   `data-surface` NÃO É O IDENTIFICADOR DO COMPONENTE, e confundir os dois já custou 14 asserções
+   de uma vez: quando a variante padrão deixou de ser verde escura, todo teste que achava o
+   placeholder procurando por `[data-surface="brand"]` parou de achá-lo. Um atributo diz "o fundo
+   aqui é escuro, reescope o anel de foco"; o outro, `data-brand-placeholder`, diz "isto é um
+   espaço à espera de foto". Use o segundo para localizar o componente.
 
    POR QUE `width`/`height` SÃO TESTADOS AQUI e não só na página: `tests/system/cls.test.ts` varre
    `dist/` e aceita DOIS sinais — os atributos OU uma classe de proporção. Este componente emite os
@@ -97,18 +104,45 @@ describe('BrandPlaceholder', () => {
     expect(aspects).toEqual([`aspect-${ratio}`]);
   });
 
-  it.each(RATIOS)('ratio="%s" declara `data-surface="brand"`', async (ratio) => {
-    const document = await render({ ratio });
+  /* `data-surface` acompanha a SUPERFÍCIE, não o componente: ele existe para reescopar o anel de
+     foco dentro de fundo escuro (global.css §6). A variante `quiet` é creme, então declará-lo ali
+     deixaria todo controle focado com anel claro sobre claro — o mesmo invariante quebrado, só
+     que na direção oposta. Quem identifica o slot é `data-brand-placeholder`. */
+  it.each(RATIOS)('ratio="%s", variante `brand`, declara `data-surface="brand"`', async (ratio) => {
+    const document = await render({ ratio, variant: 'brand' });
 
     expect(document.body.firstElementChild?.getAttribute('data-surface')).toBe('brand');
   });
 
-  /* O componente pinta `surface-brand`; quem sabe qual superfície é, é ele. Um `data-surface`
-     do chamador aqui seria um invariante de foco quebrado em silêncio. */
+  it.each(RATIOS)(
+    'ratio="%s", variante padrão (creme), NÃO declara `data-surface`',
+    async (ratio) => {
+      const document = await render({ ratio });
+
+      expect(document.body.firstElementChild?.getAttribute('data-surface')).toBeNull();
+    },
+  );
+
+  it('as duas variantes são identificáveis pelo marcador estável', async () => {
+    const quiet = await render({ ratio: '16/9' });
+    const brand = await render({ ratio: '16/9', variant: 'brand' });
+
+    expect(quiet.body.firstElementChild?.getAttribute('data-brand-placeholder')).toBe('quiet');
+    expect(brand.body.firstElementChild?.getAttribute('data-brand-placeholder')).toBe('brand');
+  });
+
+  /* Quem sabe qual superfície é, é o componente. Um `data-surface` do chamador seria um
+     invariante de foco quebrado em silêncio. */
   it('o `data-surface` do componente vence um passado pelo chamador', async () => {
-    const document = await render({ ratio: '16/9', 'data-surface': 'deep' });
+    const document = await render({ ratio: '16/9', variant: 'brand', 'data-surface': 'deep' });
 
     expect(document.body.firstElementChild?.getAttribute('data-surface')).toBe('brand');
+  });
+
+  it('o chamador também não consegue INJETAR superfície escura na variante creme', async () => {
+    const document = await render({ ratio: '16/9', 'data-surface': 'deep' });
+
+    expect(document.body.firstElementChild?.getAttribute('data-surface')).toBeNull();
   });
 
   it('radius padrão é `card`; `control` troca só o raio', async () => {
@@ -124,7 +158,7 @@ describe('BrandPlaceholder', () => {
 
     expect(classes).toContain('w-40');
     expect(classes).toContain('shrink-0');
-    expect(classes).toContain('bg-surface-brand');
+    expect(classes).toContain('bg-surface-alt');
     expect(classes).toContain('aspect-4/5');
   });
 

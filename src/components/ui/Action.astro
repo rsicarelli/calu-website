@@ -89,7 +89,14 @@ const variantClass = loading
   ? 'bg-disabled-bg text-disabled-ink'
   : {
       primary: 'bg-accent text-on-accent hover:bg-accent-hover',
-      secondary: 'border border-line text-brand hover:bg-brand-tint',
+      /* Borda e texto na MESMA cor — `COMPONENTS.md § Button`: "secondary (borda
+         `--calu-brand`, fundo transparente)", e é o que o mockup desenha. Era `border-line`,
+         um marrom quente saturado ao lado de um texto verde: duas famílias de cor no mesmo
+         controle. `--color-line` só chegou a `#8F7B50` para passar o invariante de contraste na
+         borda LITERALMENTE interativa do `ThemeToggle` (a justificativa está em global.css §2);
+         reusá-lo como borda genérica de botão era o vazamento. `--color-brand` mede 8.31:1
+         sobre `--color-bg`, então como traço de 1px sobra margem nos dois temas. */
+      secondary: 'border border-brand text-brand hover:bg-brand-tint',
     }[variant];
 
 const baseClass = 'inline-flex items-center justify-center rounded-control px-6 font-semibold';

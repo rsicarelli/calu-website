@@ -76,13 +76,20 @@ const hasRichAnswer = Astro.slots.has('default');
 
 /* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes literais
    (ver "REGIÃO EXTRA" no cabeçalho do gate). */
-const summaryClass = 'flex min-h-target cursor-pointer items-center py-4';
+const summaryClass = 'flex min-h-target cursor-pointer items-center justify-between gap-4 py-4';
 const answerClass = 'max-w-answer pb-4 text-body text-ink-body';
+/* O sinal +/− em `--calu-accent` que `COMPONENTS.md § FaqAccordion` pede, e que faltava: sem
+   ele a pergunta lia como texto estático, sem nenhuma pista de que abre. Dois nós de TEXTO de
+   verdade alternados por CSS, e não `content:` gerado — o Chrome expõe `::after` à árvore de
+   acessibilidade, e um `<span aria-hidden>` não deixa dúvida. */
+const signClass = 'shrink-0 text-h3 text-accent';
 ---
 
 <details open={open} class:list={['border-t border-line-soft', className]} {...rest}>
   <summary class={summaryClass}>
     <Heading class="text-question text-ink">{question}</Heading>
+    <span aria-hidden="true" data-faq-sign-closed class={signClass}>+</span>
+    <span aria-hidden="true" data-faq-sign-open class={signClass}>−</span>
   </summary>
   {
     hasRichAnswer ? (
@@ -94,3 +101,21 @@ const answerClass = 'max-w-answer pb-4 text-body text-ink-body';
     )
   }
 </details>
+
+<style>
+  /* O marcador nativo sai nos dois motores: `list-style` cobre Firefox e o Chrome moderno,
+     `::-webkit-details-marker` cobre Safari e o Chrome antigo. Sem isto o triângulo do
+     navegador conviveria com o sinal +/− do handoff. */
+  summary {
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details:not([open]) [data-faq-sign-open],
+  details[open] [data-faq-sign-closed] {
+    display: none;
+  }
+</style>

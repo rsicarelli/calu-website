@@ -104,7 +104,7 @@ describe('ProfessionalBio', () => {
 
   it('o retrato é sempre o espaço reservado, na proporção 4/5', async () => {
     const document = await render();
-    const retrato = document.querySelector('[data-surface="brand"]');
+    const retrato = document.querySelector('[data-brand-placeholder]');
 
     expect(retrato).not.toBeNull();
     expect((retrato!.getAttribute('class') ?? '').split(/\s+/)).toContain('aspect-4/5');

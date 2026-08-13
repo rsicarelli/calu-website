@@ -123,7 +123,11 @@ describe('Action', () => {
   it('variant padrão é `secondary` — borda, sem fundo', async () => {
     const classes = await classesOf();
 
-    expect(classes).toContain('border-line');
+    /* `border-brand`, não `border-line`: borda e texto do secundário são a MESMA cor
+       (COMPONENTS.md § Button, e é o que o mockup desenha). Esta asserção pedia `border-line` e
+       foi ela que congelou o vazamento — um marrom quente saturado ao lado de um texto verde. */
+    expect(classes).toContain('border-brand');
+    expect(classes).toContain('text-brand');
     expect(classes).toContain('text-brand');
     expect(classes.filter((c) => BACKGROUNDS.includes(c))).toEqual([]);
   });

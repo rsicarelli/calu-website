@@ -91,7 +91,7 @@ describe('LocationBlock', () => {
 
   it('sem mapa, reserva o espaço com o placeholder de marca em 3/2', async () => {
     const document = await render();
-    const slot = document.querySelector('[data-surface="brand"]')!;
+    const slot = document.querySelector('[data-brand-placeholder]')!;
 
     expect((slot.getAttribute('class') ?? '').split(/\s+/)).toContain('aspect-3/2');
   });

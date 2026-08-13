@@ -80,6 +80,25 @@ describe('FaqItem', () => {
     expect(heading!.textContent?.trim()).toBe(PROPS.question);
   });
 
+  /* O sinal +/− que `COMPONENTS.md § FaqAccordion` pede e que faltava: sem ele a pergunta lia
+     como texto estático, sem nenhuma pista de que abre. Os DOIS nós existem sempre no HTML e o
+     CSS escolhe qual aparece — é por isso que o teste conta dois, e não um. */
+  it('o <summary> traz os dois sinais, ambos escondidos do leitor de tela', async () => {
+    const document = await render();
+    const sinais = document.querySelectorAll('summary [aria-hidden="true"]');
+
+    expect(sinais).toHaveLength(2);
+    expect(Array.from(sinais).map((s) => s.textContent?.trim())).toEqual(['+', '−']);
+  });
+
+  /* O sinal é decoração: quem usa leitor de tela recebe o estado pelo próprio `<details>`, e
+     ouvir "mais" antes de cada pergunta seria ruído. */
+  it('o texto acessível da pergunta não inclui o sinal', async () => {
+    const document = await render();
+
+    expect(document.querySelector('summary h3')!.textContent?.trim()).toBe(PROPS.question);
+  });
+
   /* Sem `name` compartilhado o accordion não é exclusivo — abrir uma pergunta não fecha as
      outras. É a diferença entre "li as duas dúvidas" e "perdi a primeira". */
   it('nunca emite `name` — o accordion não é exclusivo', async () => {

@@ -92,7 +92,7 @@ O layout não pode quebrar quando um editor não-técnico mexer. Todo componente
 
 - título com **3× o tamanho previsto** (`text-wrap: balance`, sem `white-space: nowrap`, sem altura fixa);
 - lista com **2 ou 8 itens** (sem grid de 3 fixo — use `auto-fit`/coluna única);
-- **imagem ausente** → placeholder de marca (símbolo sobre `--calu-surface-brand`) na mesma proporção, nunca espaço em branco nem quebra;
+- **imagem ausente** → placeholder de marca na mesma proporção, nunca espaço em branco nem quebra. **Duas variantes, e o padrão é o discreto:** `quiet` (símbolo a 50% sobre `--calu-surface-alt`) para slot à espera de foto, `brand` (símbolo a 85% sobre `--calu-surface-brand`) para o acento deliberado. Esta regra dizia só `--calu-surface-brand`, e estava certa para o que o mockup desenha: UM slot vazio entre vizinhos fotografados. Com zero foto aprovada o site rendia ~8 caixas verdes idênticas por página, que dominavam a composição e faziam a página ler como quebrada em vez de à espera de conteúdo. O creme a 50% cai tonalmente onde cai a hachura que o próprio mockup usa para anotar "foto entra aqui";
 - **seção inteira vazia** → não renderiza; se for uma página inteira, entra o estado vazio com CTA de contato;
 - texto colado do Word com espaço duplo e aspas curvas.
 
