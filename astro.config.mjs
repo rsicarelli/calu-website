@@ -24,7 +24,15 @@ export default defineConfig({
       provider: fontProviders.google(),
       name: 'Source Serif 4',
       cssVariable: '--font-source-serif',
-      weights: ['200 900'],
+      // O eixo variável é estreitado para os dois pesos do design system (400 e 600) e o estilo é
+      // fixado em `normal`. `styles` default é ['normal', 'italic'] — sem isto o Astro baixava
+      // 96 KB de itálico que nenhum glifo do site usa (`grep -rn italic src/` não retorna nada),
+      // contra um guardrail que trata Core Web Vitals como requisito. Estreitar o eixo não muda
+      // bytes (o Google serve um arquivo variável por subset de qualquer jeito), mas deixa o
+      // descritor @font-face honesto: o navegador não consegue sintetizar um peso que o design
+      // system proíbe.
+      weights: ['400 600'],
+      styles: ['normal'],
       subsets: ['latin', 'latin-ext'],
       display: 'swap',
       fallbacks: ['Georgia', 'Times New Roman', 'serif'],

@@ -16,6 +16,9 @@ dist/
 .env
 .env.*
 
+# Override de toolchain por máquina (o mise.toml versionado é a fonte da verdade)
+mise.local.toml
+
 # Logs
 *.log
 npm-debug.log*

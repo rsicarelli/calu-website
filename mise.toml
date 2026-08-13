@@ -5,3 +5,17 @@
 node = "24.19.0"
 pnpm = "11.5.0"
 task = "3.51.1"
+
+# Interceptação TLS corporativa (Netskope) na máquina de desenvolvimento: o macOS confia na CA da
+# empresa, mas o Node usa a store Mozilla embutida e ignora o keychain. Sem esta flag o pipeline de
+# fontes do Astro (unifont) morre com SELF_SIGNED_CERT_IN_CHAIN ao buscar fonts.google.com, 3 dos 4
+# woff2 passam a servir HTTP 500 / 0 byte, e o site renderiza no fallback Times New Roman — sem erro
+# visível em lugar nenhum. `--use-system-ca` é ADITIVO: soma a store do sistema à embutida, não
+# substitui, então não reduz confiança em rede nenhuma.
+#
+# Fica aqui, e não no Taskfile nem no package.json, por dois motivos: cobre TODO ponto de entrada
+# (task, pnpm, terminal do editor) — e a falha que ela previne é silenciosa, então cobertura parcial
+# é quase nenhuma cobertura; e o build do Cloudflare Pages não roda mise, então a flag é
+# estruturalmente AUSENTE em produção, garantia mais forte do que "é inofensiva lá".
+[env]
+NODE_OPTIONS = "--use-system-ca"

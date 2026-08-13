@@ -63,6 +63,7 @@ sem processamento — `robots.txt` e afins.
 O toolchain é pinado com [mise](https://mise.jdx.dev) (`mise.toml`: Node, pnpm e go-task).
 
 ```bash
+mise trust        # obrigatório: o mise.toml exporta env (ver "Rede corporativa" abaixo)
 mise install      # provisiona Node + pnpm + task
 task install      # instala as dependências
 task dev          # sobe o dev server em localhost:4321
@@ -96,6 +97,33 @@ task hooks:install
 
 Sem o `mise`, dá para usar o pnpm diretamente (`pnpm install`, `pnpm dev`, `pnpm build`) desde
 que o Node seja a versão do `.nvmrc`.
+
+### Rede corporativa com interceptação TLS
+
+O `mise.toml` exporta `NODE_OPTIONS=--use-system-ca`. Sem isso, atrás de um proxy que intercepta
+TLS (Netskope e similares), o Node ignora o keychain do macOS, o download de fontes do Astro falha
+com `SELF_SIGNED_CERT_IN_CHAIN`, e o site renderiza no fallback `Times New Roman` — **sem erro
+visível**: o dev server sobe normal, as páginas respondem 200, e só os `woff2` servem 500 com 0
+byte. A flag é aditiva (soma a store do sistema à embutida) e inofensiva fora do proxy; o build do
+Cloudflare Pages não roda mise e nunca a vê.
+
+Duas pegadinhas conhecidas:
+
+- **`mise trust` é obrigatório.** Um `mise.toml` com bloco `[env]` não é aplicado até ser
+  confiado, e qualquer edição no arquivo revoga a confiança. Sem confiar, o `mise env` falha
+  inteiro — não só o `[env]` — e você cai de volta no fallback de fonte.
+- **A flag só chega em shell com `mise activate`.** Aqui o `node` resolve para o install do mise
+  direto no PATH, não para um shim, então o `[env]` depende do hook de ativação (`eval "$(mise
+activate zsh)"` no `~/.zshrc`). Shell não-interativo — script, CI, hook de git disparado fora do
+  terminal — não recebe. Se você usa o pnpm direto, sem o `mise`, exporte na mão:
+  `export NODE_OPTIONS=--use-system-ca`.
+
+Para conferir que as fontes estão de fato sendo servidas:
+
+```bash
+rm -rf .astro/fonts && task dev
+ls .astro/fonts/            # devem existir exatamente 2 arquivos, ambos "normal"
+```
 
 ## Licenciamento
 
