@@ -107,6 +107,46 @@ rotas `/sobre`, `/blog` e `/politica-de-privacidade` (não desenhadas), e o dado
 endereço, telefone, horário, nome e CREFITO das profissionais, mais o cadastro no Google Business
 Profile (SEO local, ver "Decisões em aberto"). O próximo passo é a **Fase 5 — endurecimento**.
 
+✅ **Fase 4.1 — correção de fidelidade visual** (7 commits, `74e9579` → `120fda3`). A Fase 4
+montou as seis rotas e a suíte ficou verde, mas o site RENDERIZADO estava longe do mockup. Sete
+defeitos, achados por quatro agentes de diagnóstico rodando contra
+`design_handoff_calu/Calu - Direcao de Marca.dc.html` como verdade visual. O que vale guardar:
+
+- **A fonte nunca tinha carregado, em máquina nenhuma atrás do proxy.** Netskope intercepta TLS;
+  o macOS confia na CA da empresa, o Node não (store Mozilla embutida, ignora o keychain), e o
+  unifont morria com `SELF_SIGNED_CERT_IN_CHAIN`. Três dos quatro woff2 serviam **HTTP 500 com 0
+  byte** e o navegador caía no fallback `Times New Roman` com `size-adjust: 142%` — de forma
+  PERMANENTE, não como flash de swap. `NODE_OPTIONS=--use-system-ca` no `[env]` do `mise.toml`.
+  Duas pegadinhas no README: `[env]` só vale depois de `mise trust` (e qualquer edição no arquivo
+  revoga), e só chega em shell com `mise activate`.
+  **Isto contaminava todo julgamento visual:** uma fonte com contraste de traço e altura-x erradas
+  faz cada decisão de espaço parecer errada junto. Vale conferir a fonte ANTES de julgar espaçamento.
+- **A `/lab` não é página de regressão, é uma SEGUNDA IMPLEMENTAÇÃO.** Ela renderiza os mesmos
+  componentes mas remonta o markup de página por conta própria, e nada compara as duas. Foi por
+  isso que `ScreenHomeBottom` tinha o CTA embutido certo enquanto a Home tinha errado — e por que
+  o herói estava errado nas DUAS do mesmo jeito, então a `/lab` não tinha como acusar. Duas
+  implementações erradas igual nunca se contradizem.
+- **Três travas que pareciam cobertura e não eram**, mesma família do ponto cego de `aspect-3/4`
+  da Fase 2: o reconhecedor de margem (`/^m[trblxy]?-/`, ancorado, CEGO para toda margem
+  negativa); a ausência total de guarda de espaçamento (o rodapé shipou com padding vertical zero
+  em toda página e as 708 asserções seguiram verdes); e `Action.test.ts` exigindo `border-line`,
+  que foi o que CONGELOU o vazamento de cor no lugar. Teste que afirma o defeito é pior que
+  teste ausente.
+- **`data-surface` não é identidade de componente.** Catorze asserções localizavam o
+  `BrandPlaceholder` por `[data-surface="brand"]`; no instante em que a variante padrão deixou de
+  ser escura, todas quebraram juntas. Um atributo diz "o fundo é escuro, reescope o anel de foco",
+  o outro (`data-brand-placeholder`) diz "isto é um slot à espera de foto". Não confundir.
+- **O handoff foi editado junto**, não vencido por silêncio: o placeholder creme diverge de
+  `DESIGN-SYSTEM.md` §95 e `COMPONENTS.md` §42 como estavam escritos, então os dois registram a
+  mudança e o porquê. Mesma regra do `<details>`/`<summary>` da Fase 2.
+- **`ServiceCard` perdeu a pele, não a extração.** A decisão da Fase 3 era se o bloco vira
+  componente (10 ocorrências, régua batida) — e continua valendo. Borda, fundo, raio e padding
+  eram um default que veio junto e que o registro nunca reivindicou; o mockup não desenha nenhum
+  deles em contexto nenhum.
+- **Adiado de propósito:** o 2-up de desktop que `PAGES.md:42` pede (família+acesso e FAQ+mapa
+  lado a lado). Exige uma variante `bare` no `PageSection` para não duplicar gutter, e o público
+  é majoritariamente mobile — não paga o custo agora. Fase 5.
+
 ## Restrições firmes
 
 1. **As editoras não são técnicas.** Qualquer fluxo de edição que exija terminal, markdown cru
@@ -287,6 +327,18 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
 - ~~**Fase 3 — extração de componentes.**~~ ✅ Feita. Só extraiu o que se repetiu de fato: 3
   ocorrências, ou 2 + variação de estado. Ver "Status" para a lista do que saiu, do que foi
   rejeitado e por quê — e para a regra de que ocorrência em galeria não conta.
+
+  > **Cláusula companheira, somada na Fase 4.1 — a regra de extração tinha só uma direção.**
+  > "3 ocorrências, ou 2 + variação" governa quando markup VIRA componente. Não havia nada
+  > governando o inverso, e foi nessa lacuna que quase todos os defeitos de fidelidade da Fase 4
+  > moraram: `index.astro` remontou à mão um CTA escuro que `CtaBlock` já modelava (e perdeu o
+  > card embutido no caminho), `404.astro` remontou um botão secundário que `Action` já é, e a
+  > `/lab` remontou o herói do zero (e errou igual). Todos passaram por todos os gates.
+  >
+  > **Se já existe componente para o bloco, a página não pode remontá-lo à mão — independentemente
+  > da contagem de ocorrências.** Precisa de uma variação que o componente não tem? Então a
+  > variação entra NO componente, com nome e teste. Nunca uma segunda cópia do markup.
+
 - ~~**Fase 4 — páginas reais.**~~ ✅ Feita. Content collections com schema Zod espelhando
   `PAGES.md`, e as seis rotas desenhadas montadas sobre os componentes. Ver "Status" para o que
   ficou decidido. Duas coisas NÃO aconteceram aqui, e é bom não procurá-las: o dado real da
@@ -294,7 +346,22 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   (`/sobre`, `/blog`, `/politica-de-privacidade`). Enquanto elas não existem, o texto que
   apontaria para elas é renderizado SEM link — `tests/system/links.test.ts` trava os dois lados.
 - **Fase 5 — endurecimento.** A11y, performance, SEO local (cadastro no Google Business Profile),
-  e só então CI/GitHub Actions.
+  e só então CI/GitHub Actions. A Fase 4.1 deixou quatro itens NOMEADOS para cá, além do escopo
+  original:
+  - **Regressão visual de verdade** (Playwright sobre `/lab` + as seis rotas). É a resposta
+    honesta para a classe inteira de defeito da Fase 4.1 — nenhuma trava de string pega "isto
+    está feio". Precisa de CI, e é por isso que mora aqui.
+  - **Generalizar o padrão que o repo já inventou.** `tests/system/contact-pair.test.ts` é a
+    forma certa: marcador `data-*` no componente, teste de sistema varrendo `dist/**` e cobrando
+    um invariante em toda página. Nunca foi aplicado a mais nada. Com `data-brand-placeholder`
+    (já existe) e marcadores equivalentes em `ServiceCard`/`CtaBlock`/`FaqItem`, dá para cobrar
+    IDENTIDADE DE CLASSE entre páginas — é isso que transforma "a `/lab` é página viva de
+    regressão" de promessa em checagem.
+  - **Promover dois contratos que hoje só valem na `/lab`:** `tests/pages/lab.test.ts:133` (todo
+    bloco escuro com controle focável declara `data-surface`) e o cabeçalho dentro do `<summary>`.
+    Os dois são invariantes de sistema presos numa página só; `tests/system/_dom.ts` já dá
+    `distPages()`.
+  - **O 2-up de desktop** de `PAGES.md:42`, com a variante `bare` no `PageSection` que ele exige.
 
 ## Convenções
 
