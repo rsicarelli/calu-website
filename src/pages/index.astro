@@ -159,7 +159,7 @@ const negocio = localBusinessLd({
         id="equipe"
         label={data.equipe.label}
         titulo={data.equipe.titulo}
-        class="pb-9 md:pb-18"
+        class="bg-surface-alt py-9 md:py-18"
       >
         <p class="mt-4 text-body text-ink-body">{data.equipe.intro}</p>
         <ul class="mt-8 grid gap-8 md:grid-cols-2">
@@ -185,7 +185,7 @@ const negocio = localBusinessLd({
     id="familia"
     label={data.familia.label}
     titulo={data.familia.titulo}
-    class="pb-9 md:pb-18"
+    class="bg-surface-alt pb-9 md:pb-18"
     width="measure"
   >
     <p class="mt-4 text-body text-ink-body">{data.familia.texto}</p>
@@ -229,21 +229,29 @@ const negocio = localBusinessLd({
       componente não o emite, e o `{...rest}` prevalece sobre o atributo do template
       (comportamento verificado e documentado em `BrandPlaceholder.astro`). */
   }
-  <PageSection
-    id="contato-rapido"
-    class="bg-surface-deep py-9 md:py-18"
-    data-surface="deep"
-    aria-labelledby="contato-rapido-titulo"
-  >
-    <p class="label text-ink-on-deep-2">{data.cta.label}</p>
-    <h2 id="contato-rapido-titulo" class="mt-2 text-h2 text-ink-on-deep">{data.cta.titulo}</h2>
-    <p class="mt-4 text-body text-ink-on-deep-2">{data.cta.texto}</p>
-    <ContactPair
-      class="mt-8"
-      whatsappHref={SITE.whatsapp.href}
-      phoneHref={SITE.phone.href}
-      phoneLabel={SITE.phone.label}
-    />
+  {
+    /* CARD EMBUTIDO, não faixa de borda a borda. O mockup desenha este bloco com raio e uma
+      margem visível da borda da tela; pintar `bg-surface-deep` na própria `<section>` produzia
+      uma tarja escura atravessando a página inteira. A `/lab` (`ScreenHomeBottom.astro`) já
+      fazia certo — foi a Home que remontou o bloco à mão e perdeu o tratamento.
+
+      `data-surface="deep"` MUDA JUNTO com o fundo, e isso não é detalhe: ele é o que reescopa
+      `--color-focus-ring` para os links de dentro (global.css §6), então precisa estar no
+      elemento que de fato pinta o escuro. Deixá-lo na `<section>` enquanto a cor desceu para o
+      filho deixaria o anel de foco verde sobre verde escuro no tema claro. */
+  }
+  <PageSection id="contato-rapido" class="pb-9 md:pb-18" aria-labelledby="contato-rapido-titulo">
+    <div data-surface="deep" class="rounded-card bg-surface-deep p-8">
+      <p class="label text-ink-on-deep-2">{data.cta.label}</p>
+      <h2 id="contato-rapido-titulo" class="mt-2 text-h2 text-ink-on-deep">{data.cta.titulo}</h2>
+      <p class="mt-4 text-body text-ink-on-deep-2">{data.cta.texto}</p>
+      <ContactPair
+        class="mt-8"
+        whatsappHref={SITE.whatsapp.href}
+        phoneHref={SITE.phone.href}
+        phoneLabel={SITE.phone.label}
+      />
+    </div>
   </PageSection>
 
   {/* ── FAQ resumido ────────────────────────────────────────────────────── */}
