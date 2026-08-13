@@ -63,10 +63,36 @@ const negocio = localBusinessLd({
   <JsonLd slot="head" schema={negocio} />
 
   {/* ── Hero ────────────────────────────────────────────────────────────── */}
+  {
+    /* A ASSINATURA VISUAL DO HERÓI, que nunca tinha sido construída — nem aqui, nem na `/lab`.
+      `COMPONENTS.md` § Hero: "Mobile: imagem 3/4 no topo, painel de texto sobrepondo −40px".
+      O que existia era uma grade de duas colunas simples, com três consequências no celular:
+      a coluna colapsava na ORDEM DO FONTE, então o texto vinha ANTES da foto (o inverso do
+      mockup); a foto herdava o gutter do `Container` em vez de sangrar de borda a borda; e não
+      havia sobreposição nenhuma.
+
+      `-mx-gutter` cancela o padding horizontal do `container-page` para a foto sangrar, e
+      `px-gutter` devolve o respiro ao texto — o painel precisa dos dois porque o canto
+      arredondado tem de alcançar a borda da tela, como o mockup desenha.
+
+      `md:order-*` dá ao mobile a ordem foto→texto e ao desktop a ordem texto→foto SEM duplicar
+      marcação: um `<div>` só, duas ordens. E todo o tratamento se aposenta no desktop
+      (`md:mt-0 md:rounded-none md:mx-0 md:px-0`), que é o que o mockup faz acima de 900px. */
+  }
   <header class="pb-9 md:py-18">
     <Container width="page">
-      <div class="grid gap-8 md:grid-cols-2 md:items-center">
-        <div>
+      <div class="grid md:grid-cols-2 md:items-center md:gap-8">
+        <AspectImage
+          src={data.hero.imagem}
+          alt=""
+          decorative
+          priority
+          ratio="3/4"
+          class="-mx-gutter md:order-2 md:mx-0 md:aspect-4/5"
+        />
+        <div
+          class="relative -mx-gutter -mt-hero-overlap rounded-t-card bg-bg px-gutter pt-7 md:order-1 md:mx-0 md:mt-0 md:rounded-none md:px-0 md:pt-0"
+        >
           {data.hero.eyebrow && <p class="label text-ink-muted">{data.hero.eyebrow}</p>}
           <h1 class="mt-2 text-display">{data.hero.titulo}</h1>
           <p class="mt-6 text-lead text-ink-body">{data.hero.lead}</p>
@@ -77,14 +103,6 @@ const negocio = localBusinessLd({
             <Action as="a" href="/servicos" size="lg">{data.hero.acaoSecundaria}</Action>
           </div>
         </div>
-        <AspectImage
-          src={data.hero.imagem}
-          alt=""
-          decorative
-          priority
-          ratio="3/4"
-          class="md:aspect-4/5"
-        />
       </div>
     </Container>
   </header>

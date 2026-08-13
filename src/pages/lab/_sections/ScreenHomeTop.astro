@@ -28,9 +28,12 @@ import { SITE } from '@/lib/site';
   <!-- Hero -->
   <div>
     <p class="label text-ink-muted">Hero</p>
-    <div class="mt-4 grid gap-8 md:grid-cols-2 md:items-center">
-      <BrandPlaceholder ratio="3/4" class="md:aspect-4/5" />
-      <div>
+    {/* Sobreposição de −40px no mobile — COMPONENTS.md § Hero. Espelha `index.astro`. */}
+    <div class="mt-4 grid md:grid-cols-2 md:items-center md:gap-8">
+      <BrandPlaceholder ratio="3/4" class="-mx-gutter md:order-2 md:mx-0 md:aspect-4/5" />
+      <div
+        class="relative -mx-gutter -mt-hero-overlap rounded-t-card bg-bg px-gutter pt-7 md:order-1 md:mx-0 md:mt-0 md:rounded-none md:px-0 md:pt-0"
+      >
         <p class="label text-ink-muted">Vila Clementino · SP</p>
         <h3 class="mt-4 text-display text-ink">Um plano para o seu corpo, não para a média</h3>
         <p class="mt-4 text-lead text-ink-body">

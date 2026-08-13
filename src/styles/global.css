@@ -265,6 +265,13 @@
      registrada no handoff. */
   --spacing-footer-bottom: calc(var(--spacing-fab-offset) + var(--spacing-gutter));
 
+  /* Sobreposição do painel de texto do herói sobre a foto 3/4 no mobile
+     (COMPONENTS.md § Hero: "painel de texto sobrepondo −40px"). Token, e não `-mt-10` cru,
+     porque o número é PAREADO: qualquer conteúdo que venha a existir dentro da foto precisa
+     de pelo menos esta folga na base para não ficar atrás do painel, e os dois têm de mudar
+     juntos. Aposentado no desktop, onde o mockup põe texto e foto lado a lado sem sobrepor. */
+  --spacing-hero-overlap: 2.5rem; /* 40px */
+
   /* ---- orçamento de rolagem do Header sticky ----
      Consumido por `scroll-padding-top` na §7. O projeto mira AAA, então o
      critério é o 2.4.12 (Foco Não Obscurecido — Aprimorado): NENHUMA parte do
