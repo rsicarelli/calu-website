@@ -257,6 +257,14 @@
      borda. */
   --spacing-fab-offset: calc(var(--spacing-gutter) + var(--spacing-target-primary));
 
+  /* Piso do rodapé. O WhatsAppFab é `fixed` e flutua sobre o rodapé também, não só sobre o
+     <main>, então a última linha do rodapé (a responsável técnica / CREFITO) precisa da mesma
+     folga que o <main> reserva, mais o respiro do próprio bloco. Token, e não `pb-24` cru,
+     porque é DERIVADO: se `--spacing-target-primary` mudar, isto acompanha sozinho.
+     O mockup escreve 104px; 96px é o mesmo fato com origem rastreável, e a divergência está
+     registrada no handoff. */
+  --spacing-footer-bottom: calc(var(--spacing-fab-offset) + var(--spacing-gutter));
+
   /* ---- orçamento de rolagem do Header sticky ----
      Consumido por `scroll-padding-top` na §7. O projeto mira AAA, então o
      critério é o 2.4.12 (Foco Não Obscurecido — Aprimorado): NENHUMA parte do

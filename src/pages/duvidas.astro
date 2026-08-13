@@ -41,13 +41,13 @@ const grupos = FAQ_GROUPS.map((grupo) => ({
   description="Respostas sobre avaliação, pedido médico, frequência, roupa, recibo e convênio na Calu, na Vila Clementino."
 >
   <PageHeader
-    class="py-12"
+    class="pt-9 pb-8 md:pt-18"
     width="page"
     titulo="Dúvidas frequentes"
     lead="Se a sua pergunta não estiver aqui, é só escrever. A gente responde no próximo horário de atendimento."
   />
 
-  <Container width="page" class="pb-12">
+  <Container width="page" class="pb-9 md:pb-18">
     {
       grupos.length > 0 ? (
         <div class="grid gap-12 md:grid-cols-4">
@@ -72,7 +72,12 @@ const grupos = FAQ_GROUPS.map((grupo) => ({
               dois cabeçalhos empilhados criariam um nível fantasma. */}
           <div class="md:col-span-3">
             {grupos.map((grupo) => (
-              <PageSection id={grupo.slug} titulo={grupo.nome} width="measure" class="pb-12">
+              <PageSection
+                id={grupo.slug}
+                titulo={grupo.nome}
+                width="measure"
+                class="pb-9 md:pb-18"
+              >
                 <FaqGroup class="mt-6" perguntas={grupo.perguntas} />
               </PageSection>
             ))}
@@ -90,7 +95,7 @@ const grupos = FAQ_GROUPS.map((grupo) => ({
     }
   </Container>
 
-  <Container width="page" class="pb-12">
+  <Container width="page" class="pb-9 md:pb-18">
     <CtaBlock
       heading="Sua dúvida não estava aqui?"
       message="Escreva contando o que você quer saber. Ninguém precisa decidir sozinho."

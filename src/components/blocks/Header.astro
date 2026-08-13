@@ -47,7 +47,19 @@ interface Props extends HTMLAttributes<'header'> {
 const { navLinks, class: className, ...rest } = Astro.props;
 ---
 
-<header class:list={['sticky top-0 z-30 min-h-header bg-bg', className]} {...rest}>
+{
+  /* A linha de baixo não é decisão nova: o orçamento de `--spacing-header` (§3 do global.css) já
+     soma "1px da linha inferior" nos 77px que arredonda para 88px — ela foi orçada e nunca
+     desenhada. Todas as 11 telas do mockup a trazem. Sem ela o header sticky não tem separação
+     nenhuma do conteúdo que rola por baixo.
+     `--color-line-strong` bate o #16201C do mockup no claro; no escuro é o sage #748268 onde o
+     mockup pôs #2E3C33 — mais visível que o mockup, coerente com o papel documentado do token
+     ("régua de abertura de seção"). */
+}
+<header
+  class:list={['sticky top-0 z-30 min-h-header border-b border-line-strong bg-bg', className]}
+  {...rest}
+>
   <Container width="page" class="flex h-full items-center justify-between gap-4">
     <a href="/" class="inline-flex items-center gap-3">
       <Image src={logoMark} alt="" width={52} height={52} class="size-target rounded-full" />

@@ -27,9 +27,9 @@ const { data } = contato;
 ---
 
 <BaseLayout title={data.seo.title} description={data.seo.description}>
-  <PageHeader class="pt-12" width="page" titulo={data.titulo} lead={data.lead} />
+  <PageHeader class="pt-9 md:pt-18" width="page" titulo={data.titulo} lead={data.lead} />
 
-  <Container width="page" class="pb-12">
+  <Container width="page" class="pb-9 md:pb-18">
     {
       /* Regra 7 dos invioláveis: telefone com o mesmo peso do WhatsApp, e os dois
         ANTES do formulário. Parte do público liga em vez de escrever. */
@@ -43,7 +43,12 @@ const { data } = contato;
     <p class="mt-4 text-small text-ink-muted">{data.prazoResposta}</p>
   </Container>
 
-  <PageSection id="formulario" titulo={data.formulario.titulo} width="measure" class="pb-12">
+  <PageSection
+    id="formulario"
+    titulo={data.formulario.titulo}
+    width="measure"
+    class="pb-9 md:pb-18"
+  >
     <ContactForm
       class="mt-8"
       nota={data.formulario.nota}
@@ -54,11 +59,11 @@ const { data } = contato;
     />
   </PageSection>
 
-  <PageSection id="onde-estamos" titulo={data.local.titulo} width="measure" class="pb-12">
+  <PageSection id="onde-estamos" titulo={data.local.titulo} width="measure" class="pb-9 md:pb-18">
     <LocationBlock class="mt-8" />
   </PageSection>
 
-  <PageSection id="acesso" titulo={data.acesso.titulo} width="measure" class="pb-12">
+  <PageSection id="acesso" titulo={data.acesso.titulo} width="measure" class="pb-9 md:pb-18">
     <AccessList class="mt-8" itens={data.acesso.itens} fecho={data.acesso.fecho} />
   </PageSection>
 </BaseLayout>

@@ -26,13 +26,13 @@ const equipe = (await getCollection('equipe')).sort((a, b) => a.data.ordem - b.d
   description="Conheça as fisioterapeutas que conduzem os atendimentos na Calu, na Vila Clementino, em São Paulo."
 >
   <PageHeader
-    class="py-12"
+    class="pt-9 pb-8 md:pt-18"
     width="page"
     titulo="Quem vai te atender"
     lead="Quem responde quando você escreve é uma das profissionais que atende aqui."
   />
 
-  <PageSection id="profissionais" titulo="As profissionais" class="pb-12">
+  <PageSection id="profissionais" titulo="As profissionais" class="pb-9 md:pb-18">
     {
       equipe.length > 0 ? (
         <ul class="mt-8 grid gap-10 md:grid-cols-2">
@@ -60,7 +60,7 @@ const equipe = (await getCollection('equipe')).sort((a, b) => a.data.ordem - b.d
     }
   </PageSection>
 
-  <Container width="page" class="pb-12">
+  <Container width="page" class="pb-9 md:pb-18">
     <CtaBlock
       heading="Quer falar com uma delas antes de marcar?"
       message="Dá para conversar antes de qualquer compromisso. Conte o que está acontecendo."

@@ -29,7 +29,7 @@ const servicos = (await getCollection('servicos')).sort((a, b) => a.data.ordem -
   description="Fisioterapia e Pilates na Vila Clementino, em São Paulo. Veja os atendimentos e fale com a gente para entender qual faz sentido pra você."
 >
   <PageHeader
-    class="py-12"
+    class="pt-9 pb-8 md:pt-18"
     width="page"
     titulo="O que a gente atende"
     lead="Se você não souber por onde começar, a gente ajuda a entender. A indicação sai da avaliação, não do site."
@@ -45,7 +45,7 @@ const servicos = (await getCollection('servicos')).sort((a, b) => a.data.ordem -
     />
   </Container>
 
-  <PageSection id="lista" titulo="Todos os atendimentos" class="py-12">
+  <PageSection id="lista" titulo="Todos os atendimentos" class="pt-9 pb-9 md:pt-18 md:pb-18">
     {
       servicos.length > 0 ? (
         <ul class="mt-8 flex flex-col gap-6">

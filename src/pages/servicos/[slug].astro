@@ -161,7 +161,11 @@ const fichaLinhas = FICHA_ROTULOS.map(([chave, rotulo]) => ({
 
   {
     relacionados.length > 0 && (
-      <PageSection id="relacionados" titulo="Outros atendimentos" class="py-12">
+      <PageSection
+        id="relacionados"
+        titulo="Outros atendimentos"
+        class="pt-9 pb-9 md:pt-18 md:pb-18"
+      >
         <ul class="mt-8 grid gap-6 md:grid-cols-3">
           {relacionados.map((outro) => (
             <ServiceCard

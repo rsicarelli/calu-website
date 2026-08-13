@@ -76,6 +76,22 @@ describe('Footer', () => {
     expect(footer!.getAttribute('data-surface')).toBe('deep');
   });
 
+  /* A regressão que este teste existe para impedir JÁ ACONTECEU: o rodapé shipou com padding
+     vertical zero em toda página — logo colado na borda de cima da faixa escura, responsável
+     técnica colada na de baixo — e as 708 asserções da suíte seguiram verdes, porque nenhuma
+     delas olhava para espaço. O `Container` só dá gutter horizontal de propósito, então o
+     ritmo vertical tem de estar no `<footer>`, e ausência dele é invisível para todo o resto
+     do gate: não quebra tipo, não quebra lint, não quebra `check:styles`.
+     `pb-footer-bottom` especificamente, e não um `pb-*` qualquer: o WhatsAppFab é `fixed` e
+     flutua sobre o rodapé, então a última linha precisa da folga que o token deriva. */
+  it('declara ritmo vertical próprio — topo e piso', async () => {
+    const document = await renderFooter();
+    const classes = document.querySelector('footer')!.className.split(/\s+/);
+
+    expect(classes.some((c) => /^(py|pt)-/.test(c))).toBe(true);
+    expect(classes).toContain('pb-footer-bottom');
+  });
+
   it('todos os links do nav do rodapé têm min-h-target, sem exceção', async () => {
     const document = await renderFooter();
 

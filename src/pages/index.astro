@@ -63,7 +63,7 @@ const negocio = localBusinessLd({
   <JsonLd slot="head" schema={negocio} />
 
   {/* ── Hero ────────────────────────────────────────────────────────────── */}
-  <header class="py-12">
+  <header class="pb-9 md:py-18">
     <Container width="page">
       <div class="grid gap-8 md:grid-cols-2 md:items-center">
         <div>
@@ -90,7 +90,21 @@ const negocio = localBusinessLd({
   </header>
 
   {/* ── Manifesto ───────────────────────────────────────────────────────── */}
-  <PageSection id="manifesto" data-surface="brand" class="bg-surface-brand py-12" width="measure">
+  {
+    /* RITMO DA HOME — assimétrico, e de propósito.
+      Toda seção usava `py-12`, então cada fronteira somava 48px de baixo + 48px de cima = 96px de
+      vazio, contra os ~36px que o mockup desenha (`padding: 0 20px 36px`, só embaixo, com a
+      próxima seção começando em zero). `contato.astro` e `equipe.astro` já faziam certo; a Home,
+      que é a página de entrada, era a única que não fazia — e por isso a mais frouxa do site.
+      Padding simétrico fica reservado para bloco de cor chapada, onde a cor precisa do respiro
+      dos dois lados para ler como faixa. */
+  }
+  <PageSection
+    id="manifesto"
+    data-surface="brand"
+    class="bg-surface-brand py-9 md:py-18"
+    width="measure"
+  >
     <p class="text-lead text-ink-on-brand">{data.manifesto.texto}</p>
   </PageSection>
 
@@ -101,7 +115,7 @@ const negocio = localBusinessLd({
         id="servicos"
         label={data.servicos.label}
         titulo={data.servicos.titulo}
-        class="py-12"
+        class="pb-9 md:pb-18"
       >
         <ul class="mt-8 grid gap-6 md:grid-cols-3">
           {servicosDestaque.map((servico) => (
@@ -123,7 +137,12 @@ const negocio = localBusinessLd({
   {/* ── Equipe ──────────────────────────────────────────────────────────── */}
   {
     equipeDestaque.length > 0 && (
-      <PageSection id="equipe" label={data.equipe.label} titulo={data.equipe.titulo} class="py-12">
+      <PageSection
+        id="equipe"
+        label={data.equipe.label}
+        titulo={data.equipe.titulo}
+        class="pb-9 md:pb-18"
+      >
         <p class="mt-4 text-body text-ink-body">{data.equipe.intro}</p>
         <ul class="mt-8 grid gap-8 md:grid-cols-2">
           {equipeDestaque.map((pessoa) => (
@@ -148,7 +167,7 @@ const negocio = localBusinessLd({
     id="familia"
     label={data.familia.label}
     titulo={data.familia.titulo}
-    class="py-12"
+    class="pb-9 md:pb-18"
     width="measure"
   >
     <p class="mt-4 text-body text-ink-body">{data.familia.texto}</p>
@@ -166,7 +185,7 @@ const negocio = localBusinessLd({
     id="acesso"
     label={data.acesso.label}
     titulo={data.acesso.titulo}
-    class="py-12"
+    class="pb-9 md:pb-18"
     width="measure"
   >
     <AccessList class="mt-6" itens={data.acesso.itens} fecho={data.acesso.fecho} />
@@ -177,7 +196,7 @@ const negocio = localBusinessLd({
     id="como-funciona"
     label={data.comoFunciona.label}
     titulo={data.comoFunciona.titulo}
-    class="py-12"
+    class="pb-9 md:pb-18"
     width="measure"
   >
     <StepList class="mt-8" passos={data.comoFunciona.passos} />
@@ -194,7 +213,7 @@ const negocio = localBusinessLd({
   }
   <PageSection
     id="contato-rapido"
-    class="bg-surface-deep py-12"
+    class="bg-surface-deep py-9 md:py-18"
     data-surface="deep"
     aria-labelledby="contato-rapido-titulo"
   >
@@ -212,7 +231,7 @@ const negocio = localBusinessLd({
   {/* ── FAQ resumido ────────────────────────────────────────────────────── */}
   {
     faqDestaque.length > 0 && (
-      <PageSection id="duvidas" titulo={data.faq.titulo} class="py-12" width="measure">
+      <PageSection id="duvidas" titulo={data.faq.titulo} class="pb-9 md:pb-18" width="measure">
         <FaqGroup class="mt-8" perguntas={faqDestaque} />
         <Action as="a" href="/duvidas" class="mt-8">
           {data.faq.linkLabel}
@@ -222,7 +241,7 @@ const negocio = localBusinessLd({
   }
 
   {/* ── Onde estamos ────────────────────────────────────────────────────── */}
-  <PageSection id="onde-estamos" titulo={data.local.titulo} class="py-12" width="measure">
+  <PageSection id="onde-estamos" titulo={data.local.titulo} class="pb-9 md:pb-18" width="measure">
     <LocationBlock class="mt-8" />
   </PageSection>
 </BaseLayout>

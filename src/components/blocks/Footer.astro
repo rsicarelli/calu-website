@@ -47,7 +47,18 @@ interface Props extends HTMLAttributes<'footer'> {
 const { navLinks, class: className, ...rest } = Astro.props;
 ---
 
-<footer data-surface="deep" class:list={['bg-surface-deep text-ink-on-deep', className]} {...rest}>
+{
+  /* O ritmo vertical fica AQUI, e não no `Container` — o Container só conhece gutter horizontal,
+     de propósito (ver o cabeçalho dele). Sem estas duas classes o rodapé shipou com padding
+     vertical ZERO em toda página: logo colado na borda de cima da faixa escura, linha da
+     responsável técnica colada na de baixo. `pb-footer-bottom` (e não `pb-8`) porque o
+     WhatsAppFab flutua sobre o rodapé também e a última linha precisa passar por baixo dele. */
+}
+<footer
+  data-surface="deep"
+  class:list={['bg-surface-deep pt-8 pb-footer-bottom text-ink-on-deep', className]}
+  {...rest}
+>
   <Container width="page" class="flex flex-col gap-8">
     <Image src={logoLockup} alt="Calu Pilates e Fisioterapia" width={128} height={142} />
 
