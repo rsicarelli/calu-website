@@ -156,10 +156,40 @@ describe('ServiceCard', () => {
     expect(document.querySelectorAll('li')).toHaveLength(1);
   });
 
+  /* O reconhecedor era `/^m[trblxy]?-/`, ancorado — e portanto CEGO para toda margem negativa:
+     `-m-4` não casa, `-mt-10` não casa. Mesma família do ponto cego de `aspect-3/4` registrado
+     nos defeitos da Fase 2: checagem que parece cobertura e não é. Corrigido para aceitar o
+     hífen inicial, com bloco de regressão do próprio reconhecedor abaixo.
+
+     `-m-4` é a ÚNICA margem tolerada, e só porque ela não é margem externa no sentido que o
+     teste guarda: ela cancela exatamente o `p-4` do mesmo elemento, para a superfície de hover
+     crescer 16px sem deslocar a grade (o `padding:16px; margin:-16px` do mockup). Margem que
+     empurrasse o vizinho continua proibida — espaçamento entre itens é do contêiner. */
+  const MARGIN = /^-?m[trblxy]?-/;
+  const MARGENS_PERMITIDAS = ['-m-4'];
+
+  it('reconhece margem negativa (regressão do próprio reconhecedor)', () => {
+    expect(['-m-4', '-mt-10', '-mx-gutter', 'm-4', 'mt-8'].filter((c) => MARGIN.test(c))).toEqual([
+      '-m-4',
+      '-mt-10',
+      '-mx-gutter',
+      'm-4',
+      'mt-8',
+    ]);
+  });
+
   it('não define margem externa própria', async () => {
     const document = await render();
     const classes = (document.querySelector('li')!.getAttribute('class') ?? '').split(/\s+/);
 
-    expect(classes.filter((c) => /^m[trblxy]?-/.test(c))).toEqual([]);
+    expect(classes.filter((c) => MARGIN.test(c) && !MARGENS_PERMITIDAS.includes(c))).toEqual([]);
+  });
+
+  /* A margem tolerada só é tolerável enquanto o padding que ela cancela existir. */
+  it('a margem negativa vem sempre acompanhada do padding que ela cancela', async () => {
+    const document = await render();
+    const classes = (document.querySelector('li')!.getAttribute('class') ?? '').split(/\s+/);
+
+    if (classes.includes('-m-4')) expect(classes).toContain('p-4');
   });
 });

@@ -48,7 +48,7 @@ const servicos = (await getCollection('servicos')).sort((a, b) => a.data.ordem -
   <PageSection id="lista" titulo="Todos os atendimentos" class="pt-9 pb-9 md:pt-18 md:pb-18">
     {
       servicos.length > 0 ? (
-        <ul class="mt-8 flex flex-col gap-6">
+        <ul class="mt-8 flex flex-col border-t border-line-strong">
           {servicos.map((servico) => (
             <ServiceCard
               layout="row"

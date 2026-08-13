@@ -86,9 +86,23 @@ const {
 
 /* Sufixo `Class` nos nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
    literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
-const rootClass =
-  'relative flex flex-col gap-6 rounded-card border border-line-soft bg-surface p-6';
-const layoutClass = layout === 'row' ? '@container @row:flex-row' : undefined;
+/* SEM BORDA E SEM FUNDO PRÓPRIO — o mockup nunca desenha um deles, em contexto nenhum.
+   A extração do componente na Fase 3 continua valendo (10 ocorrências, régua batida); o que
+   estava errado era só a PELE, um default de card que veio junto e que o registro nunca
+   reivindicou. Nos três contextos do mockup o item é transparente em repouso e só ganha
+   `--color-surface` no hover:
+     Home mobile   — contêiner com régua no topo, item com régua embaixo
+     Home desktop  — três colunas, `padding:16px; margin:-16px; border-radius:4px`
+     /servicos     — mesma régua da Home mobile, linha inteira
+   A borda + fundo + raio por item produzia a grade de caixas genérica que a estética de régua
+   editorial existe justamente para evitar, e multiplicava por 10 ocorrências. */
+const rootClass = 'relative flex flex-col';
+/* `-m-4 p-4` se cancelam: a superfície de hover cresce 16px em volta do item sem deslocar a
+   grade — é literalmente o `padding:16px; margin:-16px` do mockup. */
+const layoutClass =
+  layout === 'row'
+    ? '@container gap-6 border-b border-line-soft py-5 hover:bg-surface @row:flex-row'
+    : 'gap-4 -m-4 rounded-control p-4 hover:bg-surface';
 const mediaClass = layout === 'row' ? 'w-full shrink-0 @row:w-64' : undefined;
 const actionClass =
   'mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0';
