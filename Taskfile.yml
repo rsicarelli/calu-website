@@ -91,6 +91,24 @@ tasks:
     cmds:
       - pnpm test
 
+  # `astro preview` DAEMONIZA — imprime o pid e RETORNA, com o servidor no ar. Foi por isso que o
+  # `webServer` do Playwright ficou de fora do `playwright.config.ts`: ele trata um comando que
+  # retorna como servidor que morreu. O ciclo de vida mora aqui, e o `defer` garante que o servidor
+  # caia mesmo quando a medição reprova.
+  test:metrics:
+    desc: Mede o site RENDERIZADO num navegador (Playwright sobre o dist/)
+    deps:
+      - build
+    cmds:
+      - pnpm exec astro preview --port 4321
+      - defer: pnpm exec astro preview stop
+      - pnpm exec playwright test {{.CLI_ARGS}}
+
+  browsers:
+    desc: Baixa o Chromium que a medição usa (uma vez por máquina)
+    cmds:
+      - pnpm exec playwright install chromium
+
   dod:
     desc: Definition of Done — formata, roda os gates, builda e testa (rode antes de commitar)
     cmds:
