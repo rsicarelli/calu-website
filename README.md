@@ -10,7 +10,7 @@ fisioterapia na Vila Clementino, São Paulo.
 > `/servicos/[slug]`, `/equipe`, `/duvidas` e `/contato` — montadas a partir de content
 > collections com schema Zod.
 >
-> **Ainda não existem:** CMS, hospedagem/deploy, CI, analytics, favicon, imagem OG, as rotas
+> **Ainda não existem:** CMS, hospedagem/deploy, analytics, favicon, imagem OG, as rotas
 > `/sobre`, `/blog` e `/politica-de-privacidade` (não desenhadas), e um formulário que de fato
 > envie. **O dado real da clínica também não:** endereço, telefone e horário são placeholder
 > tipado em `src/lib/site.ts`; nome e CREFITO das profissionais são marcadores em
@@ -34,6 +34,8 @@ verdade do código e do conteúdo.
 | Design     | handoff em `design_handoff_calu/`, implementado         |
 | Conteúdo   | **content collections** + Zod (`src/content.config.ts`) |
 | Testes     | **Vitest** — tokens, componentes, páginas, sistema      |
+| Medição    | **Playwright** — geometria e cor do site renderizado    |
+| CI         | **GitHub Actions** — roda `task ci` a cada push         |
 | CMS        | _a decidir_ — Git-based, com interface visual           |
 | Hospedagem | _a decidir_ — provavelmente Cloudflare Pages            |
 

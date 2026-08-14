@@ -102,10 +102,93 @@ testes. Detalhes que valem para quem continuar:
   aberto. Ele valida no cliente e nunca finge sucesso.
 
 **Ainda não existe** — e a ausência é temporária, não uma decisão contra:
-CMS, hospedagem/deploy, CI, analytics, formulários que de fato enviem, favicon, imagem OG, as
+CMS, hospedagem/deploy, analytics, formulários que de fato enviem, favicon, imagem OG, as
 rotas `/sobre`, `/blog` e `/politica-de-privacidade` (não desenhadas), e o dado real da clínica —
 endereço, telefone, horário, nome e CREFITO das profissionais, mais o cadastro no Google Business
-Profile (SEO local, ver "Decisões em aberto"). O próximo passo é a **Fase 5 — endurecimento**.
+Profile (SEO local, ver "Decisões em aberto").
+
+✅ **Fase 5 — endurecimento implementada e commitada** (12 commits a partir de `4cc02f6`; este
+parágrafo fecha a fase). Ela existe por causa da 4.1: sete defeitos de fidelidade visual passaram
+por TODOS os gates, e a causa comum era estrutural — **toda trava do repositório era proxy de
+string sobre HTML parseado**. `tests/system/_dom.ts` já dizia que linkedom não computa CSS e que
+medição real exigiria um navegador "enquanto não houver CI"; `tests/system/a11y.test.ts` já dizia
+que o axe sem CSS nunca avalia contraste. A Fase 5 é essas duas notas vencendo.
+
+O que entrou: `tests/metrics/` (Playwright sobre o `dist/` servido, 183 medições em 320/360/1280),
+`.github/workflows/ci.yml`, os dois contratos que viviam presos na `/lab` promovidos a sistema,
+identidade de componente entre páginas, o 2-up de desktop de `PAGES.md:42` e o orçamento do build.
+A suíte do Vitest foi de 722 para 819 asserções, mais as 183 medições. **Sete defeitos reais foram
+encontrados e corrigidos** — nenhum deles inventado para justificar a fase:
+
+- **O anel de foco do CTA principal da Home era branco sobre creme: 1,12:1.** Mesma família do anel
+  de 1,01:1 que a Fase 0 shipou, e MESMA causa — medir contra a superfície errada. `Action` e
+  `WhatsAppFab` declaravam `data-surface="accent"` em si mesmos, reapontando o próprio anel para a
+  cor que contrasta com o fundo que o anel **nunca toca**: `outline-offset: 2px` põe o anel FORA da
+  caixa, sobre a página. `tests/tokens/pairs.ts` já dizia isso por extenso na seção do anel de foco.
+  **`data-surface` é atributo de CONTÊINER, nunca do próprio controle.**
+- **O cabeçalho estourava 352px numa tela de 320px** — barra horizontal em TODA página. Item de flex
+  nasce com `min-width: auto` e o lockup da marca se recusava a encolher. `PAGES.md:30` exige 320px
+  desde sempre e nada nunca tinha verificado.
+- **O par de contato do CTA escuro da Home desenhava a 1,84:1.** Cada filho escrito à mão levava a
+  sua cor; o `ContactPair` entrou sem nenhuma e herdou a tinta do `<body>`.
+- **Um `<h3>` da `/lab` renderizava #16211B sobre #16211B** — 1,00:1, invisível desde a Fase 2.
+  `global.css` dá a `h1..h6` um `color` de seletor nu que VENCE a herança.
+- **Alvo de toque de 24px e 28px** na trilha de `servicos/[slug]` e no índice de `/duvidas` — os dois
+  passavam porque `touch-targets.test.ts` varre só os TRÊS `<nav>` nomeados da casca.
+- **Três caixas de 320px fixos na `/lab`** estouravam a janela de 320px por construção.
+
+Cinco coisas que valem para quem continuar, e que só se aprende medindo:
+
+- **A cláusula que EXIGIA o defeito.** O contrato de `data-surface` promovido da `/lab` dizia
+  "contém controle focável **OU É** um", tratando botão que pinta o próprio fundo como contêiner.
+  Essa metade não apenas permitia o anel branco — ela o **exigia**. Teste que afirma o defeito, de
+  novo, exatamente como o `border-line` do `Action.test.ts` na 4.1. Os dois lados são cobrados
+  agora: contêiner pintado PRECISA declarar, controle pintado NÃO PODE.
+- **O caminho óbvio para testar fonte é falso duas vezes, e foi medido.**
+  `document.fonts.check('1em "Source Serif 4"')` devolve `true` **mesmo com woff2 de 0 byte** (a
+  Fonts API do Astro registra um nome COM HASH, então nenhuma face se chama assim e o `check` cai no
+  "resolve para alguma coisa?"), e `getComputedStyle().fontFamily` devolve a pilha DECLARADA, nunca
+  a face escolhida. O que discrimina é `FontFace.status` mais a LARGURA do texto renderizado contra
+  uma família inexistente. Verificado nos dois estados: 33 passam com build íntegro, 33 reprovam com
+  0 byte.
+- **A opção que existia para dar determinismo era a única fonte de indeterminismo.**
+  `reducedMotion: 'reduce'` aciona a receita padrão que zera transição com `0.01ms` — e 0,01ms **não
+  é 0s**: numa propriedade que não transicionava, isso CRIA uma transição, e a leitura no mesmo
+  quadro pega o valor inicial. Ela teria feito a suíte acusar um defeito de anel de foco inexistente.
+  O determinismo veio da raiz certa: semear o tema ANTES da primeira pintura, em vez de trocá-lo
+  depois.
+- **Anel de foco só existe com Tab de verdade.** O anel vive em `:focus-visible`, e `element.focus()`
+  por script não satisfaz essa pseudoclasse. A primeira versão do teste acusou "sem anel de foco" em
+  TODO controle do site — e poderia ter sido "consertada" trocando o CSS para `:focus`, piorando o
+  site para agradar o teste.
+- **Toda trava nova foi vista VERMELHA antes de entrar.** Cada uma nasceu de um defeito real, então
+  cada uma foi provada quebrando de propósito o que ela vigia. Duas delas **passaram** nesse teste
+  quando não deviam e precisaram ser reescritas: o alvo de toque do skip link (que mede 1px até
+  receber foco) e o gutter do 2-up (que media a `<section>`, ocupando a coluna inteira com ou sem
+  gutter duplicado, e passava contra um build sabidamente quebrado).
+
+E três decisões de escopo, registradas para não voltarem por hábito:
+
+- **Nada de screenshot com baseline.** Não é estética: por meses o site renderizou em Times New
+  Roman em toda máquina atrás do proxy. Uma baseline capturada ali seria um registro **verde e
+  autoritativo do defeito** — a mesma família do `border-line`. "Altura ≥ 52px" é verdade ou mentira
+  independentemente da fonte que carregou.
+- **Nada de CLS nem de Lighthouse na medição.** Chromium headless sobre servidor estático local
+  reporta CLS ~0 incondicionalmente, e pontuação de Lighthouse é não-determinística num runner
+  compartilhado. Teste que não consegue reprovar é o quarto membro da família que já contém o ponto
+  cego de `aspect-3/4`, o de margem negativa e a ausência de guarda de espaçamento. **Recusar é a
+  decisão; registrar a recusa é o que impede o retorno.**
+- **O CI é segunda opinião, não portão.** Com trabalho direto na `main` e sem fluxo de PR, ele não
+  bloqueia nada — deixa o commit vermelho depois do fato. O valor real é rodar numa máquina **sem o
+  proxy corporativo e sem o keychain**, que foram exatamente as duas condições que esconderam o bug
+  de fonte por meses.
+
+**Ficou de fora, e não por esquecimento:** o SEO local segue bloqueado em dado da cliente (a função
+construtora e o consumidor existem desde a Fase 4 — falta o conteúdo aprovado e o cadastro no Google
+Business Profile). E `ContactPair` recebe do CHAMADOR a tinta da superfície onde pousa (`text-ink`
+no Header, `text-ink-on-deep` no Footer) — um eixo real que ele não modela em prop nenhuma.
+Descoberto ao escrever o invariante de identidade, registrado ali, e deixado de fora porque modelar
+é decisão de desenho, não de endurecimento.
 
 ✅ **Fase 4.1 — correção de fidelidade visual** (7 commits, `74e9579` → `120fda3`). A Fase 4
 montou as seis rotas e a suíte ficou verde, mas o site RENDERIZADO estava longe do mockup. Sete
@@ -350,23 +433,24 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   clínica (segue placeholder tipado, à espera da cliente) e as três rotas não desenhadas
   (`/sobre`, `/blog`, `/politica-de-privacidade`). Enquanto elas não existem, o texto que
   apontaria para elas é renderizado SEM link — `tests/system/links.test.ts` trava os dois lados.
-- **Fase 5 — endurecimento.** A11y, performance, SEO local (cadastro no Google Business Profile),
-  e só então CI/GitHub Actions. A Fase 4.1 deixou quatro itens NOMEADOS para cá, além do escopo
-  original:
-  - **Regressão visual de verdade** (Playwright sobre `/lab` + as seis rotas). É a resposta
-    honesta para a classe inteira de defeito da Fase 4.1 — nenhuma trava de string pega "isto
-    está feio". Precisa de CI, e é por isso que mora aqui.
-  - **Generalizar o padrão que o repo já inventou.** `tests/system/contact-pair.test.ts` é a
-    forma certa: marcador `data-*` no componente, teste de sistema varrendo `dist/**` e cobrando
-    um invariante em toda página. Nunca foi aplicado a mais nada. Com `data-brand-placeholder`
-    (já existe) e marcadores equivalentes em `ServiceCard`/`CtaBlock`/`FaqItem`, dá para cobrar
-    IDENTIDADE DE CLASSE entre páginas — é isso que transforma "a `/lab` é página viva de
-    regressão" de promessa em checagem.
-  - **Promover dois contratos que hoje só valem na `/lab`:** `tests/pages/lab.test.ts:133` (todo
-    bloco escuro com controle focável declara `data-surface`) e o cabeçalho dentro do `<summary>`.
-    Os dois são invariantes de sistema presos numa página só; `tests/system/_dom.ts` já dá
-    `distPages()`.
-  - **O 2-up de desktop** de `PAGES.md:42`, com a variante `bare` no `PageSection` que ele exige.
+- ~~**Fase 5 — endurecimento.**~~ ✅ Feita. Os quatro itens que a Fase 4.1 nomeou fecharam, mais
+  a11y, performance e CI. Ver "Status" para os sete defeitos reais que a medição encontrou, para as
+  três recusas registradas (screenshot com baseline, CLS headless, Lighthouse) e para o que ela
+  aprendeu medindo. Duas coisas NÃO aconteceram aqui: o **SEO local**, que segue bloqueado em dado
+  da cliente e não em código, e a prop de tom do `ContactPair`, que é decisão de desenho.
+
+  > **A régua que a Fase 5 acrescenta, e que vale para toda trava futura: uma trava precisa ter
+  > sido vista VERMELHA.** Cada checagem nova nasceu de um defeito real e foi provada quebrando de
+  > propósito o que ela vigia. Duas passaram nesse teste quando não deviam e tiveram de ser
+  > reescritas — mediam a coisa errada e teriam entrado no repositório parecendo cobertura. É a
+  > mesma família do ponto cego de `aspect-3/4` (Fase 2), do reconhecedor de margem negativa e da
+  > guarda de espaçamento ausente (Fase 4.1). Escrever a trava é metade; a outra metade é vê-la
+  > reprovar.
+
+- **Fase 6 — o que ficou em aberto.** Não é escopo fechado, é o que se sabe hoje: hospedagem e
+  deploy (domínio registrado, DNS em aberto), CMS, para onde o formulário envia, SEO local quando o
+  dado da cliente chegar, analytics, favicon e imagem OG, e as rotas `/sobre`, `/blog` e
+  `/politica-de-privacidade` quando forem desenhadas.
 
 ## Convenções
 
@@ -374,7 +458,7 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   `.claude/skills/commit/SKILL.md`. O **conteúdo** do site é em pt-BR; o **código e os commits**
   seguem em inglês.
 - Trabalho **direto na `main`** — repositório fechado, sem fluxo de PR.
-- Antes de commitar: `task dod` (fmt → check → build → test). `task check` roda typecheck, lint,
+- Antes de commitar: `task dod` (fmt → check → build → test → test:metrics). `task check` roda typecheck, lint,
   `fmt:check` e `check:styles`. O pre-commit chama `task check` por um único alvo — de propósito,
   para nunca divergir do gate quando um novo check entrar.
 - Alias `@/*` → `src/*` (via `paths` no `tsconfig.json`; Astro/Vite resolvem sozinhos).
@@ -383,7 +467,11 @@ Contexto para quem pegar o projeto depois da Fase 0 (tokens):
   `seo.ts`, `jsonld.ts`), `src/styles/global.css` (tokens e base), `tests/tokens/` (contraste e
   invariantes dos tokens), `tests/components/` (Container API + axe-core), `tests/lib/`,
   `tests/pages/`, `tests/system/` (linkedom sobre `dist/**`), `scripts/`
-  (`check-utilities.mjs`, o gate de arbitrary value/utility morta).
+  (`check-utilities.mjs`, o gate de arbitrary value/utility morta), `tests/metrics/` (Playwright
+  sobre o `dist/` servido — a única camada que mede o site RENDERIZADO; `.spec.ts`, não `.test.ts`,
+  para o Vitest e o Playwright ficarem disjuntos sem config extra).
+- `task test:metrics` roda a medição; `task browsers` baixa o Chromium (uma vez por máquina);
+  `task ci` é o alvo que o GitHub Actions executa — igual ao `dod`, menos o `fmt`, que escreve.
 - `task --list` mostra todos os comandos disponíveis.
 
 > O `~/.claude/CLAUDE.md` global (RTK) continua valendo; este arquivo é aditivo e escopado ao projeto.
