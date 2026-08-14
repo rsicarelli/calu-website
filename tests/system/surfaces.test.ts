@@ -12,11 +12,27 @@
    build, e reprova mais cedo. É a mesma sobreposição deliberada que o cabeçalho de `lab.test.ts`
    já justifica para rótulo de `<nav>` e dimensão de `<img>` — "espelho pré-build".
 
-   O RECORTE "que contém controle focável" veio junto, e junto com ele o motivo (que é o que o
+   O RECORTE "que CONTÉM controle focável" veio junto, e junto com ele o motivo (que é o que o
    torna uma regra e não um ritual): `data-surface` só reescopa o anel de foco, então não tem o que
    fazer num elemento onde nada recebe foco. A primeira versão daquele teste exigia o atributo de
    QUALQUER elemento pintado e reprovou as amostras de 52px da grade de cor — `<span>` decorativo,
    sem descendente focável. Exigir o atributo ali criaria marcação que não muda nada.
+
+   ─────────────────────────────────────────────────────────────────────────────────────────────
+   "CONTÉM", E NÃO "É" — a correção que a medição de foco obrigou, e a metade que faltava.
+
+   A versão herdada da `/lab` aceitava as duas coisas (`el.querySelector(FOCUSÁVEL) || el.matches(
+   FOCUSÁVEL)`), tratando um botão que pinta o próprio fundo como se fosse um contêiner. Não é, e a
+   diferença é o mecanismo: `outline-offset: 2px` põe o anel FORA da caixa do controle, sobre a
+   superfície da PÁGINA. Um controle que declara `data-surface` reaponta o próprio anel para a cor
+   escolhida contra um fundo que o anel nunca toca.
+
+   Não é teoria: era o CTA principal da Home desenhando anel branco sobre creme a **1,12:1** —
+   `tests/metrics/focus.spec.ts` mediu. A cláusula `|| el.matches(...)` não só deixava passar o
+   defeito, ela o EXIGIA. Teste que afirma o defeito, de novo.
+
+   Por isso os dois lados são cobrados agora: contêiner pintado PRECISA declarar, controle pintado
+   NÃO PODE declarar. O segundo é o que impede o retorno por hábito.
 
    Ver a limitação geral em `tests/system/_dom.ts` (linkedom não computa CSS): aqui ela não morde,
    porque este teste é 100% estrutural — presença de classe e de atributo, nada de layout. O que
@@ -38,11 +54,18 @@ const EXPECTED: Record<string, string> = {
 
 const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex="0"]';
 
-/** Elementos que pintam um dos fundos escuros E contêm (ou são) um controle focável. */
+/** Elementos que pintam um dos fundos e CONTÊM um controle focável — os contêineres. */
 function painted(document: Document): Element[] {
   return Array.from(document.querySelectorAll('[class]'))
-    .filter((el) => el.querySelector(FOCUSABLE) !== null || el.matches(FOCUSABLE))
+    .filter((el) => el.querySelector(FOCUSABLE) !== null)
     .filter((el) => Object.keys(EXPECTED).some((painted) => el.classList.contains(painted)));
+}
+
+/** Controles que pintam o próprio fundo — os que NÃO podem declarar `data-surface`. */
+function paintedControls(document: Document): Element[] {
+  return Array.from(document.querySelectorAll(FOCUSABLE)).filter((el) =>
+    Object.keys(EXPECTED).some((painted) => el.classList.contains(painted)),
+  );
 }
 
 describe('todo bloco de fundo escuro com controle focável declara `data-surface`', () => {
@@ -72,6 +95,26 @@ describe('todo bloco de fundo escuro com controle focável declara `data-surface
         .filter((entry, i, all) => all.indexOf(entry) === i);
 
       expect(offenders, `${file}: sem data-surface: ${offenders.join(', ')}`).toEqual([]);
+    },
+  );
+
+  /* O OUTRO LADO, e o que impede a volta do defeito por hábito — ver o cabeçalho. */
+  it.each(pages.map(({ file, document }) => ({ file, document })))(
+    'em $file, nenhum controle que pinta o próprio fundo declara `data-surface`',
+    ({ file, document }) => {
+      const offenders = paintedControls(document)
+        .filter((el) => el.hasAttribute('data-surface'))
+        .map(
+          (el) =>
+            `${el.tagName.toLowerCase()}[data-surface="${el.getAttribute('data-surface')}"] ` +
+            `"${(el.textContent ?? '').trim().slice(0, 24)}"`,
+        )
+        .filter((entry, i, all) => all.indexOf(entry) === i);
+
+      expect(
+        offenders,
+        `${file}: controle reescopando o próprio anel de foco: ${offenders.join(', ')}`,
+      ).toEqual([]);
     },
   );
 });

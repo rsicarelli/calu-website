@@ -28,10 +28,16 @@
  * `<button>` não recebe. Era essa assimetria que fazia o markup cru ter a classe em alguns e não
  * em outros.
  *
- * `data-surface="accent"` acompanha a variante `primary` e é do COMPONENTE — descartado se vier do
- * chamador, pelo mesmo motivo (e com a mesma verificação empírica sobre a precedência do spread)
- * documentado em `BrandPlaceholder.astro`: o atributo reescopa o anel de foco sobre o fundo que o
- * próprio componente pinta.
+ * ESTE COMPONENTE NÃO DECLARA `data-surface`, e a ausência é uma decisão medida — não um
+ * esquecimento. A variante `primary` declarava `data-surface="accent"`, e o efeito era o oposto do
+ * pretendido: o atributo reaponta `--color-focus-ring` para `--color-on-accent`, que contrasta com
+ * o fundo accent do próprio botão — mas `outline-offset: 2px` (global.css §6) põe o anel FORA da
+ * caixa, sobre a superfície da PÁGINA. O CTA principal da Home desenhava anel branco sobre o creme
+ * de `--color-bg`: **1,12:1**, praticamente invisível para quem navega por teclado. Mesma família
+ * do anel de 1,01:1 que a Fase 0 shipou, e pela mesma causa — medir contra a superfície errada.
+ *
+ * Sem o atributo, o anel padrão mede 8,31:1 sobre `--color-bg` e 13,44:1 no escuro. `data-surface`
+ * segue sendo de CONTÊINER, e o `delete` abaixo continua impedindo que um chamador o injete aqui.
  *
  * DUAS VARIANTES, NÃO QUATRO. O handoff prevê também `ghost` e a ação dourada sobre fundo escuro.
  * Nenhuma das duas tem consumidor: as três ocorrências de `ghost` e as quatro de `accent-deep` na
@@ -75,8 +81,9 @@ const {
   ...rest
 } = Astro.props;
 
-/* Ver `BrandPlaceholder.astro`: o spread do Astro prevalece sobre o atributo literal, então o
-   descarte precisa ser explícito. */
+/* `data-surface` é atributo de CONTÊINER (global.css §6). Um controle que o declara em si mesmo
+   reaponta o próprio anel de foco para uma cor escolhida contra um fundo que o anel não toca — ver
+   o cabeçalho. O descarte impede que um chamador reintroduza o defeito por fora. */
 delete rest['data-surface'];
 
 /* Sufixo `Class` nos nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
@@ -113,7 +120,6 @@ const cursorClass = Tag === 'button' && !loading ? 'cursor-pointer' : undefined;
 ---
 
 <Tag
-  data-surface={variant === 'primary' && !loading ? 'accent' : undefined}
   aria-disabled={loading ? 'true' : undefined}
   aria-busy={loading ? 'true' : undefined}
   {...rest}

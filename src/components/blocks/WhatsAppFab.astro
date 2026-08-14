@@ -14,26 +14,21 @@
  *                do documento — perda de contexto pior que deixar o FAB sobreposto por um
  *                instante). Sem `watchTarget`, o FAB nunca se esconde.
  *
- * MEDIÇÃO DE CONTRASTE DO ANEL DE FOCO (WCAG 1.4.11, ≥3:1) — não presumida, medida. O FAB pinta
- * o próprio fundo com `bg-accent`, que não é `surface-deep` nem `surface-brand`: o mecanismo
- * `[data-surface]` de `global.css` §6 não se aplica sozinho, porque `--color-accent` MUDA de
- * claridade entre temas por desenho (claro: bronze escuro; escuro: dourado claro) — nem o anel
- * padrão nem a variante `-on-dark` acompanham essa inversão, e as duas colidem com o accent
- * igual nos dois temas (medido: ambos ~1.67–1.68:1, abaixo do piso).
+ * O ANEL DE FOCO NÃO É REESCOPADO AQUI, e a ausência é medida. Este componente declarava
+ * `data-surface="accent"` na raiz para reapontar `--color-focus-ring` a `--color-on-accent`, com o
+ * argumento de que o anel padrão colide com `--color-accent` (~1,67:1). O argumento media o par
+ * errado: `outline-offset: 2px` (global.css §6) tira o anel de cima do controle e o joga na
+ * superfície ATRÁS dele — `tests/tokens/pairs.ts` §"Anel de foco" já dizia exatamente isso, e é o
+ * buraco por onde passou o anel de 1,01:1 da Fase 0. O anel do FAB nunca toca o próprio bronze.
  *
- * A solução é reaproveitar `--color-on-accent` — o token que já existe especificamente para ter
- * contraste garantido contra `--color-accent` (é a cor do TEXTO que fica em cima do accent) e
- * que inverte de polaridade exatamente do jeito certo entre os temas (branco no claro sobre
- * bronze escuro, quase preto no escuro sobre dourado claro). `global.css` §6 ganhou um seletor
- * dedicado, `[data-surface="accent"]`, que reaponta `--color-focus-ring` para
- * `--color-on-accent`. Medido com um script Node solto (apagado depois de usar), reaproveitando
- * a fórmula de contraste de `tests/tokens/parse.ts` contra os hex atuais de `global.css`:
+ * Medido em `tests/metrics/focus.spec.ts`: com o atributo, anel branco sobre o creme da página =
+ * **1,12:1**. Sem ele, o anel padrão dá 8,31:1 sobre `--color-bg` no claro e 13,44:1 no escuro.
  *
- *   tema claro  · --color-on-accent (#ffffff) × --color-accent (#8f5e23) = 5.54:1  PASSA
- *   tema escuro · --color-on-accent (#16211b) × --color-accent (#d3b070) = 8.06:1  PASSA
- *
- * DECISÃO: `data-surface="accent"` está aplicado no elemento raiz — resolve os DOIS temas, sem
- * token novo, reaproveitando o mesmo mecanismo `[data-surface]` já usado por Footer/CtaBlock.
+ * RESÍDUO CONHECIDO, registrado em vez de escondido: o FAB é `position: fixed` e pode passar por
+ * cima de uma faixa `surface-deep` durante a rolagem, onde o anel padrão cai para 1,78:1. Vale
+ * para qualquer sobreposição fixa, e resolver de verdade pediria um token de anel que funcione nos
+ * dois extremos — decisão de desenho, não de endurecimento. O estado atual é estritamente melhor
+ * que o anterior: acerta a superfície comum em vez de errar todas.
  */
 import type { HTMLAttributes } from 'astro/types';
 
@@ -53,7 +48,6 @@ const { href, label = 'WhatsApp', watchTarget, class: className, ...rest } = Ast
   href={href}
   data-whatsapp-fab
   data-watch-target={watchTarget}
-  data-surface="accent"
   class:list={[
     'fixed right-gutter bottom-gutter inline-flex min-h-target-primary items-center gap-2',
     'rounded-full bg-accent px-6 shadow-float',

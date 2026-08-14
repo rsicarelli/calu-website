@@ -2,8 +2,9 @@
    ============================================================================
    Confirma: zero violação de axe-core; a raiz é `<button>` por padrão e `<a href>` com `as="a"`;
    o texto do slot chega ao DOM; cada tamanho emite o piso de toque certo; cada variante emite
-   EXATAMENTE um fundo; `primary` declara `data-surface="accent"` e vence o do chamador; e as duas
-   metades da regra de "enviando".
+   EXATAMENTE um fundo; que NENHUMA variante declara `data-surface` (o anel de foco cai fora da
+   caixa do controle, então reescopá-lo aqui o joga contra a superfície errada); e as duas metades
+   da regra de "enviando".
 
    A REGRA QUE ESTE ARQUIVO EXISTE PARA TRAVAR — `COMPONENTS.md § ContactForm` marca como "não
    reintroduzir": o botão em envio usa `aria-disabled` + `aria-busy` e NUNCA o atributo `disabled`,
@@ -139,20 +140,20 @@ describe('Action', () => {
     expect(classes).toContain('text-on-accent');
   });
 
-  it('variant="primary" declara `data-surface="accent"`, que reescopa o anel de foco', async () => {
-    const root = await render({ variant: 'primary' });
-
-    expect(root.getAttribute('data-surface')).toBe('accent');
+  /* NENHUMA variante declara `data-surface`, e a ausência é medida — ver o cabeçalho do
+     componente. `primary` declarava `accent`, o que reapontava o PRÓPRIO anel de foco para a cor
+     escolhida contra o fundo accent; mas `outline-offset: 2px` põe o anel FORA da caixa, sobre a
+     superfície da página, e o CTA principal da Home desenhava anel branco sobre creme a 1,12:1.
+     `data-surface` é atributo de contêiner. */
+  it('nenhuma variante declara `data-surface` — o anel cai fora da caixa do controle', async () => {
+    for (const variant of ['primary', 'secondary'] as const) {
+      const root = await render({ variant });
+      expect(root.hasAttribute('data-surface'), `variant=${variant}`).toBe(false);
+    }
   });
 
-  it('o `data-surface` do componente vence um passado pelo chamador', async () => {
+  it('o chamador não consegue injetar `data-surface` no controle', async () => {
     const root = await render({ variant: 'primary', 'data-surface': 'deep' });
-
-    expect(root.getAttribute('data-surface')).toBe('accent');
-  });
-
-  it('`secondary` não declara `data-surface` — não pinta fundo escuro', async () => {
-    const root = await render();
 
     expect(root.hasAttribute('data-surface')).toBe(false);
   });
