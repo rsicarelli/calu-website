@@ -50,14 +50,25 @@ export default defineConfig({
     baseURL: 'http://localhost:4321',
     /* O `dist/` servido é estático e local; um traço por falha basta e nada precisa de vídeo. */
     trace: 'retain-on-failure',
-    /* MEDIR O ESTADO ASSENTADO, e por um caminho que o site já tem. O `ThemeToggle` anima cor por
-       150ms (`transition-colors duration-150`); trocar de tema e medir logo depois pegava o botão
-       NO MEIO da transição, e a mesma página devolvia contraste diferente a cada rodada — a
-       definição de teste que ensina a suíte a mentir. `reducedMotion` aciona a regra de
-       `prefers-reduced-motion` que o `global.css` §6 já declara (`transition-duration: 0.01ms`), em
-       vez de injetar CSS de teste que o site não conhece: a medição usa um caminho REAL do produto,
-       o mesmo que a pessoa com a preferência ligada enxerga. */
-    reducedMotion: 'reduce',
+    /* SEM `reducedMotion: 'reduce'` AQUI, e a ausência custou uma investigação — vale registrar
+       para ninguém "melhorar" o config de volta.
+
+       A ideia parecia boa: acionar a regra de `prefers-reduced-motion` que o `global.css` §7 já
+       declara, para medir estado assentado sem injetar CSS que o site não conhece. O efeito foi o
+       INVERSO. Aquela regra é a receita padrão, que zera animação com
+       `transition-duration: 0.01ms !important` — 0,01ms, não `0s`. Numa propriedade que por padrão
+       NÃO transiciona, isso CRIA uma transição onde não havia, e ler o estilo computado no mesmo
+       quadro pega o valor INICIAL dela.
+
+       Medido: o anel de foco do CTA principal saía `rgb(255,255,255)` (o `currentColor` do botão)
+       na leitura imediata e `rgb(65,74,56)` 600ms depois — com `no-preference`, `transition: all 0s`
+       e o valor certo já na primeira leitura. A opção que existia para dar determinismo era a
+       ÚNICA fonte de indeterminismo restante, e teria feito a suíte acusar um defeito inexistente
+       de anel de foco. (O defeito de anel que a Fase 5 encontrou de verdade é outro, permanente e
+       independente de tempo — `data-surface` no próprio controle; ver `Action.astro`.)
+
+       O determinismo de que a medição precisa já vem da raiz certa: `_measure.ts` semeia o tema
+       ANTES da primeira pintura, então não existe transição de tema para pegar no meio. */
   },
   projects: [
     {

@@ -206,8 +206,13 @@ defeitos, achados por quatro agentes de diagnóstico rodando contra
 - **`typescript` fica em `~6.0.x`.** O `latest` do npm é 7.x e **quebra** duas dependências:
   `typescript-eslint` declara peer `<6.1.0` e `@astrojs/check` aceita `^5 || ^6`. Não trocar o
   til por caret.
-- **Não adicionar CI/GitHub Actions** nesta fase — o gate é local por design. Isso é adiado de
-  propósito, não esquecido: CI entra na Fase 5 (endurecimento), não antes.
+- ~~**Não adicionar CI/GitHub Actions** nesta fase.~~ **Cumprido, não ignorado** — o gatilho era a
+  Fase 5, a Fase 5 chegou, e `.github/workflows/ci.yml` entrou nela. Sai da lista pelo mesmo motivo
+  que o guardrail do Tailwind saiu: deixou de ser restrição em vigor. O que fica valendo no lugar:
+  **um job só, chamando `task ci` por um alvo único.** Dividir o gate em jobs paralelos de
+  lint/build/test redeclara o gate num segundo lugar e garante deriva — é o mesmo argumento que o
+  `.githooks/pre-commit` já faz para chamar `task check` inteiro. E `task ci`, não `task dod`:
+  `dod` começa por `fmt`, que ESCREVE, e CI não reformata o repositório de ninguém.
 - **Proibido arbitrary value** — `p-[13px]`, `text-[#8F5E23]`, `min-h-[52px]`, `text-(--x)`.
   Valor que falta vira token nomeado no `@theme` de `src/styles/global.css`, nunca hard-code no
   componente. Travado por `scripts/check-utilities.mjs`, que roda em `task check` (via

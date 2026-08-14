@@ -110,12 +110,28 @@ tasks:
       - pnpm exec playwright install chromium
 
   dod:
-    desc: Definition of Done — formata, roda os gates, builda e testa (rode antes de commitar)
+    desc: Definition of Done — formata, roda os gates, builda, testa e mede (rode antes de commitar)
     cmds:
       - task: fmt
       - task: check
       - task: build
       - task: test
+      - task: test:metrics
+
+  # O ALVO DO CI, e ele existe por um motivo só: `dod` COMEÇA com `fmt`, que ESCREVE. CI não
+  # reformata o repositório de ninguém — ele reprova quando a formatação está errada, e isso quem
+  # faz é o `fmt:check` que já está dentro de `check`.
+  #
+  # Fora essa diferença, é deliberadamente UM alvo, pelo mesmo motivo escrito no `.githooks/pre-commit`
+  # sobre o `task check`: com um alvo só, o gate do CI não tem como divergir do gate local quando
+  # um check novo entrar.
+  ci:
+    desc: O gate completo, sem escrever nada — é isto que o GitHub Actions roda
+    cmds:
+      - task: check
+      - task: build
+      - task: test
+      - task: test:metrics
 
   hooks:install:
     desc: Ativa o diretório .githooks/ versionado (gate de DOD no pre-commit)

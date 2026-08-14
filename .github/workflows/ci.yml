@@ -1,0 +1,97 @@
+# CI do site da Calu.
+# =============================================================================
+# POR QUE ELE EXISTE AGORA, e não antes: o `CLAUDE.md` adiava CI de propósito ("o gate é local por
+# design... CI entra na Fase 5, não antes"). O gatilho era esta fase, e ele disparou.
+#
+# O QUE ELE DE FATO ENTREGA, dito com honestidade: com trabalho direto na `main` e sem fluxo de PR,
+# CI não BLOQUEIA nada — ele deixa um commit vermelho depois do fato. O valor real é outro, e é
+# grande: uma SEGUNDA OPINIÃO numa máquina que não tem o proxy corporativo nem o keychain do
+# desenvolvedor. Foram exatamente essas duas condições que esconderam, por meses, o bug de fonte da
+# Fase 4.1 — o site renderizando em Times New Roman em toda máquina atrás do proxy, sem erro
+# visível. Uma máquina limpa rodando `tests/metrics/font.spec.ts` teria gritado no primeiro push.
+#
+# UM JOB SÓ, chamando UM ALVO (`task ci`). É a mesma razão escrita no `.githooks/pre-commit` para
+# ele chamar `task check` por um alvo único: dividir o gate em jobs paralelos de lint/build/test o
+# redeclara num segundo lugar, e garante que um dia os dois divirjam.
+
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+# Um push novo cancela a execução anterior do mesmo ref: o interesse é sempre o último commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: task ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # `NODE_OPTIONS` VAZIO DE PROPÓSITO — e esta linha é uma asserção, não configuração.
+      #
+      # O `mise.toml` exporta `NODE_OPTIONS=--use-system-ca`, e o `mise-action` aplicaria o bloco
+      # `[env]` aqui também. Mas o `README.md` argumenta longamente que a flag é contorno de proxy
+      # com interceptação TLS numa máquina de desenvolvimento, e que ela deve estar
+      # ESTRUTURALMENTE AUSENTE em qualquer outro lugar (o build do Cloudflare Pages não roda mise
+      # e nunca a vê).
+      #
+      # Zerá-la converte "a flag é inofensiva no CI" na afirmação mais forte: o build PROVA que não
+      # precisa dela. Se um dia o download de fonte falhar aqui, isso é sinal de verdade — não
+      # ruído a ser calado com a flag.
+      NODE_OPTIONS: ''
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # mise, e não `setup-node` + instalação separada de pnpm e go-task: o `mise.toml` já pina as
+      # três versões, e é o ponto INTEIRO de pinar. Três ações separadas seriam três lugares de
+      # onde uma versão pode divergir do arquivo versionado.
+      - uses: jdx/mise-action@v3
+        with:
+          version: 2026.8.5
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      # O navegador da camada de medição. `--with-deps` traz as bibliotecas de sistema que o
+      # Chromium precisa no runner; o cache é chaveado pela versão do Playwright, porque é ela que
+      # decide qual build do navegador é necessário (verificado na marra: o Chromium pré-instalado
+      # de outra versão simplesmente não serve).
+      - name: Cache do navegador
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Instalar o Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # O build baixa a Source Serif da API de fontes do Astro. Cachear tira uma dependência de
+      # rede do gate — e a chave é o config, que é o que decide QUAL fonte é baixada.
+      - name: Cache das fontes
+        uses: actions/cache@v4
+        with:
+          path: .astro/fonts
+          key: astro-fonts-${{ runner.os }}-${{ hashFiles('astro.config.mjs') }}
+
+      - name: Gate completo
+        run: task ci
+
+      # Só quando reprova, e é o que torna a falha diagnosticável sem reproduzir localmente: o
+      # traço do Playwright abre a página no estado exato em que a medição a encontrou.
+      - name: Guardar o traço da medição
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-trace
+          path: test-results/
+          retention-days: 7
