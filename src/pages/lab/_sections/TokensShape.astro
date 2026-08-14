@@ -31,8 +31,19 @@
         <span class="text-small text-ink-muted">52px — qualquer controle</span>
       </li>
       <li class="flex items-center gap-4">
+        {
+          /* SEM `text-small` nesta amostra, diferente da de cima, e a diferença é o contrato do
+          token: `tests/tokens/pairs.ts` declara o par `on-accent`/`accent` no piso de TEXTO GRANDE
+          e escreve a condição por extenso — "se algum dia o rótulo cair abaixo de 18.66px ou perder
+          o peso 600, este piso vira 7". Com `text-small` o rótulo caía para 17px e media 5,54:1
+          contra os 7:1 que a condição então exige. A amostra de cima pode usar `text-small` porque
+          é `text-ink` sobre `bg-surface`, um par sem essa condição.
+
+          O tamanho de corpo também é o que a ação principal REALMENTE usa no site (`Action` em
+          `size="lg"`), então a vitrine passou a mostrar o token como ele existe. */
+        }
         <span
-          class="flex min-h-target-primary items-center rounded-control bg-accent px-6 text-small font-semibold text-on-accent"
+          class="flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent"
           data-surface="accent">min-h-target-primary</span
         >
         <span class="text-small text-ink-muted">56px — ação principal</span>

@@ -50,6 +50,14 @@ export default defineConfig({
     baseURL: 'http://localhost:4321',
     /* O `dist/` servido é estático e local; um traço por falha basta e nada precisa de vídeo. */
     trace: 'retain-on-failure',
+    /* MEDIR O ESTADO ASSENTADO, e por um caminho que o site já tem. O `ThemeToggle` anima cor por
+       150ms (`transition-colors duration-150`); trocar de tema e medir logo depois pegava o botão
+       NO MEIO da transição, e a mesma página devolvia contraste diferente a cada rodada — a
+       definição de teste que ensina a suíte a mentir. `reducedMotion` aciona a regra de
+       `prefers-reduced-motion` que o `global.css` §6 já declara (`transition-duration: 0.01ms`), em
+       vez de injetar CSS de teste que o site não conhece: a medição usa um caminho REAL do produto,
+       o mesmo que a pessoa com a preferência ligada enxerga. */
+    reducedMotion: 'reduce',
   },
   projects: [
     {

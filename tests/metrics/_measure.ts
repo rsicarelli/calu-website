@@ -43,18 +43,29 @@ function parseRgb(color: string): [number, number, number] {
 }
 
 /**
- * Troca o tema e espera o CSS reassentar.
+ * Abre uma rota JÁ no tema pedido, do jeito que uma pessoa real a recebe.
  *
- * O tema é `data-theme` no `<html>` (ver `BaseLayout.astro`), e trocar de tema é trocar o valor das
- * mesmas custom properties — nenhum componente muda de marcação. Por isso a medição consegue rodar
- * os dois temas na MESMA carga de página, sem recarregar.
+ * POR QUE NÃO TROCAR O TEMA COM JAVASCRIPT depois de carregar, que era a primeira versão disto: o
+ * `ThemeToggle` anima cor (`transition-colors duration-150`), então medir logo após a troca pegava
+ * o botão NO MEIO da transição — e a MESMA página devolvia razões de contraste diferentes a cada
+ * rodada (1,51:1, depois 2,44:1, depois verde). Uma trava que muda de resposta sem o site mudar é
+ * pior que trava nenhuma: ela ensina quem lê a ignorá-la.
+ *
+ * Semear `localStorage` ANTES da primeira carga elimina a transição na origem, porque nunca há
+ * troca: o script inline do `<head>` (`BaseLayout.astro`) lê a chave `calu-theme` antes do CSS e a
+ * página nasce no tema certo. É também o caminho REAL do produto — exatamente o que acontece com
+ * quem já escolheu um tema e volta ao site — em vez de um estado que só existe em teste.
  */
-export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
-  await page.evaluate((value) => {
-    document.documentElement.setAttribute('data-theme', value);
+export async function gotoWithTheme(
+  page: Page,
+  route: string,
+  theme: 'light' | 'dark',
+): Promise<void> {
+  await page.addInitScript((value) => {
+    localStorage.setItem('calu-theme', value);
   }, theme);
-  /* Uma volta de rAF: o estilo computado do próximo `evaluate` já enxerga a cascata nova. */
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve(null))));
+  await page.goto(route);
+  await page.evaluate(() => document.fonts.ready);
 }
 
 export type TextSample = {
@@ -119,6 +130,16 @@ export async function textSamples(page: Page): Promise<TextSample[]> {
       /* `aria-hidden` é decoração (os glifos +/− do accordion): ninguém lê, ninguém precisa
          enxergar. Excluí-los é o mesmo recorte que o axe faz. */
       if (el.closest('[aria-hidden="true"]')) continue;
+      /* CONTROLE INATIVO é isento por decisão da NORMA, não por folga do projeto: a WCAG 1.4.3
+         exclui "inactive user interface components" do contraste mínimo. E a decisão já estava
+         tomada aqui dentro — `tests/tokens/pairs.ts` isenta `--color-disabled-ink` com essa mesma
+         justificativa escrita. Medir o desabilitado com a régua do ativo faria a medição
+         contradizer a tabela de tokens do próprio repositório.
+
+         Os dois sinais entram porque o projeto usa os dois, e de propósito (ver o texto da própria
+         `/lab`): `disabled` para o controle que ainda não faz sentido, `aria-disabled` para o
+         "enviando", que não pode sair da ordem de foco no meio do envio. */
+      if (el.closest('[disabled], [aria-disabled="true"]')) continue;
       if (!visible(el)) continue;
 
       const style = getComputedStyle(el);

@@ -240,8 +240,20 @@ const negocio = localBusinessLd({
       elemento que de fato pinta o escuro. Deixá-lo na `<section>` enquanto a cor desceu para o
       filho deixaria o anel de foco verde sobre verde escuro no tema claro. */
   }
+  {
+    /* `text-ink-on-deep` NO CONTÊINER, e não só nos filhos — foi assim que a Fase 5 encontrou o
+      bloco. Cada filho escrito à mão aqui já levava a sua cor (`text-ink-on-deep-2` no rótulo e no
+      texto, `text-ink-on-deep` no título), mas o `ContactPair` entrou sem nenhuma: ele não tem cor
+      própria, então herdava `--color-ink-body` do `<body>` e desenhava os DOIS links de contato a
+      **1,84:1** sobre o card escuro — no tema claro, na Home, no bloco cuja única função é gerar
+      contato. Nenhuma das 805 asserções via isso: contraste renderizado não era observável antes de
+      `tests/metrics/contrast.spec.ts`.
+
+      A cor no contêiner é a forma que não repete o erro: quem herda passa a herdar certo, e o
+      próximo filho não precisa lembrar de nada. O `ScreenHomeBottom` da `/lab` já fazia assim. */
+  }
   <PageSection id="contato-rapido" class="pb-9 md:pb-18" aria-labelledby="contato-rapido-titulo">
-    <div data-surface="deep" class="rounded-card bg-surface-deep p-8">
+    <div data-surface="deep" class="rounded-card bg-surface-deep p-8 text-ink-on-deep">
       <p class="label text-ink-on-deep-2">{data.cta.label}</p>
       <h2 id="contato-rapido-titulo" class="mt-2 text-h2 text-ink-on-deep">{data.cta.titulo}</h2>
       <p class="mt-4 text-body text-ink-on-deep-2">{data.cta.texto}</p>
