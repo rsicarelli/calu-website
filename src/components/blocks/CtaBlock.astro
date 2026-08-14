@@ -61,9 +61,24 @@ const {
   class: className,
   ...rest
 } = Astro.props;
+
+/* Ver `Action.astro`: o spread do Astro prevalece sobre o atributo literal, então o descarte
+   precisa ser explícito. Identidade não é prop. */
+delete rest['data-cta-block'];
 ---
 
-<div class:list={['rounded-card bg-surface-alt p-6', className]} {...rest}>
+{
+  /* `data-cta-block` — identificador estável, SEM valor. O cabeçalho declara "um único estado
+     visual, sem prop de skin", então dar um valor aqui inventaria um eixo de variante que o
+     componente recusa a ter. Quando a segunda skin chegar, ela traz o valor junto.
+
+     O marcador também torna verificável o que o cabeçalho já afirma e nada media: o `ContactPair`
+     entra POR CONSTRUÇÃO, e agora `[data-cta-block] [data-contact-pair]` é uma asserção possível.
+
+     O descarte em `rest` acima é o que impede o chamador de reetiquetar o bloco: ordem de atributo
+     não basta, o spread do Astro prevalece sobre o literal (ver `Action.astro`). */
+}
+<div data-cta-block {...rest} class:list={['rounded-card bg-surface-alt p-6', className]}>
   <Heading class="text-h3 text-ink">{heading}</Heading>
   <p class="mt-4 text-body text-ink-body">{message}</p>
   <ContactPair
