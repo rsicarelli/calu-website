@@ -10,7 +10,8 @@
  *   titulo    o cabeçalho. Ausente ⇒ nenhum cabeçalho, e a seção deixa de ser marco (ver abaixo).
  *   tituloAs  nível do cabeçalho — `h2` (padrão). A `/lab` desce tudo um nível e passa `h3`.
  *   label     rótulo curto acima do cabeçalho, no máximo 3 palavras. Ver "RÓTULO".
- *   width     largura do trilho, repassada ao `Container` — `page` (padrão) ou `measure`.
+ *   width     largura do trilho, repassada ao `Container` — `page` (padrão), `measure` ou `none`.
+ *             Ver "TRILHO PRÓPRIO OU DO PAI".
  *   …         qualquer atributo de `section` vai para a raiz, inclusive `data-surface`.
  *
  * POR QUE ISTO É COMPONENTE, E NÃO COPY-PASTE
@@ -24,6 +25,27 @@
  * O contrapositivo também é respeitado: seção SEM `titulo` não recebe `aria-labelledby`, porque
  * apontar para um id inexistente é pior que não apontar (o marco fica com nome vazio e o axe
  * reprova em `aria-valid-attr-value`). `tests/components/PageSection.test.ts` trava os dois lados.
+ *
+ * TRILHO PRÓPRIO OU DO PAI — `width="none"`
+ * ---------------------------------------------------------------------------------------
+ * `none` significa "esta seção NÃO é dona de um trilho; quem é, é o meu pai". Ela renderiza
+ * rótulo, cabeçalho e slot direto dentro do `<section>`, sem `Container`.
+ *
+ * Existe para o 2-up de desktop que `PAGES.md:42` pede (família + acesso lado a lado, FAQ + mapa
+ * dividindo a linha). O gutter é `padding-inline` no PRÓPRIO container (`global.css` §8), então
+ * duas seções normais dentro de uma grade externa aplicariam o gutter duas vezes — uma em cada
+ * coluna — e o conteúdo encolheria sem motivo. Com `none`, o trilho e o gutter ficam UMA vez, no
+ * `Container` que embrulha a linha.
+ *
+ * VALOR NOVO NA MESMA PROP, e não uma prop `bare` booleana: `width` já responde "qual é o meu
+ * trilho", e `none` é uma resposta válida para essa mesma pergunta. Uma segunda prop poderia
+ * contradizer a primeira (`bare` + `width="measure"` — quem ganha?); uma prop só não tem como se
+ * contradizer.
+ *
+ * O QUE NÃO MUDA: a `<section>` continua sendo a raiz, com `id`, `aria-labelledby` derivado e
+ * cabeçalho próprio. Os dois marcos seguem nomeados e navegáveis — é justamente por isso que o
+ * 2-up NÃO foi feito fundindo as duas seções numa só, o que teria destruído dois marcos e duas
+ * âncoras para economizar um `<div>`.
  *
  * RÓTULO — e por que `SectionLabel` não existe
  * ---------------------------------------------------------------------------------------
@@ -63,8 +85,8 @@ interface Props extends HTMLAttributes<'section'> {
   tituloAs?: HTMLTag;
   /** Rótulo curto acima do cabeçalho, máximo 3 palavras, em caixa normal. */
   label?: string;
-  /** Largura do trilho — `page` (padrão) ou `measure`. */
-  width?: 'page' | 'measure';
+  /** Largura do trilho — `page` (padrão), `measure`, ou `none` (o trilho é do pai). */
+  width?: 'page' | 'measure' | 'none';
 }
 
 const {
@@ -79,6 +101,11 @@ const {
 
 /* O id do cabeçalho é derivado do id da seção — é o que impede o par de divergir. */
 const headingId = `${id}-titulo`;
+
+/* `none` troca o `Container` por um `Fragment`, que o Astro renderiza sem emitir elemento nenhum —
+   sem `<div>` órfão a mais na árvore. Ver "TRILHO PRÓPRIO OU DO PAI". */
+const Trilho = width === 'none' ? Fragment : Container;
+const trilhoProps = width === 'none' ? {} : { width };
 ---
 
 <section
@@ -87,7 +114,12 @@ const headingId = `${id}-titulo`;
   class:list={['scroll-mt-header', className]}
   {...rest}
 >
-  <Container width={width}>
+  {
+    /* `Fragment` quando `width="none"`: o miolo é o MESMO nos dois caminhos, e duplicá-lo em dois
+      ramos de template seria a duplicação que a cláusula companheira da regra de extração proíbe —
+      duas cópias divergem, e a que diverge em silêncio é sempre a que ninguém olha. */
+  }
+  <Trilho {...trilhoProps}>
     {label && <p class="label text-ink-muted">{label}</p>}
     {
       titulo && (
@@ -97,5 +129,5 @@ const headingId = `${id}-titulo`;
       )
     }
     <slot />
-  </Container>
+  </Trilho>
 </section>
