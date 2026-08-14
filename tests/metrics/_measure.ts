@@ -169,11 +169,38 @@ export async function interactiveBoxes(page: Page): Promise<Box[]> {
       if (style.visibility === 'hidden' || style.display === 'none') continue;
       const box = el.getBoundingClientRect();
       if (box.width === 0 && box.height === 0) continue;
+      /* ESCONDIDO ATÉ RECEBER FOCO — o skip link (`global.css` §9: `width:1px; height:1px;
+         clip-path: inset(50%)`). Ele MEDE 1px de propósito enquanto ninguém o focou; cobrar 52px
+         aqui mediria o estado em que o controle não existe para ninguém. O alvo dele é cobrado
+         onde ele de fato aparece, em `focus.spec.ts`, com o foco em cima.
+
+         Reconhecido pelo `clip-path`, que é o MECANISMO do padrão, e não pelo nome da classe:
+         nome é convenção, mecanismo é contrato — a mesma escolha que `tests/system/faq.test.ts`
+         faz ao selecionar por `data-faq-group` em vez de prefixo de `id`. */
+      if (style.clipPath.startsWith('inset(') && box.height <= 1) continue;
+
+      /* O ALVO DE UM CAMPO É O CAMPO MAIS O RÓTULO ASSOCIADO, não a caixinha desenhada. Um
+         `<input type="radio">` mede ~13px em qualquer navegador, e sempre vai medir: quem clica
+         acerta o rótulo, porque `<label for>` torna a linha inteira ativável. É por isso que
+         `Field.astro` põe `min-h-target` no `<label>` e não no `input`.
+
+         Medir o `input` sozinho reprovaria todo formulário do mundo e obrigaria a inventar uma
+         exceção — e regra que precisa de exceção em todo lugar vira ritual (mesmo argumento do
+         recorte "contém controle focável" em `tests/system/surfaces.test.ts`). Medir a REGIÃO
+         ATIVÁVEL é o que a WCAG 2.5.5 de fato define. */
+      let alvo = box;
+      const rotulo =
+        el.closest('label') ??
+        (el.id ? document.querySelector(`label[for="${CSS.escape(el.id)}"]`) : null);
+      if (rotulo) {
+        const rb = rotulo.getBoundingClientRect();
+        if (rb.height > alvo.height) alvo = rb;
+      }
 
       out.push({
         where: el.tagName.toLowerCase() + (el.id ? `#${el.id}` : ''),
-        height: box.height,
-        width: box.width,
+        height: alvo.height,
+        width: alvo.width,
         text: (el.textContent ?? '').trim().slice(0, 40),
         /* Link CORRIDO dentro de prosa é um trecho de texto, não um botão: ele não tem como medir
            52px de altura sem quebrar a linha em que vive. `[data-prose]` é o marcador que o

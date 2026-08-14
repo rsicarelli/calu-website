@@ -147,7 +147,13 @@
           </p>
         </div>
       </div>
-      <div class="@container w-80 rounded-card border border-line-soft p-4">
+      {
+        /* `w-full max-w-80`, não `w-80`: uma caixa de 320px FIXOS dentro do gutter de 20px estoura
+        a janela de 320px e produz rolagem horizontal na `/lab` inteira — a mesma 1.4.10 que o
+        cabeçalho reprovava. Com `max-w-80` a demonstração continua sendo "caixa estreita" em toda
+        tela que comporta, e encolhe junto na que não comporta. */
+      }
+      <div class="@container w-full max-w-80 rounded-card border border-line-soft p-4">
         <p class="text-small text-ink-muted">Caixa estreita — o mesmo bloco, empilhado</p>
         <div class="mt-4 flex flex-col gap-4 @thumb:flex-row @thumb:items-center">
           <span class="size-target shrink-0 rounded-control bg-surface-alt"></span>
