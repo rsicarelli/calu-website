@@ -192,4 +192,23 @@ describe('ServiceCard', () => {
 
     if (classes.includes('-m-4')) expect(classes).toContain('p-4');
   });
+
+  /* IDENTIDADE — o marcador que `tests/system/component-identity.test.ts` usa para achar o card no
+     HTML construído. O valor É a variante, e é isso que permite ao teste de sistema comparar
+     `stack` com `stack` e `row` com `row`, em vez de reprovar uma diferença legítima. */
+  it('declara `data-service-card` com a variante de layout', async () => {
+    const stack = await render();
+    expect(stack.querySelector('li')!.getAttribute('data-service-card')).toBe('stack');
+
+    const row = await render({ ...PROPS, layout: 'row' });
+    expect(row.querySelector('li')!.getAttribute('data-service-card')).toBe('row');
+  });
+
+  /* Identidade não é negociável pelo chamador: o marcador é emitido ANTES do `{...rest}`, então
+     uma página não consegue reetiquetar o card para escapar do teste de sistema. */
+  it('o chamador não consegue sobrescrever o marcador de identidade', async () => {
+    const document = await render({ ...PROPS, 'data-service-card': 'outra-coisa' });
+
+    expect(document.querySelector('li')!.getAttribute('data-service-card')).toBe('stack');
+  });
 });
