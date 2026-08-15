@@ -25,7 +25,14 @@
  *
  * NATIVO, não botão + `aria-expanded`/`aria-controls`. Os dois padrões são mutuamente exclusivos,
  * e o nativo funciona sem JavaScript — coerente com o inviolável "nada depende de framework JS
- * para funcionar". O trade-off aceito é menos controle sobre a animação de abrir e fechar.
+ * para funcionar". O trade-off era menos controle sobre a animação de abrir e fechar; deixou de
+ * ser aceito quando o resultado ficou "frio" demais na prática. A correção não abandona o nativo:
+ * é o mesmo padrão de `<script>` vanilla que já rege `ThemeToggle`/`MobileNav` (CLAUDE.md § Stack:
+ * "interação... é `<script>` vanilla"). Ele escuta o `click` do `<summary>` ANTES do toggle nativo
+ * acontecer (`preventDefault`), anima a altura do painel com a Web Animations API, e só seta
+ * `details.open` no fim da transição — o estado real de aberto/fechado continua sendo o atributo
+ * `open` do próprio `<details>`; a animação é só o percurso visual até ele chegar lá.
+ * `prefers-reduced-motion` pula a animação e aplica o estado final direto, sem transição.
  *
  * O ANINHAMENTO É O MOTIVO DE ESTE COMPONENTE EXISTIR. `<details><summary><h_>` — o cabeçalho
  * DENTRO do summary, nunca o contrário. O handoff pedia o inverso e o inverso não funciona: o
@@ -34,12 +41,22 @@
  * da pergunta some junto com a resposta quando o item está fechado. A Fase 2 corrigiu isso no
  * handoff e travou com teste; aqui a correção vira estrutura — não há como escrever errado.
  *
- * NÃO É EXCLUSIVO: nenhum `<details>` leva atributo `name`, e o componente não oferece prop para
- * isso. Abrir uma pergunta não fecha as outras — quem chega com duas dúvidas quer ler as duas.
+ * EXCLUSIVO DENTRO DO GRUPO — decisão revertida. A versão original não usava atributo `name` de
+ * propósito ("quem chega com duas dúvidas quer ler as duas"); o pedido explícito passou a ser
+ * abrir uma pergunta fechar as outras, pra o acordeão ler como um fluxo guiado em vez de uma pilha
+ * de blocos soltos. `name` nativo não serve pra isso sozinho: ele vale pra PÁGINA inteira, e
+ * `FaqGroup` tem quatro usos reais — os três grupos de `/duvidas` MAIS o resumo da Home — que
+ * precisam de exclusividade independente por grupo, não uma exclusividade global que cruzaria
+ * grupos sem relação nenhuma entre si. Por isso a exclusividade mora no mesmo `<script>` do
+ * parágrafo acima: ao abrir um item, ele fecha (animando) todo `[data-faq-item][open]` irmão
+ * dentro do `[data-faq-group]` mais próximo — nunca além dele.
  *
  * O painel fechado sai do fluxo pelo comportamento NATIVO do elemento. Nunca `height: 0` com
- * `overflow: hidden`, que deixaria a resposta alcançável por Tab e por leitor de tela mesmo
- * invisível — é por isso que a resposta é conteúdo do componente e não um slot livre.
+ * `overflow: hidden` como estado PERMANENTE, que deixaria a resposta alcançável por Tab e por
+ * leitor de tela mesmo invisível — é por isso que a resposta é conteúdo do componente e não um
+ * slot livre. A animação do `<script>` usa `height`/`overflow` inline, mas só como trânsito: no
+ * fechamento, `details.open` só vira `false` quando a transição termina, nunca antes — não existe
+ * quadro onde o conteúdo está invisível e ainda assim alcançável.
  *
  * Tipagem: `Props extends HTMLAttributes<'details'>`, não genérica em `as` — ver o comentário
  * equivalente em `Container.astro`. A raiz é sempre um `<details>`.
@@ -131,3 +148,74 @@ const signClass = 'shrink-0 text-h3 text-accent';
     display: none;
   }
 </style>
+
+<script>
+  // Idempotente por item: mesmo padrão de MobileNav.astro/ThemeToggle.astro — sobrevive a
+  // qualquer reexecução futura do módulo. Um `<script>` só, deduplicado pelo Astro
+  // independentemente de quantos `FaqItem` a página renderizar.
+  (() => {
+    const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DURATION_MS = 220;
+    const inflight = new WeakMap<HTMLElement, Animation>();
+
+    function panelOf(details: HTMLDetailsElement): HTMLElement | null {
+      return details.querySelector<HTMLElement>(':scope > summary + *');
+    }
+
+    function animate(panel: HTMLElement, from: string, to: string, onFinish: () => void) {
+      inflight.get(panel)?.cancel();
+      panel.style.overflow = 'hidden';
+      const animation = panel.animate(
+        { height: [from, to] },
+        { duration: DURATION_MS, easing: 'ease' },
+      );
+      inflight.set(panel, animation);
+      animation.onfinish = () => {
+        panel.style.overflow = '';
+        panel.style.height = '';
+        onFinish();
+      };
+    }
+
+    function openItem(details: HTMLDetailsElement) {
+      const panel = panelOf(details);
+      details.open = true;
+      if (!panel || REDUCE_MOTION) return;
+      const target = panel.getBoundingClientRect().height;
+      animate(panel, '0px', `${target}px`, () => {});
+    }
+
+    function closeItem(details: HTMLDetailsElement) {
+      const panel = panelOf(details);
+      if (!panel || REDUCE_MOTION) {
+        details.open = false;
+        return;
+      }
+      const start = panel.getBoundingClientRect().height;
+      animate(panel, `${start}px`, '0px', () => {
+        details.open = false;
+      });
+    }
+
+    document.querySelectorAll<HTMLDetailsElement>('[data-faq-item]').forEach((details) => {
+      const summary = details.querySelector<HTMLElement>(':scope > summary');
+      if (!summary || details.dataset.faqBound === 'true') return;
+      details.dataset.faqBound = 'true';
+
+      summary.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (details.open) {
+          closeItem(details);
+          return;
+        }
+        details
+          .closest<HTMLElement>('[data-faq-group]')
+          ?.querySelectorAll<HTMLDetailsElement>('[data-faq-item][open]')
+          .forEach((sibling) => {
+            if (sibling !== details) closeItem(sibling);
+          });
+        openItem(details);
+      });
+    });
+  })();
+</script>
