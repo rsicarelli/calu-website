@@ -109,13 +109,30 @@ const negocio = localBusinessLd({
 
   {/* ── Manifesto ───────────────────────────────────────────────────────── */}
   {
-    /* RITMO DA HOME — assimétrico, e de propósito.
+    /* RITMO DA HOME — assimétrico é o padrão, simétrico é a exceção; e a exceção tem UMA
+      regra, não duas.
       Toda seção usava `py-12`, então cada fronteira somava 48px de baixo + 48px de cima = 96px de
-      vazio, contra os ~36px que o mockup desenha (`padding: 0 20px 36px`, só embaixo, com a
-      próxima seção começando em zero). `contato.astro` e `equipe.astro` já faziam certo; a Home,
-      que é a página de entrada, era a única que não fazia — e por isso a mais frouxa do site.
-      Padding simétrico fica reservado para bloco de cor chapada, onde a cor precisa do respiro
-      dos dois lados para ler como faixa. */
+      vazio, contra os ~36px que o mockup desenha em toda fronteira que NÃO muda de cor
+      (`padding: 0 20px 36px`, só embaixo, com a próxima seção começando em zero — é o caso de
+      "Dúvidas frequentes" → "Estrutura e acesso" → "Onde estamos", que `contato.astro` e
+      `equipe.astro` já reproduziam certo).
+
+      O que a correção original NÃO tinha visto: o mockup dá padding SIMÉTRICO — respiro dos dois
+      lados — a toda seção que TOCA uma faixa de cor chapada (`bg-surface-brand`/`bg-surface-alt`),
+      seja ela a própria faixa OU a vizinha plana logo depois. "Serviços" nasce com
+      `padding:36px 0 8px` no mockup — 36px de topo — imediatamente após o manifesto escuro; "Como
+      funciona" nasce com `padding:36px 20px` — simétrico de novo — logo após a faixa creme de
+      "Para a família"/"Estrutura e acesso". A versão anterior só dava py-9 à FAIXA (regra "cor
+      precisa de respiro dos dois lados") e deixava a vizinha plana com pt-0, contando só com o pb
+      da faixa para separar as duas — por isso o rótulo "SERVIÇOS" media 0px de fronteira de cor
+      até o próprio texto. Medido com Playwright contra o dev server: a fronteira estava em
+      exatamente 0px extra, não ~15px como uma imagem sugeriria a olho nu.
+
+      A regra corrigida: **toda fronteira que muda de superfície pintada exige contribuição dos
+      DOIS lados** — a faixa contribui pb (ou pt, se ela vier depois), e a seção vizinha, mesmo
+      sem cor própria, contribui o pt (ou pb) que falta. Só quando os dois lados de uma fronteira
+      são igualmente "planos" (sem `bg-surface-*` em nenhum dos dois) é que o bottom-only tight
+      fica de pé sozinho. */
   }
   <PageSection
     id="manifesto"
@@ -133,7 +150,7 @@ const negocio = localBusinessLd({
         id="servicos"
         label={data.servicos.label}
         titulo={data.servicos.titulo}
-        class="pb-9 md:pb-18"
+        class="py-9 md:py-18"
       >
         <ul class="mt-8 grid gap-7 md:grid-cols-3">
           {servicosDestaque.map((servico) => (
@@ -226,11 +243,17 @@ const negocio = localBusinessLd({
   </div>
 
   {/* ── Como funciona ───────────────────────────────────────────────────── */}
+  {
+    /* Mesma fronteira de cor que "Serviços" corrige acima: a faixa creme de "Para a
+      família"/"Estrutura e acesso" termina logo antes, e sem pt aqui o rótulo "COMO FUNCIONA"
+      nascia colado na linha — visualmente confirmado (não só medido): a mesma foto que motivou
+      este audit. `py-9 md:py-18`, como o mockup desenha (`padding:36px 20px`). */
+  }
   <PageSection
     id="como-funciona"
     label={data.comoFunciona.label}
     titulo={data.comoFunciona.titulo}
-    class="pb-9 md:pb-18"
+    class="py-9 md:py-18"
     width="measure"
   >
     <StepList class="mt-8" passos={data.comoFunciona.passos} />
