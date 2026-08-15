@@ -59,14 +59,19 @@ const { navLinks, class: className, ...rest } = Astro.props;
   class:list={['bg-surface-deep pt-8 pb-footer-bottom text-ink-on-deep', className]}
   {...rest}
 >
-  <Container width="page" class="flex flex-col gap-8">
-    <Image src={logoLockup} alt="Calu Pilates e Fisioterapia" width={128} height={142} />
+  <Container
+    width="page"
+    class="flex flex-col gap-8 md:grid md:grid-cols-3 md:items-start md:gap-gutter-lg"
+  >
+    <div class="flex flex-col gap-8">
+      <Image src={logoLockup} alt="Calu Pilates e Fisioterapia" width={128} height={142} />
 
-    <p class="text-ink-on-deep-2">
-      {SITE.addressLine}
-      <br />
-      {SITE.hoursLine}
-    </p>
+      <p class="text-ink-on-deep-2">
+        {SITE.addressLine}
+        <br />
+        {SITE.hoursLine}
+      </p>
+    </div>
 
     <div>
       <span class="label text-ink-on-deep-3">Navegação</span>
@@ -91,7 +96,9 @@ const { navLinks, class: className, ...rest } = Astro.props;
       />
     </div>
 
-    <p class="text-small font-semibold text-ink-on-deep-3">
+    <p
+      class="border-t border-line-soft pt-6 text-small font-semibold text-ink-on-deep-3 md:col-span-3"
+    >
       {SITE.technicalManager.name} — {SITE.technicalManager.crefito}
     </p>
   </Container>
