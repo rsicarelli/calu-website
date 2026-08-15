@@ -16,7 +16,9 @@
  *
  * O medalhão sai com `alt=""`: o texto "CaLu" ao lado do link já nomeia o link inteiro, então o
  * `<img>` é decorativo (texto alternativo que só repetiria o nome do link é redundante, não
- * informativo). `width`/`height` explícitos são o que zera o CLS.
+ * informativo). `width`/`height` explícitos são o que zera o CLS. A arte fica DENTRO de um `span`
+ * `bg-surface-deep` (52px, círculo) — o próprio traço é creme/dourado sobre fundo removido,
+ * desenhado para pousar sobre superfície escura (ver o comentário junto ao `<span>` abaixo).
  *
  * Tipagem: `Props extends HTMLAttributes<'header'>`, não genérica — mesmo teto documentado em
  * `Container.astro` (o conversor de TSX do `@astrojs/compiler` 2.13.1 estoura em `Props`
@@ -57,10 +59,10 @@ const { navLinks, class: className, ...rest } = Astro.props;
      ("régua de abertura de seção"). */
 }
 <header
-  class:list={['sticky top-0 z-30 min-h-header border-b border-line-strong bg-bg', className]}
+  class:list={['sticky top-0 z-30 flex min-h-header border-b border-line-strong bg-bg', className]}
   {...rest}
 >
-  <Container width="page" class="flex h-full items-center justify-between gap-4">
+  <Container width="page" class="flex items-center justify-between gap-4">
     {
       /* `min-w-0` NO LOCKUP, e é a 1.4.10 a 320px, não polimento.
 
@@ -75,19 +77,45 @@ const { navLinks, class: className, ...rest } = Astro.props;
         comportamento de refluxo que a norma pede. Nada muda a partir de 360px, onde já cabia. */
     }
     <a href="/" class="inline-flex min-w-0 items-center gap-3">
-      <Image src={logoMark} alt="" width={52} height={52} class="size-target rounded-full" />
+      {
+        /* O medalhão do mockup NUNCA é a arte crua: é um círculo `surface-deep` (52px,
+           `COMPONENTS.md` § Header) com o símbolo MENOR (44px) centralizado dentro — a mesma
+           relação nas 11 telas do handoff, com um pouco de fundo escuro respirando ao redor da
+           linha fina. `logo-mark.png` é a arte com fundo removido (`design_handoff_calu/
+           CLAUDE.md` § Cor: "lettering creme #EDE7D9… dourado #C9A45C"), desenhada para pousar
+           SOBRE esse fundo escuro — sem ele, o traço creme/dourado cai quase invisível sobre o
+           `bg-bg` claro (creme sobre creme) e, mesmo no escuro, a arte ocupava o círculo INTEIRO
+           sem a folga que o desenho pressupõe, encostando na borda do próprio `rounded-full`. Um
+           span `bg-surface-deep` fixo funciona nos dois temas sem `dark:` (o token já é escuro
+           nos dois — `#16211B` no claro bate o hex do mockup, `#1C2822` no escuro), coerente com
+           "trocar de tema é trocar o valor da mesma custom property" (CLAUDE.md § Stack). */
+      }
+      <span
+        class="flex size-target shrink-0 items-center justify-center rounded-full bg-surface-deep"
+      >
+        <Image src={logoMark} alt="" width={44} height={44} densities={[1, 2, 3]} class="size-11" />
+      </span>
       <span>
         <span class="text-lockup font-semibold text-ink">CaLu</span>
         <span class="block text-small text-ink-muted">Pilates e Fisioterapia</span>
       </span>
     </a>
 
-    <nav aria-label="Principal" class="hidden items-center gap-6 md:flex">
+    {
+      /* `px-3.5` + `rounded-control` + `hover:bg-surface-alt` restauram o "chip" do nav do
+         mockup (`padding:0 14px`, raio 4, hover `#EDE7D9` = `--color-surface-alt` — Calu -
+         Direcao de Marca.dc.html, header desktop). Sem eles o link era texto nu (só `gap-6`
+         entre as palavras), o único controle do header sem nenhum respiro interno — ao lado do
+         par de contato (mesmo problema) e do WhatsAppFab/ThemeToggle, que sempre tiveram `px-5`.
+         `gap-1` (4px) substitui o `gap-6` (24px): o respiro agora vem do padding de cada link,
+         não do vão entre eles — o mesmo `gap:4px` do mockup. */
+    }
+    <nav aria-label="Principal" class="hidden items-center gap-1 md:flex">
       {
         navLinks.map((link) => (
           <a
             href={link.href}
-            class="inline-flex min-h-target items-center font-body text-body text-ink"
+            class="inline-flex min-h-target items-center rounded-control px-3.5 font-body text-body text-ink transition-colors duration-150 hover:bg-surface-alt"
           >
             {link.label}
           </a>
@@ -105,7 +133,22 @@ const { navLinks, class: className, ...rest } = Astro.props;
       />
     </div>
 
-    <ThemeToggle class="hidden md:inline-flex" />
+    {
+      /* ThemeToggle já nasce com `inline-flex` no PRÓPRIO template (base classes do
+         componente) — incondicional, nunca `md:`. Passar `class="hidden md:inline-flex"` para
+         dentro do componente empata as duas utilities de `display` em especificidade (0,1,0)
+         cada, e quem decide o empate é a ORDEM no CSS gerado, não a ordem escrita na tag: medido
+         ao vivo (Playwright + CDP `CSS.getMatchedStylesForNode`) que `.inline-flex` sai DEPOIS de
+         `.hidden` na folha final, então `.inline-flex` vencia sempre — o botão "Tema escuro"
+         ficava visível em TODA largura, inclusive lado a lado com o "Menu" do MobileNav abaixo de
+         900px (as duas pílulas se sobrepunham, texto cortado). O `<div>` a seguir é o MESMO
+         padrão já usado duas seções acima para o `ContactPair`: a visibilidade mora num
+         contêiner que não carrega nenhuma outra utility de `display` para competir, e o
+         componente por dentro mantém as classes que já eram dele. */
+    }
+    <div class="hidden md:block">
+      <ThemeToggle />
+    </div>
 
     <MobileNav
       navLinks={navLinks}
