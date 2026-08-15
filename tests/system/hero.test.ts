@@ -30,17 +30,36 @@ describe('herói da Home — imagem antes do painel de texto no fonte', () => {
     const header = home!.document.querySelector('header:has(h1)');
     expect(header, 'nenhum <header> com <h1> na Home').not.toBeNull();
 
-    /* `compareDocumentPosition` em vez de comparar índices: é a pergunta exata que o teste faz
-       ("A vem antes de B no documento?") e não depende de os dois serem irmãos diretos. */
+    /* Índice em `querySelectorAll('*')`, NÃO `compareDocumentPosition`: a primeira versão deste
+       teste usava `compareDocumentPosition` por não depender de os dois serem irmãos diretos —
+       mas só foi exercida de verdade quando a Home ganhou a primeira foto real (`hero.imagem`).
+       Com o slot vazio, `[data-brand-placeholder]` senta como filho DIRETO da grade — mesmo nível
+       do painel de texto — e o cálculo dá certo por coincidência de forma. Com uma foto de
+       verdade, `AspectImage` embrulha o `<img>` num `<div class="overflow-hidden">` extra, um
+       nível mais fundo — e o `compareDocumentPosition` do linkedom (v4.1.10) devolve
+       DOCUMENT_POSITION_PRECEDING nos DOIS SENTIDOS para esse par (verificado isolado: `a.b(h1)`
+       E `h1.b(a)` retornam PRECEDING), o que é logicamente impossível pela própria especificação
+       — bug do linkedom em comparação entre nós de profundidades diferentes, não do site. A
+       ordem do FONTE nunca mudou (confirmado lendo o HTML gerado). `querySelectorAll('*')`
+       devolve os elementos em ordem de documento de verdade — é isso que decide a posição,
+       comparando índice em vez de pedir ao linkedom para fazer a conta sozinho. */
+    const elementos = [...header!.querySelectorAll('*')];
     const media = header!.querySelector('img, [data-brand-placeholder]');
     const h1 = header!.querySelector('h1');
 
     expect(media, 'herói sem slot de imagem nenhum').not.toBeNull();
     expect(h1).not.toBeNull();
 
-    const posicao = media!.compareDocumentPosition(h1!);
+    const indiceMedia = elementos.indexOf(media!);
+    const indiceH1 = elementos.indexOf(h1!);
     expect(
-      Boolean(posicao & 4 /* DOCUMENT_POSITION_FOLLOWING */),
+      indiceMedia,
+      'slot de imagem não encontrado na varredura do <header>',
+    ).toBeGreaterThanOrEqual(0);
+    expect(indiceH1, '<h1> não encontrado na varredura do <header>').toBeGreaterThanOrEqual(0);
+
+    expect(
+      indiceMedia < indiceH1,
       'o <h1> do herói precede a imagem no fonte — no celular o texto aparece ANTES da foto, que é o inverso do mockup',
     ).toBe(true);
   });
