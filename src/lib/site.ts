@@ -37,12 +37,15 @@ import type { NavLink } from '@/components/blocks/Header.astro';
 const PHONE_DIGITS = '5511000000000';
 
 const ADDRESS = {
-  streetAddress: 'Rua a confirmar, 0',
+  /** Número + complemento entram aqui: não há campo `PostalAddress` próprio para sala/andar,
+      mesmo raciocínio do bairro logo abaixo — o dado mora onde é lido, não onde o vocabulário
+      schema.org tem uma gaveta pronta. */
+  streetAddress: 'Av. Onze de Junho, 1070, Sala 710',
   /** Bairro. Não é campo de `PostalAddress`; entra no `streetAddress` do JSON-LD. */
   neighborhood: 'Vila Clementino',
   addressLocality: 'São Paulo',
   addressRegion: 'SP',
-  postalCode: '00000-000',
+  postalCode: '04041-004',
   addressCountry: 'BR',
 } as const;
 
@@ -75,6 +78,13 @@ function formatAddress(address: typeof ADDRESS): string {
   return `${address.streetAddress} — ${address.neighborhood}, ${address.addressLocality}, ${address.addressRegion}`;
 }
 
+/** Deep link do Google Maps — sem chave de API, é só uma URL. Funciona igual em qualquer
+    plataforma: abre o app nativo no celular, o Maps web no desktop. */
+function buildMapsUrl(address: typeof ADDRESS): string {
+  const query = `${address.streetAddress}, ${address.neighborhood}, ${address.addressLocality} - ${address.addressRegion}, ${address.postalCode}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
 function formatHours(hours: typeof HOURS): string {
   return hours
     .map((range) => `${range.label}, das ${formatTime(range.opens)} às ${formatTime(range.closes)}`)
@@ -97,6 +107,8 @@ export const SITE = {
   },
   /** Legível — Header, Footer, LocationBlock. Derivado de `address`. */
   addressLine: formatAddress(ADDRESS),
+  /** Deep link "Abrir no mapa" — LocationBlock. Derivado de `address`. */
+  mapsUrl: buildMapsUrl(ADDRESS),
   /** Legível — Footer, LocationBlock. Derivado de `hours`. */
   hoursLine: formatHours(HOURS),
   /** Estruturado — `localBusinessLd`. Mesmo fato, forma schema.org. */

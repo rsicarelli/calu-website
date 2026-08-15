@@ -11,6 +11,7 @@
    em `PAGES.md` a favor da versão mobile. */
 import { getEntry } from 'astro:content';
 
+import mapaEstatico from '@/assets/location/mapa.jpg';
 import AccessList from '@/components/blocks/AccessList.astro';
 import ContactForm from '@/components/blocks/ContactForm.astro';
 import LocationBlock from '@/components/blocks/LocationBlock.astro';
@@ -60,7 +61,7 @@ const { data } = contato;
   </PageSection>
 
   <PageSection id="onde-estamos" titulo={data.local.titulo} width="measure" class="pb-9 md:pb-18">
-    <LocationBlock class="mt-8" />
+    <LocationBlock mapa={mapaEstatico} class="mt-8" />
   </PageSection>
 
   <PageSection id="acesso" titulo={data.acesso.titulo} width="measure" class="pb-9 md:pb-18">

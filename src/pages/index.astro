@@ -21,6 +21,7 @@
    melhora nada e multiplica a chance de as cópias divergirem. */
 import { getEntries, getEntry } from 'astro:content';
 
+import mapaEstatico from '@/assets/location/mapa.jpg';
 import AccessList from '@/components/blocks/AccessList.astro';
 import FaqGroup from '@/components/blocks/FaqGroup.astro';
 import LocationBlock from '@/components/blocks/LocationBlock.astro';
@@ -330,7 +331,7 @@ const negocio = localBusinessLd({
     }
 
     <PageSection id="onde-estamos" titulo={data.local.titulo} width="none">
-      <LocationBlock class="mt-8" />
+      <LocationBlock mapa={mapaEstatico} class="mt-8" />
     </PageSection>
   </Container>
 </BaseLayout>

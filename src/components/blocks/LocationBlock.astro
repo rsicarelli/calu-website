@@ -14,9 +14,11 @@
  * O invariante "telefone sempre ao lado do WhatsApp" governa PAREAMENTO, não multiplicidade —
  * o próprio mockup mostra WhatsApp sozinho no herói e no CTA escuro.
  *
- * PENDENTE: o CTA que `COMPONENTS.md § LocationBlock` de fato pede aqui é um link de rota
- * ("Abrir no mapa", alvo ≥52px), que depende do endereço real — bloqueado na cliente. Entra
- * quando `SITE.address` deixar de ser placeholder.
+ * "ABRIR NO MAPA" — o link que `COMPONENTS.md § LocationBlock` pede, e que ficou bloqueado até
+ * o endereço real chegar (`SITE.address` era placeholder). `SITE.mapsUrl` é um deep link do
+ * Google Maps sem chave de API nenhuma — é só uma URL de busca (`maps.google.com/maps/search`)
+ * que abre o app nativo no celular e o Maps web no desktop. O `Action` já nasce com alvo de
+ * 52px (`size="md"`, o padrão), então nenhuma classe extra de touch target é necessária aqui.
  *
  * Props
  *   mapa   imagem 3/2 do mapa. AUSENTE ⇒ `AspectImage` cai no placeholder de marca na mesma
@@ -46,6 +48,13 @@
  * O mapa é DECORATIVO de propósito: o endereço está escrito em texto logo abaixo, e descrever
  * a imagem repetiria a mesma informação para quem usa leitor de tela.
  *
+ * O CRÉDITO ABAIXO DO MAPA acompanha `mapa`, não é fixo: a política de uso de tile do
+ * OpenStreetMap (a fonte do `mapa.jpg` de hoje, ver `MAP-CREDITS.md`) exige aviso de direito
+ * autoral visível onde o tile aparece — isento não porque a imagem é decorativa para leitor de
+ * tela (`aria-hidden` cobre isso), mas porque a exigência é do RENDER visual, não da árvore de
+ * acessibilidade. Se o `mapa` de alguma página trocar de fonte no futuro (Google Static Maps,
+ * mapa desenhado à mão), este crédito precisa mudar ou sair junto — não é genérico.
+ *
  *   <LocationBlock />                      sem mapa aprovado — placeholder de marca
  *   <LocationBlock mapa={mapaEstatico} />  com mapa
  *
@@ -53,6 +62,7 @@
  */
 import type { HTMLAttributes } from 'astro/types';
 
+import Action from '@/components/ui/Action.astro';
 import AspectImage from '@/components/ui/AspectImage.astro';
 import { SITE } from '@/lib/site';
 
@@ -66,6 +76,8 @@ const { mapa, class: className, ...rest } = Astro.props;
 
 <div class:list={[className]} {...rest}>
   <AspectImage src={mapa} decorative ratio="3/2" />
+  {mapa && <p class="mt-2 text-small text-ink-muted">Mapa: dados do OpenStreetMap</p>}
   <p class="mt-6 text-body text-ink-body">{SITE.addressLine}</p>
   <p class="mt-2 text-body text-ink-body">{SITE.hoursLine}</p>
+  <Action as="a" href={SITE.mapsUrl} class="mt-4"> Abrir no mapa </Action>
 </div>
