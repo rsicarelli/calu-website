@@ -4,6 +4,7 @@ frasePopular: 'Quero exercício em turma, sem aparelho'
 resumo: 'Exercício no colchonete, em turma pequena, conduzido por fisioterapeuta e ajustado ao que a avaliação mostrou.'
 ordem: 2
 seoDescription: 'Pilates em solo na Vila Clementino: exercício no colchonete, em turma pequena, conduzido por fisioterapeuta com plano definido na avaliação.'
+imagem: './pilates-solo.jpg'
 indicacoes:
   - 'Vontade de manter uma rotina de exercício com orientação'
   - 'Preferência por exercício sem aparelho'

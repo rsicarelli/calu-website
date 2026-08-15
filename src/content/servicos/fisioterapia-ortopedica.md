@@ -4,6 +4,7 @@ frasePopular: 'Estou com dor no ombro, no joelho ou na coluna'
 resumo: 'Atendimento individual para quem chegou com dor, perda de movimento ou receio de voltar a se exercitar.'
 ordem: 1
 seoDescription: 'Fisioterapia para dor e lesão de ombro, joelho e coluna na Vila Clementino. Avaliação individual, plano combinado com você e acompanhamento de perto.'
+imagem: './fisioterapia-ortopedica.jpg'
 indicacoes:
   - 'Dor que aparece em um movimento específico do dia a dia'
   - 'Limitação de movimento depois de uma lesão'

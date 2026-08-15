@@ -4,6 +4,7 @@ frasePopular: 'Quero me mexer com orientação'
 resumo: 'Exercício conduzido por fisioterapeuta, em turma pequena, com o plano ajustado ao que a avaliação mostrou.'
 ordem: 0
 seoDescription: 'Pilates clínico na Vila Clementino: exercício em turma pequena, conduzido por fisioterapeuta, com plano individual definido na avaliação.'
+imagem: './pilates-clinico.jpg'
 indicacoes:
   - 'Vontade de voltar a se exercitar com acompanhamento de perto'
   - 'Dor que aparece em um movimento específico do dia a dia'

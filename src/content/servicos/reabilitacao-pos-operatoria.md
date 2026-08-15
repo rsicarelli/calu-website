@@ -4,6 +4,7 @@ frasePopular: 'Vou operar, ou acabei de operar'
 resumo: 'Retomada gradual de movimento depois de uma cirurgia, no ritmo combinado com quem indicou o procedimento.'
 ordem: 4
 seoDescription: 'Reabilitação depois da cirurgia na Vila Clementino: retomada gradual de movimento, no ritmo combinado com quem indicou o procedimento.'
+imagem: './reabilitacao-pos-operatoria.jpg'
 indicacoes:
   - 'Preparação para uma cirurgia já marcada'
   - 'Retomada de movimento logo depois da alta'

@@ -6,6 +6,7 @@ hero:
   eyebrow: 'Vila Clementino · São Paulo'
   titulo: 'Um plano para o seu corpo, não para a média'
   lead: 'Cada pessoa chega com uma história diferente. A gente começa por entender a sua, com calma, antes de propor qualquer coisa.'
+  imagem: './hero.jpg'
   acaoSecundaria: 'Conhecer os serviços'
 manifesto:
   texto: 'Aqui o cuidado começa por ouvir. A avaliação vem antes de qualquer plano, e o plano muda quando o seu corpo muda. Ninguém segue um programa igual ao da pessoa do lado. O ponto de partida é o seu, e a progressão é combinada com você.'

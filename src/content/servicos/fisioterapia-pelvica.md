@@ -4,6 +4,7 @@ frasePopular: 'Escapa xixi quando eu tusso ou rio'
 resumo: 'Atendimento individual para escape de urina, vontade urgente de ir ao banheiro e desconforto na região da pelve.'
 ordem: 3
 seoDescription: 'Fisioterapia pélvica na Vila Clementino: atendimento individual para escape de urina, urgência para ir ao banheiro e desconforto na região da pelve.'
+imagem: './fisioterapia-pelvica.jpg'
 indicacoes:
   - 'Escape de urina ao tossir, rir, espirrar ou correr'
   - 'Vontade urgente de ir ao banheiro, várias vezes ao dia'
