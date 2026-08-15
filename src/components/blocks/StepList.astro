@@ -15,16 +15,33 @@
  * A ordem aqui é informação: "Contato → Avaliação → Plano" lido fora de ordem é outra coisa.
  * `<ol>` é o que comunica isso a quem usa leitor de tela, que anuncia "item 2 de 3".
  *
- * O número visível sai de um contador CSS (`counter-increment` na utility `step-list` de
- * `global.css`) em vez de vir escrito no texto, por dois motivos: quem edita o conteúdo não
- * precisa renumerar a lista à mão quando um passo entra no meio, e o leitor de tela não lê o
- * número duas vezes — uma do `<ol>` e outra do texto.
+ * O número visível sai de um contador CSS (`counter-reset` na utility `step-list` e
+ * `counter-increment` na utility `step-item`, as duas em `global.css` — precisam existir
+ * JUNTAS, por isso vivem em `@utility` e não em classe solta) em vez de vir escrito no
+ * texto, por dois motivos: quem edita o conteúdo não precisa renumerar a lista à mão quando
+ * um passo entra no meio, e o leitor de tela não lê o número duas vezes — uma do `<ol>` e
+ * outra do texto. O selo (`[data-step-badge]`) e o trilho (`[data-step-rail]`) são
+ * apresentação, não contrato de contador: ganchos `data-*`, no `<style>` deste componente,
+ * mesmo padrão que `data-faq-sign-*` usa em `FaqItem.astro`.
  *
  * CARDINALIDADE VARIÁVEL É A VARIAÇÃO QUE JUSTIFICA O COMPONENTE
  * ---------------------------------------------------------------------------------------
  * A Home trava 3 passos no schema; o serviço aceita 1 a 5. Um layout de três colunas fixas
  * atenderia a Home e quebraria no serviço com 4. Por isso `flex flex-col`: a lista muda de
  * tamanho sem mudar de forma, que é a regra 9 dos invioláveis.
+ *
+ * TRILHO CONECTOR — por que `align-items: stretch` e não posicionamento absoluto
+ * ---------------------------------------------------------------------------------------
+ * Cada passo é uma linha (selo numerado + conteúdo). O selo é um círculo de tamanho FIXO
+ * (`size-12`), mas o conteúdo ao lado varia de altura (um título de duas linhas, uma resposta
+ * curta). Uma trilha vertical que precisasse acertar o centro do PRÓXIMO selo exigiria saber a
+ * altura de cada item de antemão — impossível com conteúdo real.
+ *
+ * A solução é deixar o flexbox medir: `.step-item` estica os dois filhos (selo e conteúdo) para
+ * a mesma altura (`align-items: stretch`, o padrão do Flexbox); dentro do selo, uma coluna flex
+ * separa o círculo (tamanho fixo) da trilha (`flex-1`, ocupa o resto). O navegador termina o
+ * cálculo sozinho, para 1 a 5 passos, sem pixel mágico. O último item esconde a própria trilha
+ * (`:last-child`) — não há próximo selo para alcançar.
  *
  *   <StepList passos={home.data.comoFunciona.passos} />
  *   <StepList passos={servico.data.passos} tituloAs="h3" class="mt-8" />
@@ -43,21 +60,67 @@ interface Props extends HTMLAttributes<'ol'> {
 const { passos, tituloAs: Titulo = 'h3', class: className, ...rest } = Astro.props;
 
 /* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
-   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
-const itemClass = 'step-item border-t border-line-soft pt-4';
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). `step-list`/`step-item` continuam
+   sendo classe (não `data-*`): as duas são a metade do CONTRATO DO CONTADOR — ver o
+   `@utility` par em `global.css` — e `tests/components/StepList.test.ts` verifica as duas
+   pelo nome de classe. O selo, o trilho e o conteúdo são detalhe de APRESENTAÇÃO deste
+   redesenho, sem contrato de teste próprio, então usam `data-*` como gancho de CSS — o
+   mesmo padrão de `data-faq-sign-*` em `FaqItem.astro` — para não entrar na região que o
+   gate varre à procura de utility do Tailwind: nenhum dos três gera CSS de tema, e uma
+   classe crua com esse nome seria exatamente a "utility morta" que a trava B existe para
+   pegar (confirmado rodando `task check:styles` contra a primeira versão deste redesenho). */
+const itemClass = 'step-item flex items-stretch gap-5';
+const markerClass = 'flex shrink-0 flex-col items-center';
+const badgeClass =
+  'flex size-12 shrink-0 items-center justify-center rounded-full border border-line font-label text-label font-semibold text-brand';
+const railClass = 'mt-2 w-px flex-1 bg-line-soft';
+const contentClass = 'flex flex-col pb-10';
 const tituloClass = 'text-h3';
 const textoClass = 'mt-2 text-body text-ink-body';
 ---
 
 {
   passos.length > 0 && (
-    <ol class:list={['flex flex-col gap-6 step-list', className]} {...rest}>
+    <ol class:list={['flex flex-col step-list', className]} {...rest}>
       {passos.map((passo) => (
         <li class={itemClass}>
-          <Titulo class={tituloClass}>{passo.titulo}</Titulo>
-          <p class={textoClass}>{passo.texto}</p>
+          <span class={markerClass}>
+            <span data-step-badge class={badgeClass} />
+            <span data-step-rail class={railClass} />
+          </span>
+          <div data-step-content class={contentClass}>
+            <Titulo class={tituloClass}>{passo.titulo}</Titulo>
+            <p class={textoClass}>{passo.texto}</p>
+          </div>
         </li>
       ))}
     </ol>
   )
 }
+
+<style>
+  /* Conteúdo gerado por CSS não entra na árvore de acessibilidade — a ordem já vem do `<ol>`,
+     então o número visível pode viver inteiramente em `::before` sem duplicar informação.
+     `counter-reset`/`counter-increment` em si moram no par `@utility step-list`/`step-item`
+     de `global.css`, não aqui — ver o comentário da const `itemClass` acima. */
+  [data-step-badge]::before {
+    content: counter(step);
+  }
+
+  /* `text-label` (ver `global.css`) empacota o tracking de 0.08em pensado para rótulo em
+     caixa-alta de várias letras — sobre um dígito solto e centralizado, o tracking sobra
+     inteiro DEPOIS do caractere e empurra o número para a esquerda do círculo. Zerado só
+     aqui, sem tocar a utility: um selo numerado não é o rótulo que a exceção do piso de
+     17px foi desenhada para cobrir. */
+  [data-step-badge] {
+    letter-spacing: normal;
+  }
+
+  .step-item:last-child [data-step-rail] {
+    display: none;
+  }
+
+  .step-item:last-child [data-step-content] {
+    padding-bottom: 0;
+  }
+</style>

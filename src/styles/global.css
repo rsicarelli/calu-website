@@ -818,14 +818,16 @@
    e outra do texto, que é o que acontece quando a numeração é digitada).
 
    Vive num `@utility` porque `counter-reset` no `<ol>` e `counter-increment` no
-   `<li>` são duas declarações que precisam existir JUNTAS e na ordem certa —
-   exatamente o critério desta seção. Em classes soltas, uma delas some numa
-   refatoração e a lista passa a numerar tudo como "1" em silêncio.
+   `<li>` são duas declarações que precisam existir JUNTAS — em classes soltas,
+   uma delas some numa refatoração e a lista passa a numerar tudo como "1" em
+   silêncio; `tests/components/StepList.test.ts` trava as duas pelo nome.
 
-   O marcador nativo sai (`list-style: none`) e volta como `::before` para poder
-   receber a cor e a fonte da marca; `aria-hidden` não é necessário porque
-   conteúdo gerado por CSS não entra na árvore de acessibilidade em nenhum dos
-   navegadores-alvo — a semântica de ordem já vem do `<ol>`. */
+   O que NÃO mora mais aqui: o selo circular (`::before` com o dígito), o trilho
+   conector e o espaçamento entre passos são apresentação do redesenho, não parte
+   do contrato do contador — vivem no `<style>` de `StepList.astro`, presos por
+   `data-*` (mesmo padrão que `data-faq-sign-*` usa em `FaqItem.astro`) para não
+   entrar como classe crua na região que `check-utilities.mjs` varre. Ver o
+   cabeçalho de `StepList.astro`. */
 @utility step-list {
   counter-reset: step;
   list-style: none;
@@ -834,15 +836,4 @@
 
 @utility step-item {
   counter-increment: step;
-
-  &::before {
-    content: counter(step);
-    display: block;
-    margin-bottom: --spacing(2);
-    color: var(--color-brand);
-    font-family: var(--font-label);
-    font-size: var(--text-label);
-    letter-spacing: var(--text-label--letter-spacing);
-    font-weight: var(--font-weight-semibold);
-  }
 }
