@@ -10,6 +10,8 @@
  *   href         destino do card.
  *   actionLabel  texto do link — padrão "Ver detalhes".
  *   media        reserva o espaço de imagem — padrão `true`. `false` = sem imagem cadastrada.
+ *   image        a foto (`servico.data.imagem`). Ausente ⇒ `BrandPlaceholder` via `AspectImage`.
+ *   imageAlt     alternativa textual da foto. Só importa junto de `image`.
  *   layout       `stack` (padrão, coluna) ou `row` (imagem à esquerda a partir de 34rem).
  *   as           tag da raiz — `li` (padrão, dentro de lista) ou `div`.
  *   …            qualquer outro atributo válido é repassado à raiz.
@@ -47,7 +49,7 @@
  */
 import type { HTMLAttributes, HTMLTag } from 'astro/types';
 
-import BrandPlaceholder from '@/components/ui/BrandPlaceholder.astro';
+import AspectImage from '@/components/ui/AspectImage.astro';
 
 interface Props extends HTMLAttributes<'li'> {
   /** Frase em português comum — vem antes do nome técnico. */
@@ -64,6 +66,10 @@ interface Props extends HTMLAttributes<'li'> {
   actionLabel?: string;
   /** Reserva o espaço de imagem — padrão `true`. */
   media?: boolean;
+  /** A foto do atendimento, quando cadastrada. Ausente ⇒ `AspectImage` cai no `BrandPlaceholder`. */
+  image?: import('astro').ImageMetadata;
+  /** Alternativa textual da foto. Só importa quando `image` está presente. */
+  imageAlt?: string;
   /** `stack` (padrão) ou `row`. */
   layout?: 'stack' | 'row';
   /** Tag da raiz — `'li'` (padrão) ou `'div'`. */
@@ -78,6 +84,8 @@ const {
   href,
   actionLabel = 'Ver detalhes',
   media = true,
+  image,
+  imageAlt,
   layout = 'stack',
   as: Tag = 'li',
   class: className,
@@ -127,7 +135,24 @@ const actionClass =
      escrito depois dele; ver a mesma nota em `Action.astro` e `BrandPlaceholder.astro`. */
 }
 <Tag data-service-card={layout} {...rest} class:list={[rootClass, layoutClass, className]}>
-  {media && <BrandPlaceholder ratio="16/9" radius="control" class={mediaClass} />}
+  {
+    /* `AspectImage`, não `BrandPlaceholder` direto: o card sempre reservava o espaço da
+       imagem mas nunca sabia renderizar uma foto — `servicos.imagem` no schema ficava sem
+       consumidor nenhum aqui (só o template de serviço individual a lia). `AspectImage` já
+       cai no `BrandPlaceholder` sozinho quando `image` está ausente, então nenhum card muda
+       de aparência até o primeiro atendimento ganhar foto de verdade. */
+  }
+  {
+    media && (
+      <AspectImage
+        src={image}
+        alt={imageAlt ?? ''}
+        ratio="16/9"
+        radius="control"
+        class={mediaClass}
+      />
+    )
+  }
   <div>
     <p class="text-small text-ink-muted">{eyebrow}</p>
     <Title class="mt-4 text-h3 text-ink">{title}</Title>

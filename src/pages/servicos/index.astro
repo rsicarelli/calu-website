@@ -56,6 +56,8 @@ const servicos = (await getCollection('servicos')).sort((a, b) => a.data.ordem -
               title={servico.data.titulo}
               description={servico.data.resumo}
               href={`/servicos/${servico.id}/`}
+              image={servico.data.imagem}
+              imageAlt={servico.data.titulo}
             />
           ))}
         </ul>
