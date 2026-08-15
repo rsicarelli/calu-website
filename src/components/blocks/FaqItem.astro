@@ -72,6 +72,10 @@ const {
   ...rest
 } = Astro.props;
 
+/* Ver `Action.astro`: o spread do Astro prevalece sobre o atributo literal, então o descarte
+   precisa ser explícito. Identidade não é prop. */
+delete rest['data-faq-item'];
+
 const hasRichAnswer = Astro.slots.has('default');
 
 /* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes literais
@@ -85,7 +89,15 @@ const answerClass = 'max-w-answer pb-4 text-body text-ink-body';
 const signClass = 'shrink-0 text-h3 text-accent';
 ---
 
-<details open={open} class:list={['border-t border-line-soft', className]} {...rest}>
+{
+  /* `data-faq-item` — identificador estável, sem valor: estado visual único, e `open` é runtime,
+     não identidade. Os `data-faq-sign-*` abaixo são gancho de CSS nos glifos, não identidade da
+     raiz; não confundir os dois papéis (ver `BrandPlaceholder.astro`).
+
+     O descarte em `rest` acima é o que impede o chamador de reetiquetar o item: ordem de atributo
+     não basta, o spread do Astro prevalece sobre o literal (ver `Action.astro`). */
+}
+<details data-faq-item open={open} {...rest} class:list={['border-t border-line-soft', className]}>
   <summary class={summaryClass}>
     <Heading class="text-question text-ink">{question}</Heading>
     <span aria-hidden="true" data-faq-sign-closed class={signClass}>+</span>

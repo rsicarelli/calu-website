@@ -141,4 +141,20 @@ describe('FaqItem', () => {
 
     expect((summary!.getAttribute('class') ?? '').split(/\s+/)).toContain('min-h-target');
   });
+
+  /* IDENTIDADE — o marcador que `tests/system/component-identity.test.ts` usa para achar o item no
+     HTML construído. Sem valor: estado visual único, e `open` é runtime, não identidade. Ele fica
+     na RAIZ; os `data-faq-sign-*` são gancho de CSS nos glifos e não servem para isto. */
+  it('declara `data-faq-item` na raiz <details>', async () => {
+    const document = await render();
+    const raiz = document.querySelector('details');
+
+    expect(raiz!.hasAttribute('data-faq-item')).toBe(true);
+  });
+
+  it('o chamador não consegue sobrescrever o marcador de identidade', async () => {
+    const document = await render({ ...PROPS, 'data-faq-item': 'outra-coisa' });
+
+    expect(document.querySelector('details')!.getAttribute('data-faq-item')).toBe('');
+  });
 });

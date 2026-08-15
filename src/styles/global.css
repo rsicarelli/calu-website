@@ -527,12 +527,22 @@
   --color-focus-ring: var(--color-focus-ring-on-dark);
 }
 
-/* Superfícies com fundo --color-accent (ex: WhatsAppFab) não são "escuras" nem "de marca" no
-   sentido dos seletores acima — --color-accent inverte de claro/escuro entre os temas, então o
-   anel de foco padrão e o -on-dark colidem com ele igual nos dois casos. --color-on-accent já
-   garante contraste contra --color-accent (é o texto que fica em cima dele) e inverte de
-   polaridade do jeito certo — reaproveitado aqui em vez de um token novo. Medido:
-   5.54:1 no tema claro (#ffffff sobre #8f5e23), 8.06:1 no tema escuro (#16211b sobre #d3b070). */
+/* Mesma ideia para um CONTÊINER que pinta --color-accent e tem controle focável DENTRO: o anel
+   desses controles cai sobre o accent, e nem o anel padrão nem o -on-dark contrastam com ele
+   (medido: ~1.67:1 nos dois temas, porque --color-accent inverte de claridade entre os temas por
+   desenho). --color-on-accent existe justamente para ter contraste garantido contra --color-accent
+   e inverte de polaridade do jeito certo: 5.54:1 no claro, 8.06:1 no escuro.
+
+   ⚠️ ESTE ATRIBUTO É DE CONTÊINER, NUNCA DO PRÓPRIO CONTROLE — e a distinção não é estilo, é o
+   mecanismo descrito no topo desta seção: `outline-offset: 2px` tira o anel de cima do controle e
+   o joga na superfície ATRÁS dele. Um botão accent que declara `data-surface="accent"` em si mesmo
+   reaponta o próprio anel para a cor que contrasta com o fundo que ele NUNCA toca, e o anel vai
+   parar sobre a superfície da página. Foi o que aconteceu com o CTA principal da Home: anel branco
+   sobre o creme de --color-bg, **1.12:1**, medido em `tests/metrics/focus.spec.ts` — a mesma
+   família do anel de 1.01:1 que a Fase 0 shipou, e pela mesma causa (medir contra a superfície
+   errada). `tests/tokens/pairs.ts` §"Anel de foco" já dizia isto por extenso.
+
+   Sem o atributo, o anel padrão mede 8.31:1 sobre --color-bg e 13.44:1 no escuro. */
 [data-surface='accent'] {
   --color-focus-ring: var(--color-on-accent);
 }

@@ -32,11 +32,18 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
       A ação mais importante da tela. Sempre com palavra visível: nada no site depende de ícone
       sozinho nem de passar o cursor por cima.
     </p>
+    {
+      /* SEM `data-surface="accent"` nestas amostras — ele estava aqui e saiu na Fase 5. O atributo
+        é de CONTÊINER: num controle que pinta o próprio fundo, ele reaponta o anel de foco para a
+        cor escolhida contra o accent, enquanto `outline-offset: 2px` joga o anel FORA da caixa,
+        sobre a superfície da página. A amostra "com foco de teclado" abaixo desenhava, por causa
+        dele, um anel branco sobre creme — a vitrine mostrava um anel que o site não deve ter.
+        Ver `Action.astro` e `global.css` §6. */
+    }
     <ul class="mt-4 flex flex-wrap gap-6">
       <li class="flex flex-col gap-4">
         <span class="text-small text-ink-muted">padrão</span>
         <span
-          data-surface="accent"
           class="inline-flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent"
           >Falar no WhatsApp</span
         >
@@ -44,7 +51,6 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
       <li class="flex flex-col gap-4">
         <span class="text-small text-ink-muted">sob o cursor</span>
         <span
-          data-surface="accent"
           class="inline-flex min-h-target-primary items-center rounded-control bg-accent-hover px-6 font-semibold text-on-accent"
           >Falar no WhatsApp</span
         >
@@ -52,7 +58,6 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
       <li class="flex flex-col gap-4">
         <span class="text-small text-ink-muted">com foco de teclado</span>
         <span
-          data-surface="accent"
           class="inline-flex min-h-target-primary items-center rounded-control bg-accent px-6 font-semibold text-on-accent outline-3 outline-offset-2 outline-focus-ring"
           >Falar no WhatsApp</span
         >
@@ -61,7 +66,6 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
         <span class="text-small text-ink-muted">vivo — passe o cursor ou dê Tab</span>
         <button
           type="button"
-          data-surface="accent"
           class="inline-flex min-h-target-primary cursor-pointer items-center rounded-control bg-accent px-6 font-semibold text-on-accent hover:bg-accent-hover"
           >Falar no WhatsApp</button
         >
@@ -71,6 +75,14 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
 
   <div>
     <p class="label text-ink-muted">Ação secundária — 52px</p>
+    {
+      /* SEM `data-surface="accent"` nestas amostras — ele estava aqui e saiu na Fase 5. O atributo
+        é de CONTÊINER: num controle que pinta o próprio fundo, ele reaponta o anel de foco para a
+        cor escolhida contra o accent, enquanto `outline-offset: 2px` joga o anel FORA da caixa,
+        sobre a superfície da página. A amostra "com foco de teclado" abaixo desenhava, por causa
+        dele, um anel branco sobre creme — a vitrine mostrava um anel que o site não deve ter.
+        Ver `Action.astro` e `global.css` §6. */
+    }
     <ul class="mt-4 flex flex-wrap gap-6">
       <li class="flex flex-col gap-4">
         <span class="text-small text-ink-muted">padrão</span>
@@ -106,6 +118,14 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
 
   <div>
     <p class="label text-ink-muted">Ação discreta — 52px</p>
+    {
+      /* SEM `data-surface="accent"` nestas amostras — ele estava aqui e saiu na Fase 5. O atributo
+        é de CONTÊINER: num controle que pinta o próprio fundo, ele reaponta o anel de foco para a
+        cor escolhida contra o accent, enquanto `outline-offset: 2px` joga o anel FORA da caixa,
+        sobre a superfície da página. A amostra "com foco de teclado" abaixo desenhava, por causa
+        dele, um anel branco sobre creme — a vitrine mostrava um anel que o site não deve ter.
+        Ver `Action.astro` e `global.css` §6. */
+    }
     <ul class="mt-4 flex flex-wrap gap-6">
       <li class="flex flex-col gap-4">
         <span class="text-small text-ink-muted">padrão</span>

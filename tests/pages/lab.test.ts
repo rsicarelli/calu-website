@@ -124,12 +124,20 @@ describe('/lab — contratos estruturais', () => {
      anel de foco não é reescopado e cai para ~1,8:1 no tema claro (global.css §6). É a regra que
      a `/lab` mais exercita e a mais fácil de esquecer ao colar um bloco novo.
 
-     O recorte "que contém controle focável" não é frouxidão, é a regra de verdade: `data-surface`
+     O recorte "que CONTÉM controle focável" não é frouxidão, é a regra de verdade: `data-surface`
      só reescopa `--color-focus-ring`, então ele não tem o que fazer num elemento onde nada recebe
      foco. A primeira versão deste teste exigia o atributo de QUALQUER elemento pintado e reprovou
      as amostras de 52px da grade de cor — `<span>` decorativo, sem descendente focável, sem anel
      de foco possível. Exigir o atributo ali seria ritual: passaria a existir marcação que não
-     muda nada, e a regra perderia o significado que a torna verificável. */
+     muda nada, e a regra perderia o significado que a torna verificável.
+
+     "CONTÉM", E NÃO "É" — corrigido na Fase 5, e a cláusula `|| el.matches(...)` que estava aqui
+     era pior que ausência de teste: ela EXIGIA o defeito. Um controle que pinta o próprio fundo e
+     declara `data-surface` reaponta o PRÓPRIO anel de foco para a cor escolhida contra esse fundo,
+     enquanto `outline-offset: 2px` põe o anel FORA da caixa, sobre a superfície da página. Era o
+     CTA principal da Home desenhando anel branco sobre creme a 1,12:1 — medido em
+     `tests/metrics/focus.spec.ts`. A versão de sistema (`tests/system/surfaces.test.ts`) cobra
+     também o contrapositivo; aqui fica o espelho pré-build do lado que a `/lab` exercita. */
   it('todo bloco de fundo escuro com controle focável declara `data-surface`', () => {
     const EXPECTED: Record<string, string> = {
       'bg-surface-deep': 'deep',
@@ -139,7 +147,7 @@ describe('/lab — contratos estruturais', () => {
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex="0"]';
 
     const offenders = Array.from(document.querySelectorAll('[class]'))
-      .filter((el) => el.querySelector(FOCUSABLE) !== null || el.matches(FOCUSABLE))
+      .filter((el) => el.querySelector(FOCUSABLE) !== null)
       .flatMap((el) =>
         Object.entries(EXPECTED)
           .filter(([painted]) => el.classList.contains(painted))

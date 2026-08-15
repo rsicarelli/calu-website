@@ -180,34 +180,50 @@ const negocio = localBusinessLd({
     )
   }
 
-  {/* ── Para a família ──────────────────────────────────────────────────── */}
-  <PageSection
-    id="familia"
-    label={data.familia.label}
-    titulo={data.familia.titulo}
-    class="bg-surface-alt pb-9 md:pb-18"
-    width="measure"
-  >
-    <p class="mt-4 text-body text-ink-body">{data.familia.texto}</p>
-    <AccessList class="mt-6" itens={data.familia.itens} />
-    <ContactPair
-      class="mt-8"
-      whatsappHref={SITE.whatsapp.href}
-      phoneHref={SITE.phone.href}
-      phoneLabel={SITE.phone.label}
-    />
-  </PageSection>
+  {/* ── Para a família + Estrutura e acesso ─────────────────────────────── */}
+  {
+    /* O 2-up que `PAGES.md:42` pede e que a Fase 4 tinha adiado: "Para a família" e "Estrutura e
+      acesso" LADO A LADO no desktop. As duas seções passam a `width="none"` e o trilho vira UM só,
+      no `Container` que embrulha a linha — sem isso o gutter seria aplicado duas vezes, uma em cada
+      coluna (ver `PageSection`).
 
-  {/* ── Estrutura e acesso ──────────────────────────────────────────────── */}
-  <PageSection
-    id="acesso"
-    label={data.acesso.label}
-    titulo={data.acesso.titulo}
-    class="pb-9 md:pb-18"
-    width="measure"
-  >
-    <AccessList class="mt-6" itens={data.acesso.itens} fecho={data.acesso.fecho} />
-  </PageSection>
+      A FAIXA CREME COBRE AS DUAS COLUNAS, e isso não foi deduzido: está desenhado no mockup
+      (`Calu - Direcao de Marca.dc.html`, seção 05, 1280px) como
+      `display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start; background:#EDE7D9`
+      — o `background` está NA GRADE, não numa coluna. Antes da Fase 5 só "Para a família" era
+      creme; lado a lado, isso teria pintado meia linha. Foi a pergunta que a Fase 4.1 ensinou a
+      responder olhando o mockup em vez de deduzir.
+
+      `items-start` porque as duas colunas têm alturas diferentes por natureza (uma termina em par
+      de contato, a outra em fecho de texto) e esticá-las alinharia o nada.
+
+      As duas seções continuam sendo MARCOS NOMEADOS separados, com `id`, `aria-labelledby` e
+      cabeçalho próprios — fundir as duas num `<section>` só resolveria o layout destruindo dois
+      marcos e duas âncoras. */
+  }
+  <div class="bg-surface-alt pb-9 md:pb-18">
+    <Container width="page" class="grid gap-9 md:grid-cols-2 md:items-start md:gap-14">
+      <PageSection
+        id="familia"
+        label={data.familia.label}
+        titulo={data.familia.titulo}
+        width="none"
+      >
+        <p class="mt-4 text-body text-ink-body">{data.familia.texto}</p>
+        <AccessList class="mt-6" itens={data.familia.itens} />
+        <ContactPair
+          class="mt-8"
+          whatsappHref={SITE.whatsapp.href}
+          phoneHref={SITE.phone.href}
+          phoneLabel={SITE.phone.label}
+        />
+      </PageSection>
+
+      <PageSection id="acesso" label={data.acesso.label} titulo={data.acesso.titulo} width="none">
+        <AccessList class="mt-6" itens={data.acesso.itens} fecho={data.acesso.fecho} />
+      </PageSection>
+    </Container>
+  </div>
 
   {/* ── Como funciona ───────────────────────────────────────────────────── */}
   <PageSection
@@ -240,8 +256,20 @@ const negocio = localBusinessLd({
       elemento que de fato pinta o escuro. Deixá-lo na `<section>` enquanto a cor desceu para o
       filho deixaria o anel de foco verde sobre verde escuro no tema claro. */
   }
+  {
+    /* `text-ink-on-deep` NO CONTÊINER, e não só nos filhos — foi assim que a Fase 5 encontrou o
+      bloco. Cada filho escrito à mão aqui já levava a sua cor (`text-ink-on-deep-2` no rótulo e no
+      texto, `text-ink-on-deep` no título), mas o `ContactPair` entrou sem nenhuma: ele não tem cor
+      própria, então herdava `--color-ink-body` do `<body>` e desenhava os DOIS links de contato a
+      **1,84:1** sobre o card escuro — no tema claro, na Home, no bloco cuja única função é gerar
+      contato. Nenhuma das 805 asserções via isso: contraste renderizado não era observável antes de
+      `tests/metrics/contrast.spec.ts`.
+
+      A cor no contêiner é a forma que não repete o erro: quem herda passa a herdar certo, e o
+      próximo filho não precisa lembrar de nada. O `ScreenHomeBottom` da `/lab` já fazia assim. */
+  }
   <PageSection id="contato-rapido" class="pb-9 md:pb-18" aria-labelledby="contato-rapido-titulo">
-    <div data-surface="deep" class="rounded-card bg-surface-deep p-8">
+    <div data-surface="deep" class="rounded-card bg-surface-deep p-8 text-ink-on-deep">
       <p class="label text-ink-on-deep-2">{data.cta.label}</p>
       <h2 id="contato-rapido-titulo" class="mt-2 text-h2 text-ink-on-deep">{data.cta.titulo}</h2>
       <p class="mt-4 text-body text-ink-on-deep-2">{data.cta.texto}</p>
@@ -254,20 +282,30 @@ const negocio = localBusinessLd({
     </div>
   </PageSection>
 
-  {/* ── FAQ resumido ────────────────────────────────────────────────────── */}
+  {/* ── FAQ resumido + Onde estamos ─────────────────────────────────────── */}
   {
-    faqDestaque.length > 0 && (
-      <PageSection id="duvidas" titulo={data.faq.titulo} class="pb-9 md:pb-18" width="measure">
-        <FaqGroup class="mt-8" perguntas={faqDestaque} />
-        <Action as="a" href="/duvidas" class="mt-8">
-          {data.faq.linkLabel}
-        </Action>
-      </PageSection>
-    )
-  }
+    /* A segunda linha do 2-up de `PAGES.md:42` — "FAQ e mapa dividem a linha". Mockup, seção 05:
+      `padding:0 48px 72px; grid-template-columns:1fr 1fr; gap:48px; align-items:start`, SEM
+      background — diferente da linha de cima, e por isso o `<div>` aqui não pinta nada.
 
-  {/* ── Onde estamos ────────────────────────────────────────────────────── */}
-  <PageSection id="onde-estamos" titulo={data.local.titulo} class="pb-9 md:pb-18" width="measure">
-    <LocationBlock class="mt-8" />
-  </PageSection>
+      O FAQ pode não renderizar (0 destaques ⇒ seção some, decisão da Fase 4). A grade continua
+      correta com uma coluna só: `md:grid-cols-2` com um filho deixa a segunda coluna vazia e o mapa
+      ocupa a primeira, que é o comportamento desejado — nada de coluna fantasma reservada. */
+  }
+  <Container width="page" class="grid gap-9 pb-9 md:grid-cols-2 md:items-start md:gap-12 md:pb-18">
+    {
+      faqDestaque.length > 0 && (
+        <PageSection id="duvidas" titulo={data.faq.titulo} width="none">
+          <FaqGroup class="mt-8" perguntas={faqDestaque} />
+          <Action as="a" href="/duvidas" class="mt-8">
+            {data.faq.linkLabel}
+          </Action>
+        </PageSection>
+      )
+    }
+
+    <PageSection id="onde-estamos" titulo={data.local.titulo} width="none">
+      <LocationBlock class="mt-8" />
+    </PageSection>
+  </Container>
 </BaseLayout>

@@ -107,7 +107,14 @@ import RuledList from '@/components/ui/RuledList.astro';
   <div>
     <p class="label text-ink-muted">CTA escuro</p>
     <div data-surface="deep" class="mt-4 rounded-card bg-surface-deep p-6 text-ink-on-deep">
-      <h3 class="text-h2">Ainda em dúvida sobre qual atendimento procurar?</h3>
+      {
+        /* `text-ink-on-deep` explícito, e NÃO por herança do contêiner: `global.css` §7 dá a
+        `h1..h6` um `color: var(--color-ink)` de seletor nu, que vence a herança. Sem a classe, este
+        título renderizava #16211B sobre #16211B no tema claro — os dois são o mesmo hex —, ou seja
+        **1,00:1, invisível**, desde a Fase 2. `index.astro` sempre fez certo e explica o porquê no
+        comentário do CTA; a `/lab` é que remontou o bloco e perdeu a cor. */
+      }
+      <h3 class="text-h2 text-ink-on-deep">Ainda em dúvida sobre qual atendimento procurar?</h3>
       <p class="mt-4 text-body text-ink-on-deep-2">
         Não precisa decidir sozinho. Conte o que está acontecendo e a gente ajuda a entender o
         caminho.

@@ -30,6 +30,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/oxide": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
     "axe-core": "4.13.0",

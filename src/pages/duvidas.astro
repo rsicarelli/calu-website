@@ -58,7 +58,14 @@ const grupos = FAQ_GROUPS.map((grupo) => ({
             <ul class="flex flex-col gap-4">
               {grupos.map((grupo) => (
                 <li>
-                  <a href={`#${grupo.slug}`} class="text-body text-ink-body">
+                  {/* `min-h-target`: os três links do índice mediam 28px. Mesma omissão do link
+                    da trilha em `servicos/[slug]` e mesma causa — `tests/system/touch-targets.test.ts`
+                    varre só os TRÊS `<nav>` nomeados da casca, e este índice não é um deles. A régua
+                    de 52px não abre exceção para link pequeno, e agora quem cobra mede pixel. */}
+                  <a
+                    href={`#${grupo.slug}`}
+                    class="inline-flex min-h-target items-center text-body text-ink-body"
+                  >
                     {grupo.nome}
                   </a>
                 </li>

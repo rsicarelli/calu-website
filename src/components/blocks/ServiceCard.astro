@@ -84,6 +84,10 @@ const {
   ...rest
 } = Astro.props;
 
+/* Ver `Action.astro`: o spread do Astro prevalece sobre o atributo literal, então o descarte
+   precisa ser explícito. Identidade não é prop. */
+delete rest['data-service-card'];
+
 /* Sufixo `Class` nos nomes de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
    literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
 /* SEM BORDA E SEM FUNDO PRÓPRIO — o mockup nunca desenha um deles, em contexto nenhum.
@@ -108,7 +112,21 @@ const actionClass =
   'mt-4 inline-flex min-h-target items-center font-semibold text-brand after:absolute after:inset-0';
 ---
 
-<Tag class:list={[rootClass, layoutClass, className]} {...rest}>
+{
+  /* `data-service-card` é o identificador ESTÁVEL do card, e o VALOR é a variante — mesma grafia de
+     `data-brand-placeholder={variant}`, pelo mesmo motivo. Sem ele, a única forma de achar um
+     ServiceCard em `dist/**` é casar a string `relative flex flex-col`, que é exatamente a
+     fragilidade que `tests/system/component-identity.test.ts` existe para eliminar.
+
+     A variante vai no valor, e não em marcadores separados, porque o `rootClass` MUDA de verdade
+     entre `stack` e `row` (ver `layoutClass` acima). Um marcador sem eixo de variante obrigaria o
+     teste de identidade a comparar duas grafias legitimamente diferentes e a reprovar o correto.
+
+     O descarte em `rest` acima é o que impede o chamador de reetiquetar o card e escapar do teste
+     de sistema. Ordem de atributo NÃO basta — o spread do Astro prevalece sobre o literal, mesmo
+     escrito depois dele; ver a mesma nota em `Action.astro` e `BrandPlaceholder.astro`. */
+}
+<Tag data-service-card={layout} {...rest} class:list={[rootClass, layoutClass, className]}>
   {media && <BrandPlaceholder ratio="16/9" radius="control" class={mediaClass} />}
   <div>
     <p class="text-small text-ink-muted">{eyebrow}</p>

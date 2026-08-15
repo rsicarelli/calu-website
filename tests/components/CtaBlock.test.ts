@@ -114,4 +114,27 @@ describe('CtaBlock', () => {
     expect(classes).toContain('mt-8');
     expect(classes).toContain('bg-surface-alt');
   });
+
+  /* IDENTIDADE — o marcador que `tests/system/component-identity.test.ts` usa para achar o bloco no
+     HTML construído. Sem valor: o cabeçalho declara um único estado visual, então um valor
+     inventaria um eixo de variante que o componente recusa a ter. */
+  it('declara `data-cta-block` na raiz', async () => {
+    const document = await render();
+
+    expect(document.body.firstElementChild!.hasAttribute('data-cta-block')).toBe(true);
+  });
+
+  it('o chamador não consegue sobrescrever o marcador de identidade', async () => {
+    const document = await render({ ...PROPS, 'data-cta-block': 'outra-coisa' });
+
+    expect(document.body.firstElementChild!.getAttribute('data-cta-block')).toBe('');
+  });
+
+  /* O par de contato entra POR CONSTRUÇÃO (telefone sempre ao lado do WhatsApp, DESIGN-SYSTEM §7).
+     O cabeçalho do componente afirmava isso desde a Fase 3 e nada media — com o marcador, mede. */
+  it('contém exatamente um par de contato', async () => {
+    const document = await render();
+
+    expect(document.querySelectorAll('[data-cta-block] [data-contact-pair]')).toHaveLength(1);
+  });
 });

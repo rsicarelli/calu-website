@@ -6,6 +6,10 @@ dist/
 .astro/
 .output/
 
+# Saída da medição (Playwright) — traço e relatório são diagnóstico local, não artefato
+test-results/
+playwright-report/
+
 # Caches de deploy / ferramentas
 .wrangler/
 .vercel/

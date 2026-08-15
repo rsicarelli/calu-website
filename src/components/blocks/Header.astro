@@ -61,7 +61,20 @@ const { navLinks, class: className, ...rest } = Astro.props;
   {...rest}
 >
   <Container width="page" class="flex h-full items-center justify-between gap-4">
-    <a href="/" class="inline-flex items-center gap-3">
+    {
+      /* `min-w-0` NO LOCKUP, e é a 1.4.10 a 320px, não polimento.
+
+        Item de flex nasce com `min-width: auto`, que o proíbe de encolher abaixo do próprio
+        conteúdo intrínseco. "Pilates e Fisioterapia" em 17px pede ~160px numa linha só; a 320px o
+        `container-page` deixa 280px, o botão "Menu" toma 85px, e o lockup exigia mais do que
+        sobrava. O resultado era o cabeçalho medindo 352px numa tela de 320 — barra de rolagem
+        horizontal em TODA página do site, `PAGES.md:30` reprovado, e nenhum teste vermelho, porque
+        até a Fase 5 nada media geometria renderizada.
+
+        Com `min-w-0` o item pode encolher e o subtítulo quebra em duas linhas, que é o
+        comportamento de refluxo que a norma pede. Nada muda a partir de 360px, onde já cabia. */
+    }
+    <a href="/" class="inline-flex min-w-0 items-center gap-3">
       <Image src={logoMark} alt="" width={52} height={52} class="size-target rounded-full" />
       <span>
         <span class="text-lockup font-semibold text-ink">CaLu</span>
