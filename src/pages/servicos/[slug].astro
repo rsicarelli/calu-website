@@ -65,7 +65,7 @@ const fichaLinhas = FICHA_ROTULOS.map(([chave, rotulo]) => ({
 <BaseLayout title={`${data.titulo} · ${SITE.name}`} description={data.seoDescription}>
   <Container width="page" class="pt-8">
     <nav aria-label="Trilha de navegação">
-      <ol class="flex flex-wrap gap-2 text-small text-ink-muted">
+      <ol class="flex flex-wrap items-center gap-2 text-small text-ink-muted">
         {
           /* `min-h-target` aqui também: a régua de 52px não abre exceção para link pequeno — a
             própria `/lab` escreve isso ("vale inclusive no rodapé"). O link da trilha media 24px
@@ -74,8 +74,24 @@ const fichaLinhas = FICHA_ROTULOS.map(([chave, rotulo]) => ({
             nunca entrou na lista. Trava que parece cobertura e não é — a família de defeito da
             Fase 4.1. Agora quem cobra é a medição em pixel, que não tem lista. */
         }
-        <li><a href="/servicos" class="inline-flex min-h-target items-center">Serviços</a></li>
-        <li aria-current="page">{data.titulo}</li>
+        <li>
+          <a
+            href="/servicos"
+            class="inline-flex min-h-target items-center rounded-control px-1 transition-colors duration-150 hover:text-ink hover:underline hover:underline-offset-4"
+          >
+            Serviços
+          </a>
+        </li>
+        {
+          /* Separador como NÓ DE TEXTO real com `aria-hidden`, não `content:` gerado — mesma
+            decisão de `FaqItem.astro` para o sinal +/−: Chrome expõe `::after`/`::before` à
+            árvore de acessibilidade, então um glifo gerado por CSS não é silenciosamente
+            decorativo em todo motor. Item de lista próprio (não um `<span>` solto) porque
+            `<ol>` só aceita `<li>` como filho direto — texto solto seria HTML inválido que o
+            navegador reposicionaria de forma imprevisível. */
+        }
+        <li aria-hidden="true">/</li>
+        <li aria-current="page" class="font-semibold text-ink">{data.titulo}</li>
       </ol>
     </nav>
   </Container>
