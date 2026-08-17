@@ -17,6 +17,7 @@
 import { getCollection, getEntries, getEntry, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 
+import Gallery from '@/components/blocks/Gallery.astro';
 import PageHeader from '@/components/blocks/PageHeader.astro';
 import PageSection from '@/components/blocks/PageSection.astro';
 import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
@@ -182,6 +183,20 @@ const fichaLinhas = FICHA_ROTULOS.map(([chave, rotulo]) => ({
       </aside>
     </div>
   </Container>
+
+  {
+    data.galeria && data.galeria.length > 0 && (
+      <PageSection id="galeria" titulo="Fotos do atendimento" class="pt-9 pb-9 md:pt-18 md:pb-18">
+        <Gallery
+          class="mt-8"
+          images={data.galeria.map((foto, i) => ({
+            src: foto,
+            alt: `${data.titulo}: foto ${i + 1} do atendimento`,
+          }))}
+        />
+      </PageSection>
+    )
+  }
 
   {
     relacionados.length > 0 && (

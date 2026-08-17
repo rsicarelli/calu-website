@@ -1,0 +1,162 @@
+---
+/**
+ * Gallery — grade de fotos com um vídeo opcional (COMPONENTS.md § Gallery).
+ * Dois usos reais: a Home ("Galeria") e cada página de serviço ("Fotos do atendimento").
+ *
+ * Props
+ *   images   as fotos, na ordem. Cada uma leva `alt` próprio — são fotos de conteúdo, não
+ *            decorativas (o endereço/mapa é decorativo porque o texto ao lado já descreve o
+ *            fato; uma foto de galeria É o fato).
+ *   video    opcional — um vídeo do YouTube como último item da grade. Ausente ⇒ grade só de
+ *            fotos.
+ *   …        qualquer atributo de `ul` vai para a raiz.
+ *
+ * NUNCA IFRAME NO CARREGAMENTO — mesma regra de `LocationBlock.astro`, só que mais cara aqui:
+ * um `<iframe>` do YouTube carrega centenas de KB de JS de terceiro assim que a página abre,
+ * mesmo que ninguém clique em play. O vídeo nasce como FACHADA — a miniatura oficial do
+ * YouTube (`i.ytimg.com/vi/<id>/hqdefault.jpg`), baixada e servida localmente, com um botão de
+ * play por cima. O `<iframe>` real (via `youtube-nocookie.com`, que reduz cookie de terceiro
+ * antes do clique) só é criado no clique — o mesmo padrão de `<script>` vanilla idempotente que
+ * `FaqItem.astro` usa para animação, com o mesmo motivo (CLAUDE.md § Stack: "interação... é
+ * `<script>` vanilla").
+ *
+ * ZERO CLS: cada item da grade — foto ou fachada de vídeo — leva `aspect-4/5` mais dimensão
+ * real (`AspectImage` para as fotos, `width`/`height` explícitos na miniatura do vídeo), então
+ * o espaço da grade nunca muda depois do primeiro quadro, inclusive no clique de play (a
+ * fachada e o iframe ocupam o MESMO slot).
+ *
+ * ALVO DE TOQUE: o botão de play cobre o item INTEIRO (`absolute inset-0`), não só o círculo
+ * visual de 56px — a régua de 52px mínimo (56px em ação primária) vale pelo círculo, mas nada
+ * impede a área clicável real de ser maior.
+ *
+ *   <Gallery images={[{ src: foto1, alt: 'Sala de Pilates' }, { src: foto2, alt: 'Reformer' }]} />
+ *   <Gallery images={fotos} video={{ youtubeId: 'fITOM64Kg6g', title: '…', thumbnail: capa }} />
+ *
+ * Tipagem: `Props extends HTMLAttributes<'ul'>`, não genérica — ver o comentário equivalente em
+ * `Container.astro`. A raiz é sempre um `<ul>`: cada item é uma foto ou o vídeo, não há ordem
+ * que dependa de leitura sequencial (diferente do `StepList`, que por isso usa `<ol>`).
+ */
+import { Image } from 'astro:assets';
+import type { HTMLAttributes } from 'astro/types';
+
+import AspectImage from '@/components/ui/AspectImage.astro';
+
+interface GalleryImage {
+  src: import('astro').ImageMetadata;
+  alt: string;
+}
+
+interface GalleryVideo {
+  /** O ID do vídeo — o trecho depois de `v=` na URL do YouTube. */
+  youtubeId: string;
+  /** Título real do vídeo — vira `alt` do play, `title` do `<iframe>` e rótulo acessível. */
+  title: string;
+  /** Miniatura oficial do YouTube, baixada e importada localmente (nunca `i.ytimg.com` ao vivo). */
+  thumbnail: import('astro').ImageMetadata;
+}
+
+interface Props extends HTMLAttributes<'ul'> {
+  /** As fotos, na ordem. Vazio ⇒ só o vídeo (se houver) é renderizado. */
+  images: GalleryImage[];
+  /** Vídeo do YouTube como último item da grade, atrás de uma fachada estática. */
+  video?: GalleryVideo;
+}
+
+const { images, video, class: className, ...rest } = Astro.props;
+
+/* Sufixo `Class` de propósito: é o que faz `scripts/check-utilities.mjs` enxergar estes
+   literais (ver "REGIÃO EXTRA" no cabeçalho do gate). */
+/* DUAS colunas em toda largura, não três no desktop: os dois usos reais têm 2 itens (serviço) ou
+   4 (Home, 3 fotos + vídeo) — ambos múltiplos de 2. Testado ao vivo com 3 colunas: o vídeo, único
+   na segunda linha, sobrava sozinho e deixava dois terços da linha vazios no desktop. */
+const gridClass = 'grid grid-cols-2 gap-4';
+/* Sem classe de foco própria: `:focus-visible` já é regra global (global.css §9) — o mesmo
+   motivo de `Action.astro` não declarar uma. Sem `group`/`group-hover` também: o projeto não usa
+   o par em lugar nenhum, e `group` sozinho não gera CSS (é só o gancho da variante), o que o
+   `check-utilities.mjs` lê como classe morta. */
+const playButtonClass = 'absolute inset-0 flex items-center justify-center rounded-card';
+const playGlyphClass =
+  'flex size-target-primary items-center justify-center rounded-full bg-surface-deep';
+---
+
+{
+  (images.length > 0 || video) && (
+    <ul class:list={[gridClass, className]} {...rest}>
+      {images.map((imagem) => (
+        <li>
+          <AspectImage src={imagem.src} alt={imagem.alt} ratio="4/5" radius="card" />
+        </li>
+      ))}
+      {video && (
+        <li>
+          {/* `data-gallery-video-id`/`title` no CONTÊINER, não no botão: é o que o script lê pra
+               montar o `<iframe>` sem precisar de um segundo elemento com o mesmo dado. */}
+          <div
+            data-gallery-video
+            data-gallery-video-id={video.youtubeId}
+            data-gallery-video-title={video.title}
+            data-surface="deep"
+            class="relative aspect-4/5 overflow-hidden rounded-card bg-surface-deep"
+          >
+            <Image
+              src={video.thumbnail}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover"
+            />
+            <button
+              type="button"
+              data-gallery-video-play
+              aria-label={`Assistir: ${video.title}`}
+              class={playButtonClass}
+            >
+              <span aria-hidden="true" class={playGlyphClass}>
+                {/* Triângulo real em SVG, não glifo de fonte — mesma decisão do sinal +/− de
+                     `FaqItem.astro`: suporte de fonte varia, um `<path>` não. `aria-hidden` porque
+                     o nome acessível já vem do `aria-label` do botão. */}
+                <svg
+                  viewBox="0 0 24 24"
+                  width="22"
+                  height="22"
+                  fill="none"
+                  class="text-ink-on-deep"
+                >
+                  <path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </li>
+      )}
+    </ul>
+  )
+}
+
+<script>
+  // Idempotente, mesmo padrão de FaqItem.astro/ThemeToggle.astro/MobileNav.astro: sobrevive a
+  // qualquer reexecução futura do módulo, um `<script>` só deduplicado pelo Astro
+  // independentemente de quantos `Gallery` a página renderizar.
+  (() => {
+    document.querySelectorAll<HTMLElement>('[data-gallery-video]').forEach((facade) => {
+      const button = facade.querySelector<HTMLButtonElement>('[data-gallery-video-play]');
+      if (!button || facade.dataset.galleryVideoBound === 'true') return;
+      facade.dataset.galleryVideoBound = 'true';
+
+      button.addEventListener('click', () => {
+        const id = facade.dataset.galleryVideoId;
+        const title = facade.dataset.galleryVideoTitle ?? '';
+        if (!id) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1`;
+        iframe.title = title;
+        iframe.className = 'size-full';
+        iframe.allow =
+          'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        facade.replaceChildren(iframe);
+      });
+    });
+  })();
+</script>

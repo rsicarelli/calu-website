@@ -66,4 +66,11 @@ faq:
   linkLabel: 'Ver todas as dúvidas'
 local:
   titulo: 'Onde estamos'
+galeria:
+  label: 'Galeria'
+  titulo: 'Um pouco do nosso dia a dia'
+  imagens:
+    - './galeria-1.jpg'
+    - './galeria-2.png'
+    - './galeria-3.jpg'
 ---

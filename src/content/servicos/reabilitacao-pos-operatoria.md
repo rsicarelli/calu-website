@@ -5,6 +5,9 @@ resumo: 'Retomada gradual de movimento depois de uma cirurgia, no ritmo combinad
 ordem: 4
 seoDescription: 'Reabilitação depois da cirurgia na Vila Clementino: retomada gradual de movimento, no ritmo combinado com quem indicou o procedimento.'
 imagem: './reabilitacao-pos-operatoria.jpg'
+galeria:
+  - './reabilitacao-pos-operatoria-galeria-1.jpg'
+  - './reabilitacao-pos-operatoria-galeria-2.jpg'
 indicacoes:
   - 'Preparação para uma cirurgia já marcada'
   - 'Retomada de movimento logo depois da alta'

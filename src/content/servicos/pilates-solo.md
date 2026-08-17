@@ -5,6 +5,9 @@ resumo: 'Exercício no colchonete, em turma pequena, conduzido por fisioterapeut
 ordem: 2
 seoDescription: 'Pilates em solo na Vila Clementino: exercício no colchonete, em turma pequena, conduzido por fisioterapeuta com plano definido na avaliação.'
 imagem: './pilates-solo.jpg'
+galeria:
+  - './pilates-solo-galeria-1.jpg'
+  - './pilates-solo-galeria-2.jpg'
 indicacoes:
   - 'Vontade de manter uma rotina de exercício com orientação'
   - 'Preferência por exercício sem aparelho'

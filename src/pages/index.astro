@@ -22,8 +22,10 @@
 import { getEntries, getEntry } from 'astro:content';
 
 import mapaEstatico from '@/assets/location/mapa.jpg';
+import videoCapa from '@/assets/video/pilates-video-thumb.jpg';
 import AccessList from '@/components/blocks/AccessList.astro';
 import FaqGroup from '@/components/blocks/FaqGroup.astro';
+import Gallery from '@/components/blocks/Gallery.astro';
 import LocationBlock from '@/components/blocks/LocationBlock.astro';
 import PageSection from '@/components/blocks/PageSection.astro';
 import ProfessionalBio from '@/components/blocks/ProfessionalBio.astro';
@@ -261,6 +263,31 @@ const negocio = localBusinessLd({
   >
     <StepList class="mt-8" passos={data.comoFunciona.passos} />
   </PageSection>
+
+  {/* ── Galeria ─────────────────────────────────────────────────────────── */}
+  {
+    data.galeria && (
+      <PageSection
+        id="galeria"
+        label={data.galeria.label}
+        titulo={data.galeria.titulo}
+        class="pb-9 md:pb-18"
+      >
+        <Gallery
+          class="mt-8"
+          images={data.galeria.imagens.map((foto, i) => ({
+            src: foto,
+            alt: `Foto ${i + 1} do dia a dia da Calu`,
+          }))}
+          video={{
+            youtubeId: 'fITOM64Kg6g',
+            title: 'Pilates Reformer Demo - part 1',
+            thumbnail: videoCapa,
+          }}
+        />
+      </PageSection>
+    )
+  }
 
   {/* ── CTA escuro ──────────────────────────────────────────────────────── */}
   {

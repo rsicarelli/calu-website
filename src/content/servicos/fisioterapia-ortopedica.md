@@ -5,6 +5,9 @@ resumo: 'Atendimento individual para quem chegou com dor, perda de movimento ou 
 ordem: 1
 seoDescription: 'Fisioterapia para dor e lesão de ombro, joelho e coluna na Vila Clementino. Avaliação individual, plano combinado com você e acompanhamento de perto.'
 imagem: './fisioterapia-ortopedica.jpg'
+galeria:
+  - './fisioterapia-ortopedica-galeria-1.jpg'
+  - './fisioterapia-ortopedica-galeria-2.jpg'
 indicacoes:
   - 'Dor que aparece em um movimento específico do dia a dia'
   - 'Limitação de movimento depois de uma lesão'

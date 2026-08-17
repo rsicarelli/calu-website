@@ -5,6 +5,9 @@ resumo: 'Exercício conduzido por fisioterapeuta, em turma pequena, com o plano 
 ordem: 0
 seoDescription: 'Pilates clínico na Vila Clementino: exercício em turma pequena, conduzido por fisioterapeuta, com plano individual definido na avaliação.'
 imagem: './pilates-clinico.jpg'
+galeria:
+  - './pilates-clinico-galeria-1.jpg'
+  - './pilates-clinico-galeria-2.jpg'
 indicacoes:
   - 'Vontade de voltar a se exercitar com acompanhamento de perto'
   - 'Dor que aparece em um movimento específico do dia a dia'

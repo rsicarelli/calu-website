@@ -140,6 +140,15 @@ const home = defineCollection({
           })
           .strict(),
         local: z.object({ titulo: z.string() }).strict(),
+        /** Ausente ⇒ a seção não renderiza — mesma disciplina de `servicos.destaque` acima. */
+        galeria: z
+          .object({
+            label: sectionLabel,
+            titulo: z.string(),
+            imagens: image().array().min(3).max(8),
+          })
+          .strict()
+          .optional(),
       })
       .strict(),
 });
@@ -178,6 +187,8 @@ const servicos = defineCollection({
           .optional(),
         profissional: reference('equipe').optional(),
         relacionados: z.array(reference('servicos')).min(2).max(3).optional(),
+        /** Fotos adicionais do atendimento, além de `imagem`. Ausente ⇒ sem galeria. */
+        galeria: image().array().min(2).max(6).optional(),
       })
       .strict(),
 });

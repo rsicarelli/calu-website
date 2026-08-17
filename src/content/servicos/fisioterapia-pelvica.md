@@ -5,6 +5,9 @@ resumo: 'Atendimento individual para escape de urina, vontade urgente de ir ao b
 ordem: 3
 seoDescription: 'Fisioterapia pélvica na Vila Clementino: atendimento individual para escape de urina, urgência para ir ao banheiro e desconforto na região da pelve.'
 imagem: './fisioterapia-pelvica.jpg'
+galeria:
+  - './fisioterapia-pelvica-galeria-1.jpg'
+  - './fisioterapia-pelvica-galeria-2.jpg'
 indicacoes:
   - 'Escape de urina ao tossir, rir, espirrar ou correr'
   - 'Vontade urgente de ir ao banheiro, várias vezes ao dia'
